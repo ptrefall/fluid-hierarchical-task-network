@@ -41,14 +41,30 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Tasks\CompoundTasks\Selector.cs" />
+    <Compile Include="Tasks\CompoundTasks\Sequence.cs" />
+    <Compile Include="Conditions\FuncCondition.cs" />
     <Compile Include="Domain.cs" />
     <Compile Include="DomainBuilder.cs" />
+    <Compile Include="Conditions\ICondition.cs" />
+    <Compile Include="Effects\ActionEffect.cs" />
+    <Compile Include="Effects\IEffect.cs" />
+    <Compile Include="Tasks\ITask.cs" />
+    <Compile Include="Tasks\CompoundTasks\ICompoundTask.cs" />
     <Compile Include="Mockups\Dummy\DummyTest.cs" />
-    <Compile Include="EffectType.cs" />
-    <Compile Include="IContext.cs" />
+    <Compile Include="Effects\EffectType.cs" />
+    <Compile Include="Contexts\IContext.cs" />
     <Compile Include="Mockups\TrollBridge\DomainDefinitions.cs" />
+    <Compile Include="Operators\FuncOperator.cs" />
+    <Compile Include="Operators\IOperator.cs" />
+    <Compile Include="Planners\Planner.cs" />
+    <Compile Include="Tasks\PrimitiveTasks\IPrimitiveTask.cs" />
+    <Compile Include="Tasks\PrimitiveTasks\PrimitiveTask.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TaskStatus.cs" />
+    <Compile Include="Tasks\CompoundTasks\CompoundTask.cs" />
+    <Compile Include="Tasks\CompoundTasks\TaskRoot.cs" />
+    <Compile Include="Tasks\TaskStatus.cs" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

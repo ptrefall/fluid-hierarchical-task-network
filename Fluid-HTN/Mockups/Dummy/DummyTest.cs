@@ -33,7 +33,7 @@ namespace FluidHTN.Mockups.Dummy
 
 		public void Initialize()
 		{
-			var speedBoostDomain = new DomainBuilder<DummyContext>()
+			var speedBoostDomain = new DomainBuilder<DummyContext>("Speed boost module")
 				.Sequence( "Grab speed boost")
 					.Condition( "Not carrying flag", (ctx) => ctx.HasFlag == false )
 					.Condition( "Not a defender", (ctx) => ctx.IsDefender == false )
@@ -51,7 +51,7 @@ namespace FluidHTN.Mockups.Dummy
 					.End()
 				.Build();
 			
-			_domain = new DomainBuilder<DummyContext>()
+			_domain = new DomainBuilder<DummyContext>("Capture the flag")
 				.Splice( speedBoostDomain )
 				.Action( "Idle" )
 					.Do( Idle )
@@ -59,7 +59,7 @@ namespace FluidHTN.Mockups.Dummy
 
 			_domain.Save( "myDomain.json" );
 
-			var domainFromFile = new DomainBuilder< DummyContext >()
+			var domainFromFile = new DomainBuilder< DummyContext >(string.Empty)
 				.Load( "myDomain.json" );
 		}
 
