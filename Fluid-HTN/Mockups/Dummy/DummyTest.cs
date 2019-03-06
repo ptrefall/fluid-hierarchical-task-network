@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace FluidHTN
+namespace FluidHTN.Mockups.Dummy
 {
 	public enum Speed { Slow, Fast }
 
