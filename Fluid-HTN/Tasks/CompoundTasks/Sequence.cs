@@ -29,12 +29,14 @@ namespace FluidHTN.Compounds
 		{
 			Plan.Clear();
 
+			var oldCtx = ctx.Duplicate();
+
 			foreach ( var task in Children )
 			{
 				if ( task.IsValid( ctx ) == false )
 				{
-					//TODO: Remove effects
 					Plan.Clear();
+					ctx.Copy( oldCtx );
 					break;
 				}
 
@@ -45,8 +47,8 @@ namespace FluidHTN.Compounds
 					// If the decomposition failed
 					if ( result.Count == 0 )
 					{
-						//TODO: Remove effects
 						Plan.Clear();
+						ctx.Copy( oldCtx );
 						break;
 					}
 
