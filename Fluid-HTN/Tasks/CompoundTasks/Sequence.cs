@@ -18,7 +18,7 @@ namespace FluidHTN.Compounds
 			return true;
 		}
 
-		private static readonly Queue< ITask > Plan = new Queue< ITask >();
+		private readonly Queue< ITask > Plan = new Queue< ITask >();
 
 		/// <summary>
 		/// In a Sequence decomposition, all sub-tasks must be valid and successfully decomposed in order for the Sequence to be successfully decomposed.

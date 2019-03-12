@@ -18,7 +18,7 @@ namespace FluidHTN.Compounds
 			return true;
 		}
 
-		private static readonly Queue< ITask > Plan = new Queue< ITask >();
+		private readonly Queue< ITask > Plan = new Queue< ITask >();
 
 		/// <summary>
 		/// In a Selector decomposition, just a single sub-task must be valid and successfully decompose for the Selector to be successfully decomposed.
@@ -44,9 +44,14 @@ namespace FluidHTN.Compounds
 						continue;
 					}
 
+					int i = result.Count;
 					while ( result.Count > 0 )
 					{
-						Plan.Enqueue( result.Dequeue() );
+						var res = result.Dequeue();
+						Plan.Enqueue( res );
+						i--;
+						if (i < 0)
+							break;
 					}
 				}
 				else if( task is IPrimitiveTask primitiveTask )

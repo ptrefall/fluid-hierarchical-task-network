@@ -82,7 +82,7 @@ namespace FluidHTN
 	    }
 
 		/// <summary>
-		/// A compound task that requires one child task to be valid.
+		/// A compound task that requires a single child task to be valid.
 		/// Child tasks can be sequences, selectors or actions.
 		/// </summary>
 		/// <param name="name"></param>
