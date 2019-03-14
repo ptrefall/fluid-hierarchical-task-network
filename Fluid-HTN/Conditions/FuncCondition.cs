@@ -17,7 +17,12 @@ namespace FluidHTN.Conditions
 		{
 			if ( ctx is T c )
 			{
-				return _func?.Invoke( c ) ?? false;
+				var result = _func?.Invoke( c ) ?? false;
+				if (result == false)
+				{
+					ctx.LastConditionFail = Name;
+				}
+				return result;
 			}
 			else
 			{
