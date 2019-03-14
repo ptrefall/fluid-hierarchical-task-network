@@ -44,6 +44,14 @@ namespace FluidHTN.Compounds
 				{
 					var result = compoundTask.Decompose( ctx );
 
+					// If result is null, that means the entire planning procedure should cancel.
+					if (result == null)
+					{
+						Plan.Clear();
+						ctx.Copy( oldCtx );
+						return null;
+					}
+
 					// If the decomposition failed
 					if ( result.Count == 0 )
 					{

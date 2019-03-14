@@ -29,18 +29,53 @@ namespace FluidHTN.Compounds
 		{
 			Plan.Clear();
 
-			foreach ( var task in Children )
+			for(var taskIndex = 0; taskIndex < Children.Count; taskIndex++)
 			{
+				// If the last plan is still running, we need to check whether the
+				// new decomposition can possibly beat it.
+				if (ctx.LastMTR != null && ctx.LastMTR.Count > 0)
+				{
+					// To reliably compare, we need the new decomposition record count to
+					// at least be smaller than the last plan's record.
+					if (ctx.MethodTraversalRecord.Count < ctx.LastMTR.Count)
+					{
+						// If the last plan's traversal record for this decomposition layer 
+						// has a smaller index than the current task index we're about to
+						// decompose, then the new decomposition can't possibly beat the
+						// running plan, so we cancel finding a new plan.
+						var currentDecompositionIndex = ctx.MethodTraversalRecord.Count;
+						if (ctx.LastMTR[currentDecompositionIndex] < taskIndex)
+						{
+							ctx.MethodTraversalRecord.Add(-1);
+							return null;
+						}
+					}
+				}
+
+				var task = Children[taskIndex];
+
 				if ( task.IsValid( ctx ) == false )
 					continue;
 
 				if ( task is ICompoundTask compoundTask )
 				{
+					// We need to record the task index before we decompose the task,
+					// so that the traversal record is set up in the right order.
+					ctx.MethodTraversalRecord.Add(taskIndex);
+
 					var result = compoundTask.Decompose( ctx );
+
+					// If result is null, that means the entire planning procedure should cancel.
+					if (result == null)
+					{
+						return null;
+					}
 
 					// If the decomposition failed
 					if ( result.Count == 0 )
 					{
+						// Remove the taskIndex if it failed to decompose.
+						ctx.MethodTraversalRecord.RemoveAt(ctx.MethodTraversalRecord.Count-1);
 						continue;
 					}
 
