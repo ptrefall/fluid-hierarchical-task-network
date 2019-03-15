@@ -44,6 +44,6 @@ namespace FluidHTN
 		/// <param name="ctx"></param>
 		void Copy( IContext ctx );
 
-		string LastConditionFail { get; set; }
+		Stack<string> LastConditionFail { get; set; }
 	}
 }
