@@ -198,6 +198,24 @@ namespace FluidHTN
 		}
 
 		/// <summary>
+		/// We can add a partial split anywhere in our domain definition,
+		/// and this will give us partial planning.
+		/// It means that we can tell our planner to only plan up to a certain point,
+		/// then stop. If the partial plan completes execution successfully, the next
+		/// time we try to find a plan, we will continue planning where we left off.
+		/// Typical use cases is to split after we navigate toward a location, since
+		/// this is often time consuming, it's hard to predict the world state when
+		/// we have reached the destination, and thus there's little point wasting
+		/// milliseconds on planning further into the future at that point. We might
+		/// still want to plan what to do when reaching the destination, however, and
+		/// this is where partial plans comes into play.
+		/// </summary>
+		public DomainBuilder< T > PartialSplit()
+		{
+			return this;
+		}
+
+		/// <summary>
 		/// Build the designed domain and return a domain instance.
 		/// </summary>
 		/// <returns></returns>
