@@ -5,6 +5,7 @@ using FluidHTN.Conditions;
 using FluidHTN.Effects;
 using FluidHTN.Operators;
 using FluidHTN.PrimitiveTasks;
+using Packages.Tasks.CompoundTasks;
 
 namespace FluidHTN
 {
@@ -63,6 +64,21 @@ namespace FluidHTN
 			else
 			{
 				throw new Exception("Pointer is not a compound task type. Did you forget an End() after a Primitive Task Action was defined?");
+			}
+
+			return this;
+		}
+
+		protected DomainBuilder<T> PartialSplitTask()
+		{
+			if (Pointer is IDecomposeAll compoundTask)
+			{
+				var parent = new PartialSplitTask() {Name = "Partial Split"};
+				_domain.Add(compoundTask, parent);
+			}
+			else
+			{
+				throw new Exception("Pointer is not a decompose-all compound task type, like a Sequence. Maybe you tried to partial split a Selector, or forget an End() after a Primitive Task Action was defined?");
 			}
 
 			return this;
@@ -208,11 +224,11 @@ namespace FluidHTN
 		/// we have reached the destination, and thus there's little point wasting
 		/// milliseconds on planning further into the future at that point. We might
 		/// still want to plan what to do when reaching the destination, however, and
-		/// this is where partial plans comes into play.
+		/// this is where partial plans come into play.
 		/// </summary>
 		public DomainBuilder< T > PartialSplit()
 		{
-			return this;
+			return PartialSplitTask();
 		}
 
 		/// <summary>

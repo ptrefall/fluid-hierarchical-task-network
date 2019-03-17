@@ -25,11 +25,11 @@ namespace FluidHTN.Compounds
 		/// </summary>
 		/// <param name="ctx"></param>
 		/// <returns></returns>
-		protected override Queue<ITask> OnDecompose( IContext ctx )
+		protected override Queue<ITask> OnDecompose( IContext ctx, int startIndex )
 		{
 			Plan.Clear();
 
-			for(var taskIndex = 0; taskIndex < Children.Count; taskIndex++)
+			for(var taskIndex = startIndex; taskIndex < Children.Count; taskIndex++)
 			{
 				// If the last plan is still running, we need to check whether the
 				// new decomposition can possibly beat it.
@@ -63,7 +63,7 @@ namespace FluidHTN.Compounds
 					// so that the traversal record is set up in the right order.
 					ctx.MethodTraversalRecord.Add(taskIndex);
 
-					var result = compoundTask.Decompose( ctx );
+					var result = compoundTask.Decompose( ctx, 0 );
 
 					// If result is null, that means the entire planning procedure should cancel.
 					if (result == null)

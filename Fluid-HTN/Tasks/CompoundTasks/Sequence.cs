@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
 using FluidHTN.PrimitiveTasks;
+using Packages.Tasks.CompoundTasks;
 
 namespace FluidHTN.Compounds
 {
-	public class Sequence : CompoundTask
+	public class Sequence : CompoundTask, IDecomposeAll
 	{
 		public override bool IsValid( IContext ctx )
 		{
@@ -25,14 +26,16 @@ namespace FluidHTN.Compounds
 		/// </summary>
 		/// <param name="ctx"></param>
 		/// <returns></returns>
-		protected override Queue<ITask> OnDecompose( IContext ctx )
+		protected override Queue<ITask> OnDecompose( IContext ctx, int startIndex )
 		{
 			Plan.Clear();
 
 			var oldCtx = ctx.Duplicate();
 
-			foreach ( var task in Children )
+			for(var taskIndex = startIndex; taskIndex < Children.Count; taskIndex++)
 			{
+				var task = Children[taskIndex];
+
 				if ( task.IsValid( ctx ) == false )
 				{
 					Plan.Clear();
@@ -42,7 +45,7 @@ namespace FluidHTN.Compounds
 
 				if ( task is ICompoundTask compoundTask )
 				{
-					var result = compoundTask.Decompose( ctx );
+					var result = compoundTask.Decompose( ctx, 0 );
 
 					// If result is null, that means the entire planning procedure should cancel.
 					if (result == null)
@@ -69,6 +72,12 @@ namespace FluidHTN.Compounds
 				{
 					primitiveTask.ApplyEffects( ctx );
 					Plan.Enqueue( task );
+				}
+				else if (task is PartialSplitTask partialSplit)
+				{
+					ctx.PlanStartTaskParent = this;
+					ctx.PlanStartTaskChildIndex = taskIndex + 1;
+					return Plan;
 				}
 			}
 

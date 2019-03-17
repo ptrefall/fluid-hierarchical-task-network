@@ -22,12 +22,12 @@ namespace FluidHTN.Compounds
 
 		public TaskStatus LastStatus { get; private set; }
 
-		public Queue<ITask> Decompose( IContext ctx )
+		public Queue<ITask> Decompose( IContext ctx, int startIndex )
 		{
-			return OnDecompose(ctx);
+			return OnDecompose(ctx, startIndex);
 		}
 
-		protected abstract Queue<ITask> OnDecompose(IContext ctx);
+		protected abstract Queue<ITask> OnDecompose(IContext ctx, int startIndex);
 
 		public List< ITask > Children { get; } = new List< ITask >();
 		public ICompoundTask AddChild( ITask child )

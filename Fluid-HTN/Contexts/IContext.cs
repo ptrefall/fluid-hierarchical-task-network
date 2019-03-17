@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using FluidHTN.Compounds;
+using Packages.Tasks.CompoundTasks;
 
 namespace FluidHTN
 {
@@ -44,6 +46,21 @@ namespace FluidHTN
 		/// <param name="ctx"></param>
 		void Copy( IContext ctx );
 
+		/// <summary>
+		/// 
+		/// </summary>
 		Stack<string> LastConditionFail { get; set; }
+
+		/// <summary>
+		/// The parent task of the partial split. The next child to be decomposed is marked by the
+		/// PlanStartTaskChildIndex marker.
+		/// </summary>
+		ICompoundTask PlanStartTaskParent { get; set; }
+
+		/// <summary>
+		/// The marker for where to continue in a decompose-all compound task, like a Sequence task,
+		/// after a partial split.
+		/// </summary>
+		int PlanStartTaskChildIndex { get; set; }
 	}
 }
