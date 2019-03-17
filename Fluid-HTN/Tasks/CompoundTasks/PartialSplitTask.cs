@@ -13,7 +13,7 @@ namespace FluidHTN
 
 		public ICompoundTask Parent { get; set; }
 
-		public List< ICondition > Conditions { get; } = new List< ICondition >();
+		public List< ICondition > Conditions { get; } = null;
 		public ITask AddCondition( ICondition condition )
 		{
 			throw new Exception("Partial Split tasks does not support conditions.");
@@ -25,7 +25,7 @@ namespace FluidHTN
 			return true;
 		}
 
-		public List< IEffect > Effects { get; } = new List< IEffect >();
+		public List< IEffect > Effects { get; } = null;
 
 		public ITask AddEffect( IEffect effect )
 		{

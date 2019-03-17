@@ -22,12 +22,13 @@ namespace FluidHTN
 			// if we had a partial plan split somewhere in our plan, and we now
 			// want to continue where we left off.
 			// If this is the case, we don't erase the MTR, but continue building it.
-			if (ctx.PlanStartTaskParent != null)
+			// However, if we have a partial plan, but LastMTR is not 0, that means
+			// that the partial plan is still running, but something triggered a replan.
+			// When this happens, we have to plan from the domain root (we're not
+			// continuing the current plan), so that we're open for other plans to replace
+			// the running partial plan.
+			if (ctx.PlanStartTaskParent != null && ctx.LastMTR.Count == 0)
 			{
-				// When we continue a partial plan, we are already committed, and stop
-				// comparing to the LastMTR (we erase it).
-				ctx.LastMTR.Clear();
-
 				var root = ctx.PlanStartTaskParent;
 				ctx.PlanStartTaskParent = null;
 				var startIndex = ctx.PlanStartTaskChildIndex;
@@ -48,10 +49,20 @@ namespace FluidHTN
 			}
 			else
 			{
+				var lastPlanStartTaskParent = ctx.PlanStartTaskParent;
+
 				// We only erase the MTR if we start from the root task of the domain.
 				ctx.MethodTraversalRecord.Clear();
 
 				plan = domain.Root.Decompose(ctx, 0);
+
+				// If we found a new plan, let's make sure we remove any partial plan tracking, unless
+				// the new plan replaced our partial plan tracking with a new partial plan.
+				if (lastPlanStartTaskParent != null && plan != null && plan.Count > 0 && ctx.PlanStartTaskParent == lastPlanStartTaskParent)
+				{
+					ctx.PlanStartTaskParent = null;
+					ctx.PlanStartTaskChildIndex = 0;
+				}
 			}
 
 			return plan;
