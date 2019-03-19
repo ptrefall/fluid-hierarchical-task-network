@@ -35,6 +35,11 @@ namespace FluidHTN
 		List<int> LastMTR { get; }
 
 		/// <summary>
+		/// Reset the context state to default values.
+		/// </summary>
+		void Reset();
+
+		/// <summary>
 		/// Duplicate only the world state that will have the potential to change through effects during planning.
 		/// </summary>
 		/// <returns></returns>
