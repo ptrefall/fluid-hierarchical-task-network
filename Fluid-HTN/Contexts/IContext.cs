@@ -4,8 +4,12 @@ using Packages.Tasks.CompoundTasks;
 
 namespace FluidHTN
 {
+	public enum ContextState { Planning, Executing }
+
 	public interface IContext
 	{
+		ContextState ContextState { get; set; }
+
 		/// <summary>
 		/// The Method Traversal Record is used while decomposing a domain and
 		/// records the valid decomposition indices as we go through our
@@ -39,17 +43,12 @@ namespace FluidHTN
 		/// </summary>
 		void Reset();
 
-		/// <summary>
-		/// Duplicate only the world state that will have the potential to change through effects during planning.
-		/// </summary>
-		/// <returns></returns>
-		IContext Duplicate();
+		void TrimForExecution();
+		void TrimToStackDepth(int[] toDepth);
 
-		/// <summary>
-		/// Copies the values of ctx that has the potential to change through effects during planning.
-		/// </summary>
-		/// <param name="ctx"></param>
-		void Copy( IContext ctx );
+		bool HasState(int state, byte value);
+		byte GetState(int state);
+		void SetState(int state, byte value, bool setAsDirty = true, EffectType e = EffectType.Permanent);
 
 		/// <summary>
 		/// 
@@ -67,5 +66,15 @@ namespace FluidHTN
 		/// after a partial split.
 		/// </summary>
 		int PlanStartTaskChildIndex { get; set; }
+
+		byte[] WorldState { get; }
+
+		/// <summary>
+		/// A stack of changes applied to each world state entry during planning.
+		/// This is necessary if one wants to support planner-only and plan&execute effects.
+		/// </summary>
+		Stack<KeyValuePair<EffectType, byte>>[] WorldStateChangeStack { get; }
+
+		int[] GetWorldStateChangeDepth();
 	}
 }

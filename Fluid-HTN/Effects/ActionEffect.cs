@@ -6,9 +6,9 @@ namespace FluidHTN.Effects
 	{
 		public string Name { get; }
 		public EffectType Type { get; }
-		private readonly Action< T > _action;
+		private readonly Action< T, EffectType > _action;
 
-		public ActionEffect( string name, EffectType type, Action< T > action )
+		public ActionEffect( string name, EffectType type, Action< T, EffectType > action )
 		{
 			Name = name;
 			Type = type;
@@ -19,7 +19,7 @@ namespace FluidHTN.Effects
 		{
 			if ( ctx is T c )
 			{
-				_action?.Invoke( c );
+				_action?.Invoke( c, Type );
 			}
 			else
 			{

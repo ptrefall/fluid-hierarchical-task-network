@@ -30,7 +30,8 @@ namespace FluidHTN.Compounds
 		{
 			Plan.Clear();
 
-			var oldCtx = ctx.Duplicate();
+			//var oldCtx = ctx.Duplicate();
+			var oldStackDepth = ctx.GetWorldStateChangeDepth();
 
 			for(var taskIndex = startIndex; taskIndex < Children.Count; taskIndex++)
 			{
@@ -39,7 +40,8 @@ namespace FluidHTN.Compounds
 				if ( task.IsValid( ctx ) == false )
 				{
 					Plan.Clear();
-					ctx.Copy( oldCtx );
+					//ctx.Copy( oldCtx );
+					ctx.TrimToStackDepth(oldStackDepth);
 					break;
 				}
 
@@ -51,7 +53,8 @@ namespace FluidHTN.Compounds
 					if (result == null)
 					{
 						Plan.Clear();
-						ctx.Copy( oldCtx );
+						//ctx.Copy( oldCtx );
+						ctx.TrimToStackDepth(oldStackDepth);
 						return null;
 					}
 
@@ -59,7 +62,8 @@ namespace FluidHTN.Compounds
 					if ( result.Count == 0 )
 					{
 						Plan.Clear();
-						ctx.Copy( oldCtx );
+						//ctx.Copy( oldCtx );
+						ctx.TrimToStackDepth(oldStackDepth);
 						break;
 					}
 

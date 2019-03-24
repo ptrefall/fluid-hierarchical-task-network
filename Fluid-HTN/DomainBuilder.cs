@@ -167,7 +167,7 @@ namespace FluidHTN
 		/// <param name="effectType"></param>
 		/// <param name="action"></param>
 		/// <returns></returns>
-	    public DomainBuilder< T > Effect( string name, EffectType effectType, Action< T > action )
+	    public DomainBuilder< T > Effect( string name, EffectType effectType, Action< T, EffectType > action )
 		{
 			if ( Pointer is IPrimitiveTask task )
 			{
