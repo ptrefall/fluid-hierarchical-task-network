@@ -53,7 +53,7 @@ namespace FluidHTN
 		/// <summary>
 		/// 
 		/// </summary>
-		Stack<string> LastConditionFail { get; set; }
+		Stack<string> DecompositionLog { get; set; }
 
 		/// <summary>
 		/// The parent task of the partial split. The next child to be decomposed is marked by the

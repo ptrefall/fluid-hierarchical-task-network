@@ -20,7 +20,7 @@ namespace FluidHTN.Conditions
 				var result = _func?.Invoke( c ) ?? false;
 				if (result == false)
 				{
-					ctx.LastConditionFail.Push(Name);
+					ctx.DecompositionLog.Push(Name);
 				}
 				return result;
 			}

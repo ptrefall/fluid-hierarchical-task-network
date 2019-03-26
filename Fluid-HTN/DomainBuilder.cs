@@ -143,11 +143,11 @@ namespace FluidHTN
 		/// </summary>
 		/// <param name="action"></param>
 		/// <returns></returns>
-	    public DomainBuilder< T > Do( Func< T, TaskStatus > action )
+	    public DomainBuilder< T > Do( Func< T, TaskStatus > action, Action< T > forceStopAction = null )
 	    {
 		    if ( Pointer is IPrimitiveTask task )
 		    {
-			    var op = new FuncOperator< T >( action );
+			    var op = new FuncOperator< T >( action, forceStopAction );
 				task.SetOperator( op );
 		    }
 		    else

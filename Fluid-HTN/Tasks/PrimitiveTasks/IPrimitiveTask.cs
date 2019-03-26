@@ -11,5 +11,7 @@ namespace FluidHTN.PrimitiveTasks
 		List<IEffect> Effects { get; }
 		ITask AddEffect( IEffect effect );
 		void ApplyEffects( IContext ctx );
+
+		void Stop( IContext ctx );
 	}
 }

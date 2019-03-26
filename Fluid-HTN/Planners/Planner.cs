@@ -38,22 +38,17 @@ namespace FluidHTN
 				ctx.PlanStartTaskChildIndex = 0;
 
 				plan = root.Decompose(ctx, startIndex);
-
-				// If we fail to decompose from where we left off, then we failed to continue the partial
-				// plan, and need a replan from the domain root.
-				if (plan == null || plan.Count == 0)
+				if ( ( plan == null || plan.Count == 0 ) )
 				{
-					ctx.LastConditionFail.Push($"Failed to continue the partial plan when decomposing {root.Name}.");
 					ctx.MethodTraversalRecord.Clear();
+					domain.Root.Decompose( ctx, 0 );
 
-					root = domain.Root;
-					plan = root.Decompose(ctx, 0);
-
-					// If we fail to find a plan from the root, well, then we didn't find a plan at all!
-					if (plan == null || plan.Count == 0)
+					// If we found a new plan, let's make sure we remove any partial plan tracking, unless
+					// the new plan replaced our partial plan tracking with a new partial plan.
+					if (root != null && plan != null && plan.Count > 0 && ctx.PlanStartTaskParent == root)
 					{
-						ctx.ContextState = ContextState.Executing;
-						return null;
+						ctx.PlanStartTaskParent = null;
+						ctx.PlanStartTaskChildIndex = 0;
 					}
 				}
 
@@ -62,11 +57,22 @@ namespace FluidHTN
 					plan = root.Decompose(ctx, startIndex);
 
 					// If decomposing the current root fails, we backtrack the decomposition up the hierarchy,
-					// continuing to look for valid decomposition.
+					// continuing to look for valid decomposition. We can't simply fall back to decompose from
+					// the domain root, because chances are good that we'll just end up with the same partial plan
+					// we already completed. If we have to back-track our decomposition root when attempting to 
+					// continue a partial plan, it can be a sign of bad condition design, but sometimes it's
+					// "by design" as well. E.g. we want to plan up to the point where a troll runs and uproots
+					// a tree trunk, then hold off on planning further into the  future. The initial intention
+					// before uprooting the trunk was to attack an enemy, so now that we have uprooted said trunk,
+					// we should continue the plan, but world state has most likely changed by the time we have a
+					// tree trunk in our hand. Is the enemy still visible to us? Can I still reach the enemy? The
+					// distance to the enemy has most likely changed? All these world state changes can't be predicted
+					// far enough in advance that we want to plan further until we're ready to either run after the enemy
+					// with our trunk, or abandon the plan.
 					if ( (plan == null || plan.Count == 0) )
 					{
 						root = BacktrackDecomposition(domain, root, ctx, out startIndex);
-						ctx.LastConditionFail.Push($"Backtrack decomposition to new root {root?.Name ?? "none"}.");
+						ctx.DecompositionLog.Push($"Backtrack decomposition to new root {root?.Name ?? "none"}.");
 						if (root == domain.Root)
 						{
 							ctx.ContextState = ContextState.Executing;
@@ -93,17 +99,20 @@ namespace FluidHTN
 				}
 			}
 
-			// Trim away any plan-only or plan&execute effects from the world state change stack, that only
-			// permanent effects on the world state remains now that the planning is done.
-			ctx.TrimForExecution();
-
-			// Apply permanent world state changes to the actual world state used during plan execution.
-			for (var i = 0; i < ctx.WorldStateChangeStack.Length; i++)
+			if ( plan != null )
 			{
-				var stack = ctx.WorldStateChangeStack[i];
-				if (stack != null && stack.Count > 0)
+				// Trim away any plan-only or plan&execute effects from the world state change stack, that only
+				// permanent effects on the world state remains now that the planning is done.
+				ctx.TrimForExecution();
+
+				// Apply permanent world state changes to the actual world state used during plan execution.
+				for ( var i = 0; i < ctx.WorldStateChangeStack.Length; i++ )
 				{
-					ctx.WorldState[i] = stack.Peek().Value;
+					var stack = ctx.WorldStateChangeStack[ i ];
+					if ( stack != null && stack.Count > 0 )
+					{
+						ctx.WorldState[ i ] = stack.Peek().Value;
+					}
 				}
 			}
 

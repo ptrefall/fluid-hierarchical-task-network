@@ -59,5 +59,10 @@ namespace FluidHTN.PrimitiveTasks
 				effect.Apply( ctx );
 			}
 		}
+
+		public void Stop( IContext ctx )
+		{
+			Operator?.Stop( ctx );
+		}
 	}
 }
