@@ -41,6 +41,8 @@ namespace FluidHTN
 				if ( ( plan == null || plan.Count == 0 ) )
 				{
 					ctx.MethodTraversalRecord.Clear();
+					ctx.MTRDebug.Clear();
+
 					domain.Root.Decompose( ctx, 0 );
 
 					// If we found a new plan, let's make sure we remove any partial plan tracking, unless
@@ -87,6 +89,7 @@ namespace FluidHTN
 
 				// We only erase the MTR if we start from the root task of the domain.
 				ctx.MethodTraversalRecord.Clear();
+				ctx.MTRDebug.Clear();
 
 				plan = domain.Root.Decompose(ctx, 0);
 
@@ -96,6 +99,27 @@ namespace FluidHTN
 				{
 					ctx.PlanStartTaskParent = null;
 					ctx.PlanStartTaskChildIndex = 0;
+				}
+			}
+
+			// If this MTR equals the last MTR, then we need to double check whether we ended up
+			// just finding the exact same plan. During decomposition each compound task can't check
+			// for equality, only for less than, so this case needs to be treated after the fact.
+			var isMTRsEqual = ctx.MethodTraversalRecord.Count == ctx.LastMTR.Count;
+			if ( isMTRsEqual )
+			{
+				for ( var i = 0; i < ctx.MethodTraversalRecord.Count; i++ )
+				{
+					if ( ctx.MethodTraversalRecord[ i ] < ctx.LastMTR[ i ] )
+					{
+						isMTRsEqual = false;
+						break;
+					}
+				}
+
+				if ( isMTRsEqual )
+				{
+					plan = null;
 				}
 			}
 
@@ -144,6 +168,7 @@ namespace FluidHTN
 			if (ctx.MethodTraversalRecord.Count > 0)
 			{
 				ctx.MethodTraversalRecord.RemoveAt(ctx.MethodTraversalRecord.Count - 1);
+				ctx.MTRDebug.RemoveAt(ctx.MTRDebug.Count-1 );
 			}
 
 			// Find the start index

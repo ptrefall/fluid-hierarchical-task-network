@@ -25,6 +25,7 @@ namespace FluidHTN
 		/// see fit.
 		/// </summary>
 		List<int> MethodTraversalRecord { get; set; }
+		List<string> MTRDebug { get; set; }
 
 		/// <summary>
 		/// The Method Traversal Record that was recorded for the currently
@@ -37,6 +38,7 @@ namespace FluidHTN
 		/// see fit.
 		/// </summary>
 		List<int> LastMTR { get; }
+		List<string> LastMTRDebug { get; set; }
 
 		/// <summary>
 		/// Reset the context state to default values.
