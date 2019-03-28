@@ -136,6 +136,20 @@ namespace FluidHTN
 					if ( stack != null && stack.Count > 0 )
 					{
 						ctx.WorldState[ i ] = stack.Peek().Value;
+						stack.Clear();
+					}
+				}
+			}
+			else
+			{
+				// Clear away any changes that might have been applied to the stack
+				// No changes should be made or tracked further when the plan failed.
+				for ( var i = 0; i < ctx.WorldStateChangeStack.Length; i++ )
+				{
+					var stack = ctx.WorldStateChangeStack[ i ];
+					if ( stack != null && stack.Count > 0 )
+					{
+						stack.Clear();
 					}
 				}
 			}
