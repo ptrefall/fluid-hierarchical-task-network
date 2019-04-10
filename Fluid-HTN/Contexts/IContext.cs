@@ -46,7 +46,7 @@ namespace FluidHTN
 		void Reset();
 
 		void TrimForExecution();
-		void TrimToStackDepth(int[] toDepth);
+		void TrimToStackDepth(int[] stackDepth);
 
 		bool HasState(int state, byte value);
 		byte GetState(int state);

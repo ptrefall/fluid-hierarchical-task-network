@@ -41,6 +41,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Contexts\BaseContext.cs" />
     <Compile Include="Tasks\CompoundTasks\IDecomposeAll.cs" />
     <Compile Include="Tasks\CompoundTasks\PartialSplitTask.cs" />
     <Compile Include="Tasks\CompoundTasks\Selector.cs" />
