@@ -129,7 +129,7 @@ In UnityProject/Packages/manifest.json add the following line under dependencies
 ```
 Your Unity project should now have integrated Fluid HTN, and you should be able to proceed with the getting started example above. Slightly more elaborate examples based on Unity is also available in the Examples section below.
 ### Partial planning
-We can easily integrate the concept of partial planning into our domains. We call it a Partial Split, and must be set inside a sequence to be valid. It allows the planner to only plan up to a certain point, then continue from there once the partial plan has been completed.
+We can easily integrate the concept of partial planning into our domains. We call it a Partial Split, and it must be set inside a sequence to be valid. It allows the planner to only plan up to a certain point, then continue from there once the partial plan has been completed.
 ```C#
 .Sequence("A")
     .Action("1")
@@ -139,6 +139,17 @@ We can easily integrate the concept of partial planning into our domains. We cal
     .Action("2")
         //...
     .End()
+.End()
+```
+### Sub-domains and domain splicing
+We can define sub-domains and splice them together to form new domains. This can be quite handy for re-use of sub-domains, and prevent a single domain definition from growing too large.
+```C#
+.Select("A")
+    //...
+.End()
+.Splice(subDomain)
+.Select("B")
+    //...
 .End()
 ```
 
