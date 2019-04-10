@@ -101,6 +101,7 @@ In UnityProject/Packages/manifest.json add the following line under dependencies
 ```json
 "fluid.htn": "file:path/to/fluid-hierarchial-task-network"
 ```
+Your Unity project should now have integrated Fluid HTN, and you should be able to proceed with the getting started example above.
 
 ## Extensions
 The [Fluid HTN Extension library](https://github.com/ptrefall/fluid-hierarchial-task-network-ext) adds extended selector implementations, like Random Select and Utility Select, as well as JSON serialization of HTN Domains.
