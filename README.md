@@ -84,3 +84,6 @@ The [Fluid HTN Extension library](https://github.com/ptrefall/fluid-hierarchial-
 
 ## Examples
 Example projects have been pulled into their own repositories, as not to clutter the core library.
+
+## TODO
+* Improve documentation
