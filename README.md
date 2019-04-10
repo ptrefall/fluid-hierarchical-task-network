@@ -8,9 +8,6 @@ A simple HTN planner based around the principles of the Builder pattern, inspire
 * Easy to extend with new features, as demonstrated in the [extension library](https://github.com/ptrefall/fluid-hierarchial-task-network-ext).
 * Comes with Unity Package Module definitions for seamless integration into Unity projects.
 
-## Extensions
-The [Fluid HTN Extension library](https://github.com/ptrefall/fluid-hierarchial-task-network-ext) adds extended selector implementations, like Random Select and Utility Select, as well as JSON serialization of HTN Domains.
-
 ## Getting started
 ### Coding with Fluid HTN
 First we need to set up a WorldState enum and a Context. This is the blackboard the planner uses to access state during its planning procedure.
@@ -69,9 +66,25 @@ var domain = new DomainBuilder<MyContext>( "MyDomain" )
             .End()
         .End()
     .End()
+    .Build();
+```
+Now that we have a domain, we can start to generate plans. We do that through the Planner API.
+```C#
+var ctx = new MyContext();
+var planner = new Planner();
+planner.TickPlan(domain, ctx);
 ```
 ### Using Fluid HTN with Unity
 In UnityProject/Packages/manifest.json add the following line under dependencies, and edit the path to point to where you have cloned the Fluid HTN repository.
 ```json
 "fluid.htn": "file:path/to/fluid-hierarchial-task-network"
 ```
+
+## Extensions
+The [Fluid HTN Extension library](https://github.com/ptrefall/fluid-hierarchial-task-network-ext) adds extended selector implementations, like Random Select and Utility Select, as well as JSON serialization of HTN Domains.
+
+## Examples
+Example projects have been pulled into their own repositories, as not to clutter the core library.
+
+## TODO
+* Improve documentation
