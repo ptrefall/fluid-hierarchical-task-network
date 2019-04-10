@@ -39,26 +39,48 @@ public class MyContext : BaseContext
     }
 }
 ```
+For convenience we extend our context with some specialized world state manipulation methods now that we have defined our world state.
+```C#
+public class MyContext : BaseContext
+    {
+        // ...
+
+        public bool HasState(MyWorldState state, bool value)
+        {
+            return HasState((int)state, (byte) (value ? 1 : 0));
+        }
+
+        public bool HasState(MyWorldState state)
+        {
+            return HasState((int)state, 1);
+        }
+
+        public void SetState(MyWorldState state, bool value, EffectType type)
+        {
+            SetState((int)state, (byte)(value ? 1 : 0), true, type);
+        }
+    }
+```
 Now we have what we need to start to define a new HTN domain.
 ```C#
 var domain = new DomainBuilder<MyContext>("MyDomain")
     .Select("C")
-        .Condition("Has A and B", (ctx) => { return ctx.HasState((int)MyWorldState.HasA, 1) && ctx.HasState((int)MyWorldState.HasB, 1); })
-        .Condition("Has NOT C", (ctx) => ctx.HasState((int)MyWorldState.HasC, 0))
+        .Condition("Has A and B", (ctx) => ctx.HasState(MyWorldState.HasA) && ctx.HasState(MyWorldState.HasB))
+        .Condition("Has NOT C", (ctx) => !ctx.HasState(MyWorldState.HasC))
         .Action("Get C")
             .Do((ctx) => { Console.WriteLine("Get C"); return TaskStatus.Success; })
-            .Effect("Has C", EffectType.PlanOnly, (ctx, type) => ctx.SetState((int)MyWorldState.HasC, 1, true, type))
+            .Effect("Has C", EffectType.PlanOnly, (ctx, type) => ctx.SetState(MyWorldState.HasC, true, type))
         .End()
    .End()
    .Sequence("A and B")
-       .Condition("Has NOT A nor B", (ctx) => { return !(ctx.HasState((int)MyWorldState.HasA, 1) && ctx.HasState((int)MyWorldState.HasB, 1)); })
+       .Condition("Has NOT A nor B", (ctx) => !(ctx.HasState(MyWorldState.HasA) && ctx.HasState(MyWorldState.HasB)))
        .Action("Get A")
            .Do((ctx) => { Console.WriteLine("Get A"); return TaskStatus.Success; })
-           .Effect("Has A", EffectType.PlanOnly, (ctx, type) => ctx.SetState((int)MyWorldState.HasA, 1, true, type))
+           .Effect("Has A", EffectType.PlanOnly, (ctx, type) => ctx.SetState(MyWorldState.HasA, true, type))
       .End()
       .Action("Get B")
           .Do((ctx) => { Console.WriteLine("Get B"); return TaskStatus.Success; })
-          .Effect("Has B", EffectType.PlanOnly, (ctx, type) => ctx.SetState((int)MyWorldState.HasB, 1, true, type))
+          .Effect("Has B", EffectType.PlanOnly, (ctx, type) => ctx.SetState(MyWorldState.HasB, true, type))
      .End()
      .Select("Done")
          .Action("Done")
