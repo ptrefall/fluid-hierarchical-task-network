@@ -30,6 +30,7 @@ public class MyContext : BaseContext
     public override byte[] WorldState => _worldState;
     
     // Custom state
+    public bool Done { get; set; } = false;
     
     public override void Init()
     {
@@ -69,33 +70,56 @@ var domain = new DomainBuilder<MyContext>("MyDomain")
         .Condition("Has NOT C", (ctx) => !ctx.HasState(MyWorldState.HasC))
         .Action("Get C")
             .Do((ctx) => { Console.WriteLine("Get C"); return TaskStatus.Success; })
-            .Effect("Has C", EffectType.PlanOnly, (ctx, type) => ctx.SetState(MyWorldState.HasC, true, type))
+            .Effect("Has C", EffectType.PlanAndExecute, (ctx, type) => ctx.SetState(MyWorldState.HasC, true, type))
         .End()
-   .End()
-   .Sequence("A and B")
-       .Condition("Has NOT A nor B", (ctx) => !(ctx.HasState(MyWorldState.HasA) && ctx.HasState(MyWorldState.HasB)))
-       .Action("Get A")
-           .Do((ctx) => { Console.WriteLine("Get A"); return TaskStatus.Success; })
-           .Effect("Has A", EffectType.PlanOnly, (ctx, type) => ctx.SetState(MyWorldState.HasA, true, type))
-      .End()
-      .Action("Get B")
-          .Do((ctx) => { Console.WriteLine("Get B"); return TaskStatus.Success; })
-          .Effect("Has B", EffectType.PlanOnly, (ctx, type) => ctx.SetState(MyWorldState.HasB, true, type))
-     .End()
-     .Select("Done")
-         .Action("Done")
-             .Do((ctx) => { Console.WriteLine("Done"); return TaskStatus.Success; })
-          .End()
-      .End()
-  .End()
-  .Build();
+    .End()
+    .Sequence("A and B")
+        .Condition("Has NOT A nor B", (ctx) => !(ctx.HasState(MyWorldState.HasA) && ctx.HasState(MyWorldState.HasB)))
+        .Action("Get A")
+            .Do((ctx) => { Console.WriteLine("Get A"); return TaskStatus.Success; })
+            .Effect("Has A", EffectType.PlanAndExecute, (ctx, type) => ctx.SetState(MyWorldState.HasA, true, type))
+        .End()
+        .Action("Get B")
+            .Do((ctx) => { Console.WriteLine("Get B"); return TaskStatus.Success; })
+            .Effect("Has B", EffectType.PlanAndExecute, (ctx, type) => ctx.SetState(MyWorldState.HasB, true, type))
+        .End()
+    .End()
+    .Select("Done")
+        .Action("Done")
+            .Do((ctx) => 
+            {
+                Console.WriteLine("Done");
+                ctx.Done = true;
+                return TaskStatus.Continue;
+            })
+        .End()
+    .End()
+    .Build();
 ```
-Now that we have a domain, we can start to generate plans. We do that through the Planner API.
+Now that we have a domain, we can start to generate plans. First we need to instantiate our planner and the context.
 ```C#
 var ctx = new MyContext();
 var planner = new Planner();
 ctx.Init();
-planner.TickPlan(domain, ctx);
+```
+Next, let's tick the planner until the Done flag in our context is set to false.
+```C#
+while (!c.Done)
+{
+    planner.TickPlan(domain, c);
+}
+```
+If this little example is being integrated into a C# console app, we can add a pause after the while loop to prevent the console from shutting down immediately.
+```C#
+Console.ReadKey();
+```
+Now, if we run this example, we should see the following print to our console:
+```
+Get A
+Get B
+Get C
+Done
+
 ```
 ### Using Fluid HTN with Unity
 In UnityProject/Packages/manifest.json add the following line under dependencies, and edit the path to point to where you have cloned the Fluid HTN repository.
