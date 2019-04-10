@@ -70,6 +70,12 @@ var domain = new DomainBuilder<MyContext>( "MyDomain" )
         .End()
     .End()
 ```
+Now that we have a domain, we can start to generate plans. We do that through the Planner API.
+```C#
+var ctx = new MyContext();
+var planner = new Planner();
+planner.TickPlan(domain, ctx);
+```
 ### Using Fluid HTN with Unity
 In UnityProject/Packages/manifest.json add the following line under dependencies, and edit the path to point to where you have cloned the Fluid HTN repository.
 ```json
