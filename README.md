@@ -94,6 +94,7 @@ Now that we have a domain, we can start to generate plans. We do that through th
 ```C#
 var ctx = new MyContext();
 var planner = new Planner();
+ctx.Init();
 planner.TickPlan(domain, ctx);
 ```
 ### Using Fluid HTN with Unity
