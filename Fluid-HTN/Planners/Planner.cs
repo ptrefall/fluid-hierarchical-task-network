@@ -199,6 +199,18 @@ namespace FluidHTN
             }
         }
 
-		
+        /// <summary>
+        /// Get the current plan.
+        /// </summary>
+        /// <returns></returns>
+		public Queue<ITask> GetPlan()
+        {
+            return _plan;
+        }
+
+        public ITask GetCurrentTask()
+        {
+            return _currentTask;
+        }
 	}
 }
