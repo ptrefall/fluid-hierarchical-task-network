@@ -5,6 +5,7 @@ A simple HTN planner based around the principles of the Builder pattern, inspire
 * Comes with a Domain Builder to simplify the design of code-oriented HTN domains.
 * Fluid HTN is a total-order forward decomposition planner, as described by Troy Humphrey in his [GameAIPro article](http://www.gameaipro.com/GameAIPro/GameAIPro_Chapter12_Exploring_HTN_Planners_through_Example.pdf).
 * Partial planning
+* Domain splicing
 * Easy to extend with new features, as demonstrated in the [extension library](https://github.com/ptrefall/fluid-hierarchial-task-network-ext).
 * Comes with Unity Package Module definitions for seamless integration into Unity projects.
 
