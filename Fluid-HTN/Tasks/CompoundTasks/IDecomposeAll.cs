@@ -1,6 +1,5 @@
-﻿using FluidHTN.Compounds;
-
-namespace Packages.Tasks.CompoundTasks
+﻿
+namespace FluidHTN.Compounds
 {
 	/// <summary>
 	/// The Decompose All interface is a tag to signify that this compound task type intends to

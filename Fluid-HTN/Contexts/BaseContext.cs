@@ -25,6 +25,15 @@ namespace FluidHTN.Contexts
 
         public Stack<KeyValuePair<EffectType, byte>>[] WorldStateChangeStack { get; protected set; }
 
+        public virtual void Init()
+        {
+            WorldStateChangeStack = new Stack<KeyValuePair<EffectType, byte>>[WorldState.Length];
+            for (var i = 0; i < WorldState.Length; i++)
+            {
+                WorldStateChangeStack[i] = new Stack<KeyValuePair<EffectType, byte>>();
+            }
+        }
+
         public bool HasState(int state, byte value)
         {
             return GetState(state) == value;

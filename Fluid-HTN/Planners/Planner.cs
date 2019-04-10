@@ -3,207 +3,188 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using FluidHTN.Compounds;
-using Packages.Tasks.CompoundTasks;
+using FluidHTN.PrimitiveTasks;
 
 namespace FluidHTN
 {
-	public static class Planner
+	public class Planner<T> where T : IContext
 	{
-		public static Queue<ITask> FindPlan<T>( this Domain< T > domain, T ctx ) where T : IContext
-		{
-			if (ctx.MethodTraversalRecord == null)
-			{
-				throw new Exception("We require the Method Traversal Record to have a valid instance.");
-			}
+        private Queue<ITask> _plan = new Queue<ITask>();
+        private ITask _currentTask;
 
-			ctx.ContextState = ContextState.Planning;
+        public void TickPlan( Domain<T> domain, T ctx )
+        {
+            // Check whether state has changed or the current plan has finished running.
+            // and if so, try to find a new plan.
+            if ((_currentTask == null && (_plan == null || _plan.Count == 0)) || ctx.IsDirty)
+            {
+                var partialPlanTemp = ctx.PlanStartTaskParent;
+                var partialPlanIndexTemp = ctx.PlanStartTaskChildIndex;
 
-			Queue<ITask> plan = null;
+                bool worldStateDirtyReplan = ctx.IsDirty;
+                ctx.IsDirty = false;
 
-			// We first check whether we have a stored start task. This is true
-			// if we had a partial plan split somewhere in our plan, and we now
-			// want to continue where we left off.
-			// If this is the case, we don't erase the MTR, but continue building it.
-			// However, if we have a partial plan, but LastMTR is not 0, that means
-			// that the partial plan is still running, but something triggered a replan.
-			// When this happens, we have to plan from the domain root (we're not
-			// continuing the current plan), so that we're open for other plans to replace
-			// the running partial plan.
-			if (ctx.PlanStartTaskParent != null && ctx.LastMTR.Count == 0)
-			{
-				var root = ctx.PlanStartTaskParent;
-				ctx.PlanStartTaskParent = null;
+                if (worldStateDirtyReplan)
+                {
+                    // If we're simply re-evaluating whether to replace the current plan because
+                    // some world state got dirt, then we do not intend to continue a partial plan
+                    // right now, but rather see whether the world state changed to a degree where
+                    // we should pursue a better plan. Thus, if this replan fails to find a better
+                    // plan, we have to add back the partial plan temps cached above.
+                    ctx.PlanStartTaskParent = null;
+                    ctx.PlanStartTaskChildIndex = 0;
 
-				var startIndex = ctx.PlanStartTaskChildIndex;
-				ctx.PlanStartTaskChildIndex = 0;
+                    // We also need to ensure that the last mtr is up to date with the on-going MTR of the partial plan,
+                    // so that any new potential plan that is decomposing from the domain root has to beat the currently
+                    // running partial plan.
+                    if (partialPlanTemp != null)
+                    {
+                        ctx.LastMTR.Clear();
+                        foreach (var record in ctx.MethodTraversalRecord)
+                        {
+                            ctx.LastMTR.Add(record);
 
-				plan = root.Decompose(ctx, startIndex);
-				if ( ( plan == null || plan.Count == 0 ) )
-				{
-					ctx.MethodTraversalRecord.Clear();
-					ctx.MTRDebug.Clear();
+                        }
 
-					domain.Root.Decompose( ctx, 0 );
+                        ctx.LastMTRDebug.Clear();
+                        foreach (var record in ctx.MTRDebug)
+                        {
+                            ctx.LastMTRDebug.Add(record);
+                        }
+                    }
+                }
 
-					// If we found a new plan, let's make sure we remove any partial plan tracking, unless
-					// the new plan replaced our partial plan tracking with a new partial plan.
-					if (root != null && plan != null && plan.Count > 0 && ctx.PlanStartTaskParent == root)
-					{
-						ctx.PlanStartTaskParent = null;
-						ctx.PlanStartTaskChildIndex = 0;
-					}
-				}
+                var newPlan = domain.FindPlan(ctx);
+                if (newPlan != null)
+                {
+                    _plan.Clear();
+                    while (newPlan.Count > 0)
+                    {
+                        _plan.Enqueue(newPlan.Dequeue());
+                    }
 
-				/*while (plan == null || plan.Count == 0)
-				{
-					plan = root.Decompose(ctx, startIndex);
+                    if (_currentTask != null && _currentTask is IPrimitiveTask t)
+                    {
+                        t.Stop(ctx);
+                        _currentTask = null;
+                    }
 
-					// If decomposing the current root fails, we backtrack the decomposition up the hierarchy,
-					// continuing to look for valid decomposition. We can't simply fall back to decompose from
-					// the domain root, because chances are good that we'll just end up with the same partial plan
-					// we already completed. If we have to back-track our decomposition root when attempting to 
-					// continue a partial plan, it can be a sign of bad condition design, but sometimes it's
-					// "by design" as well. E.g. we want to plan up to the point where a troll runs and uproots
-					// a tree trunk, then hold off on planning further into the  future. The initial intention
-					// before uprooting the trunk was to attack an enemy, so now that we have uprooted said trunk,
-					// we should continue the plan, but world state has most likely changed by the time we have a
-					// tree trunk in our hand. Is the enemy still visible to us? Can I still reach the enemy? The
-					// distance to the enemy has most likely changed? All these world state changes can't be predicted
-					// far enough in advance that we want to plan further until we're ready to either run after the enemy
-					// with our trunk, or abandon the plan.
-					if ( (plan == null || plan.Count == 0) )
-					{
-						root = BacktrackDecomposition(domain, root, ctx, out startIndex);
-						ctx.DecompositionLog.Push($"Backtrack decomposition to new root {root?.Name ?? "none"}.");
-						if (root == domain.Root)
-						{
-							ctx.ContextState = ContextState.Executing;
-							return null;
-						}
-					}
-				}*/
-			}
-			else
-			{
-				var lastPlanStartTaskParent = ctx.PlanStartTaskParent;
+                    // Copy the MTR into our LastMTR to represent the current plan's decomposition record
+                    // that must be beat to replace the plan.
+                    if (ctx.MethodTraversalRecord != null)
+                    {
+                        ctx.LastMTR.Clear();
+                        foreach (var record in ctx.MethodTraversalRecord)
+                        {
+                            ctx.LastMTR.Add(record);
+                        }
 
-				// We only erase the MTR if we start from the root task of the domain.
-				ctx.MethodTraversalRecord.Clear();
-				ctx.MTRDebug.Clear();
+                        ctx.LastMTRDebug.Clear();
+                        foreach (var record in ctx.MTRDebug)
+                        {
+                            ctx.LastMTRDebug.Add(record);
+                        }
+                    }
+                }
+                else if (partialPlanTemp != null)
+                {
+                    ctx.PlanStartTaskParent = partialPlanTemp;
+                    ctx.PlanStartTaskChildIndex = partialPlanIndexTemp;
 
-				plan = domain.Root.Decompose(ctx, 0);
+                    if (ctx.LastMTR.Count > 0)
+                    {
+                        ctx.MethodTraversalRecord.Clear();
+                        foreach (var record in ctx.LastMTR)
+                        {
+                            ctx.MethodTraversalRecord.Add(record);
+                        }
+                        ctx.LastMTR.Clear();
 
-				// If we found a new plan, let's make sure we remove any partial plan tracking, unless
-				// the new plan replaced our partial plan tracking with a new partial plan.
-				if (lastPlanStartTaskParent != null && plan != null && plan.Count > 0 && ctx.PlanStartTaskParent == lastPlanStartTaskParent)
-				{
-					ctx.PlanStartTaskParent = null;
-					ctx.PlanStartTaskChildIndex = 0;
-				}
-			}
+                        ctx.MTRDebug.Clear();
+                        foreach (var record in ctx.LastMTRDebug)
+                        {
+                            ctx.MTRDebug.Add(record);
+                        }
+                        ctx.LastMTRDebug.Clear();
+                    }
+                }
+            }
 
-			// If this MTR equals the last MTR, then we need to double check whether we ended up
-			// just finding the exact same plan. During decomposition each compound task can't check
-			// for equality, only for less than, so this case needs to be treated after the fact.
-			var isMTRsEqual = ctx.MethodTraversalRecord.Count == ctx.LastMTR.Count;
-			if ( isMTRsEqual )
-			{
-				for ( var i = 0; i < ctx.MethodTraversalRecord.Count; i++ )
-				{
-					if ( ctx.MethodTraversalRecord[ i ] < ctx.LastMTR[ i ] )
-					{
-						isMTRsEqual = false;
-						break;
-					}
-				}
+            if (_currentTask == null && _plan != null && _plan.Count > 0)
+            {
+                _currentTask = _plan?.Dequeue();
+                if (_currentTask != null)
+                {
+                    foreach (var condition in _currentTask.Conditions)
+                    {
+                        // If a condition failed, then the plan failed to progress! A replan is required.
+                        if (condition.IsValid(ctx) == false)
+                        {
+                            _currentTask = null;
+                            _plan.Clear();
 
-				if ( isMTRsEqual )
-				{
-					plan = null;
-				}
-			}
+                            ctx.LastMTR.Clear();
+                            ctx.LastMTRDebug.Clear();
 
-			if ( plan != null )
-			{
-				// Trim away any plan-only or plan&execute effects from the world state change stack, that only
-				// permanent effects on the world state remains now that the planning is done.
-				ctx.TrimForExecution();
+                            return;
+                        }
+                    }
+                }
+            }
 
-				// Apply permanent world state changes to the actual world state used during plan execution.
-				for ( var i = 0; i < ctx.WorldStateChangeStack.Length; i++ )
-				{
-					var stack = ctx.WorldStateChangeStack[ i ];
-					if ( stack != null && stack.Count > 0 )
-					{
-						ctx.WorldState[ i ] = stack.Peek().Value;
-						stack.Clear();
-					}
-				}
-			}
-			else
-			{
-				// Clear away any changes that might have been applied to the stack
-				// No changes should be made or tracked further when the plan failed.
-				for ( var i = 0; i < ctx.WorldStateChangeStack.Length; i++ )
-				{
-					var stack = ctx.WorldStateChangeStack[ i ];
-					if ( stack != null && stack.Count > 0 )
-					{
-						stack.Clear();
-					}
-				}
-			}
+            if (_currentTask != null)
+            {
+                if (_currentTask is IPrimitiveTask task)
+                {
+                    if (task.Operator != null)
+                    {
+                        var status = task.Operator.Update(ctx);
 
-			ctx.ContextState = ContextState.Executing;
-			return plan;
-		}
+                        // If the operation finished successfully, we set task to null so that we dequeue the next task in the plan the following tick.
+                        if (status == TaskStatus.Success)
+                        {
+                            // All effects that is a result of running this task should be applied when the task is a success.
+                            foreach (var effect in task.Effects)
+                            {
+                                if (effect.Type == EffectType.PlanAndExecute)
+                                {
+                                    effect.Apply(ctx);
+                                }
+                            }
 
-		private static ICompoundTask BacktrackDecomposition<T>(Domain<T> domain, ICompoundTask root, IContext ctx, out int startIndex) where T : IContext
-		{
-			startIndex = 0;
+                            _currentTask = null;
+                            if (_plan.Count == 0)
+                            {
+                                ctx.LastMTR.Clear();
+                                ctx.LastMTRDebug.Clear();
 
-			// If we decomposed back down to the root task of the domain, but failed, we failed to find a valid plan!
-			if (root == domain.Root)
-			{
-				return domain.Root;
-			}
+                                ctx.IsDirty = false;
 
-			// For each root that fails to find a plan, we need to go back up the hierarchy,
-			// but we require roots to be selectors now! Track the descendants, to ensure we
-			// continue decomposition after the descendant.
-			var descendant = root; 
-			while (root is IDecomposeAll)
-			{
-				descendant = root;
-				root = root.Parent;
-			}
+                                TickPlan(domain, ctx);
+                            }
+                        }
 
-			// We now need to backtrack our MTR, so that it's correct with the decomposition backtracking.
-			if (ctx.MethodTraversalRecord.Count > 0)
-			{
-				ctx.MethodTraversalRecord.RemoveAt(ctx.MethodTraversalRecord.Count - 1);
-				ctx.MTRDebug.RemoveAt(ctx.MTRDebug.Count-1 );
-			}
+                        // If the operation failed to finish, we need to fail the entire plan, so that we will replan the next tick.
+                        else if (status == TaskStatus.Failure)
+                        {
+                            _currentTask = null;
+                            _plan.Clear();
 
-			// Find the start index
-			for (var i = 0; i < root.Children.Count; i++)
-			{
-				if (root.Children[i] == descendant)
-				{
-					startIndex = i+1;
-					break;
-				}
-			}
+                            ctx.LastMTR.Clear();
+                            ctx.LastMTRDebug.Clear();
+                        }
 
-			// If the descendant was the last child of root, we need to backtrack up the hierarchy further.
-			if (startIndex >= root.Children.Count)
-			{
-				return BacktrackDecomposition<T>(domain, root, ctx, out startIndex);
-			}
+                        // Otherwise the operation isn't done yet and need to continue.
+                    }
+                    else
+                    {
+                        // This should not really happen if a domain is set up properly.
+                        _currentTask = null;
+                    }
+                }
+            }
+        }
 
-			// If we get this far, we should have found a new root that we're confident we can decompose,
-			// and the index we want to start the decomposition from.
-			return root;
-		}
+		
 	}
 }

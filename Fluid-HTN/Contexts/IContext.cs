@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using FluidHTN.Compounds;
-using Packages.Tasks.CompoundTasks;
 
 namespace FluidHTN
 {
@@ -8,7 +7,8 @@ namespace FluidHTN
 
 	public interface IContext
 	{
-		ContextState ContextState { get; set; }
+        bool IsDirty { get; set; }
+        ContextState ContextState { get; set; }
 
 		/// <summary>
 		/// The Method Traversal Record is used while decomposing a domain and
