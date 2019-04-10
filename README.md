@@ -128,6 +128,19 @@ In UnityProject/Packages/manifest.json add the following line under dependencies
 "fluid.htn": "file:path/to/fluid-hierarchial-task-network"
 ```
 Your Unity project should now have integrated Fluid HTN, and you should be able to proceed with the getting started example above. Slightly more elaborate examples based on Unity is also available in the Examples section below.
+### Partial planning
+We can easily integrate the concept of partial planning into our domains. We call it a Partial Split, and must be set inside a sequence to be valid. It allows the planner to only plan up to a certain point, then continue from there once the partial plan has been completed.
+```C#
+.Sequence("A")
+    .Action("1")
+        //...
+    .End()
+    .PartialSplit()
+    .Action("2")
+        //...
+    .End()
+.End()
+```
 
 ## Extensions
 The [Fluid HTN Extension library](https://github.com/ptrefall/fluid-hierarchial-task-network-ext) adds extended selector implementations, like Random Select and Utility Select, as well as JSON serialization of HTN Domains.
