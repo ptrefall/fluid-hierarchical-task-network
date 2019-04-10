@@ -3,6 +3,9 @@ using FluidHTN.Compounds;
 
 namespace FluidHTN
 {
+    /// <summary>
+    /// The state our context can be in. This is essentially planning or execution state.
+    /// </summary>
 	public enum ContextState { Planning, Executing }
 
 	public interface IContext

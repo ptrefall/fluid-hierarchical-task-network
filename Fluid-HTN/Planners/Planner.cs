@@ -7,11 +7,25 @@ using FluidHTN.PrimitiveTasks;
 
 namespace FluidHTN
 {
+    /// <summary>
+    /// A planner is a responsible for handling the management of finding plans in a domain, replan when the state of the running plan
+    /// demands it, or look for a new potential plan if the world state gets dirty.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
 	public class Planner<T> where T : IContext
 	{
         private Queue<ITask> _plan = new Queue<ITask>();
         private ITask _currentTask;
 
+        /// <summary>
+        /// Call this with a domain and context instance to have the planner manage plan and task handling for the domain at runtime.
+        /// If the plan completes or fails, the planner will find a new plan, or if the context is marked dirty, the planner will attempt
+        /// a replan to see whether we can find a better plan now that the state of the world has changed.
+        /// 
+        /// This planner can also be used as a blueprint for writing a custom planner.
+        /// </summary>
+        /// <param name="domain"></param>
+        /// <param name="ctx"></param>
         public void TickPlan( Domain<T> domain, T ctx )
         {
             // Check whether state has changed or the current plan has finished running.
