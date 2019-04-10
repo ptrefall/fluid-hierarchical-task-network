@@ -18,7 +18,7 @@ namespace FluidHTN.Compounds
 			return true;
 		}
 
-		private readonly Queue< ITask > Plan = new Queue< ITask >();
+		protected readonly Queue< ITask > Plan = new Queue< ITask >();
 
 		/// <summary>
 		/// In a Selector decomposition, just a single sub-task must be valid and successfully decompose for the Selector to be successfully decomposed.

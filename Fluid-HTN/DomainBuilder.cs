@@ -35,9 +35,22 @@ namespace FluidHTN
 			_pointers.Add( _domain.Root );
 	    }
 
-	    // ========================================================= HIERARCHY HANDLING
+        // ========================================================= HIERARCHY HANDLING
 
-		public DomainBuilder<T> CompoundTask<P>( string name ) where P : ICompoundTask, new ()
+        /// <summary>
+        /// Compound tasks are where HTN get their “hierarchical” nature. You can think of compound task as 
+        /// a high level task that has multiple ways of being accomplished. There are primarily two types of 
+        /// compound tasks. Selectors and Sequencers. A Selector must be able to decompose a single sub-task, 
+        /// while a Sequence must be able to decompose all of its sub-tasks successfully for itself to have 
+        /// decomposed successfully. There is nothing stopping you from extending this toolset with RandomSelect,
+        /// UtilitySelect, etc. These tasks are decomposed until we're left with only Primitive Tasks, which represent 
+        /// a final plan.
+        /// http://www.gameaipro.com/GameAIPro/GameAIPro_Chapter12_Exploring_HTN_Planners_through_Example.pdf
+        /// </summary>
+        /// <typeparam name="P">The type of compound task</typeparam>
+        /// <param name="name">The name given to the task, mainly for debug/display purposes</param>
+        /// <returns></returns>
+        public DomainBuilder<T> CompoundTask<P>( string name ) where P : ICompoundTask, new ()
 		{
 			if ( Pointer is ICompoundTask compoundTask )
 			{
@@ -53,7 +66,17 @@ namespace FluidHTN
 			return this;
 		}
 
-		public DomainBuilder<T> PrimitiveTask<P>( string name ) where P : IPrimitiveTask, new ()
+        /// <summary>
+        /// There are two types of tasks that are used to build a HTN, called compound tasks and primitive tasks. 
+        /// Primitive tasks represent a single step that can be performed by our NPC.  A set of primitive tasks 
+        /// is the plan that we are ultimately getting out of the HTN.Primitive tasks are comprised of an operator 
+        /// and sets of effects and conditions.
+        /// http://www.gameaipro.com/GameAIPro/GameAIPro_Chapter12_Exploring_HTN_Planners_through_Example.pdf
+        /// </summary>
+        /// <typeparam name="P">The type of primitive task</typeparam>
+        /// <param name="name">The name given to the task, mainly for debug/display purposes</param>
+        /// <returns></returns>
+        public DomainBuilder<T> PrimitiveTask<P>( string name ) where P : IPrimitiveTask, new ()
 		{
 			if ( Pointer is ICompoundTask compoundTask )
 			{
@@ -69,7 +92,16 @@ namespace FluidHTN
 			return this;
 		}
 
-		protected DomainBuilder<T> PartialSplitTask()
+        /// <summary>
+        /// Partial planning is one of the most powerful features of HTN. In simplest terms, it allows 
+        /// the planner the ability to not fully decompose a complete plan. HTN is able to do this because 
+        /// it uses forward decomposition or forward search to find plans. That is, the planner starts with 
+        /// the current world state and plans forward in time from that. This allows the planner to only 
+        /// plan ahead a few steps.
+        /// http://www.gameaipro.com/GameAIPro/GameAIPro_Chapter12_Exploring_HTN_Planners_through_Example.pdf
+        /// </summary>
+        /// <returns></returns>
+        protected DomainBuilder<T> PartialSplitTask()
 		{
 			if (Pointer is IDecomposeAll compoundTask)
 			{
@@ -87,8 +119,8 @@ namespace FluidHTN
 	    // ========================================================= COMPOUND TASKS
 
 		/// <summary>
-		/// A compound task that requires all child tasks to be valid.
-		/// Child tasks can be sequences, selectors or actions.
+		/// A compound task that requires all sub-tasks to be valid.
+		/// Sub-tasks can be sequences, selectors or actions.
 		/// </summary>
 		/// <param name="name"></param>
 		/// <returns></returns>
@@ -98,8 +130,8 @@ namespace FluidHTN
 	    }
 
 		/// <summary>
-		/// A compound task that requires a single child task to be valid.
-		/// Child tasks can be sequences, selectors or actions.
+		/// A compound task that requires a single sub-task to be valid.
+		/// Sub-tasks can be sequences, selectors or actions.
 		/// </summary>
 		/// <param name="name"></param>
 		/// <returns></returns>
@@ -136,14 +168,14 @@ namespace FluidHTN
 		    return this;
 	    }
 
-	    // ========================================================= OPERATORS
+        // ========================================================= OPERATORS
 
-		/// <summary>
-		/// The operator of a primitive task, called Action.
-		/// </summary>
-		/// <param name="action"></param>
-		/// <returns></returns>
-	    public DomainBuilder< T > Do( Func< T, TaskStatus > action, Action< T > forceStopAction = null )
+        /// <summary>
+        /// The operator of an Action / primitive task.
+        /// </summary>
+        /// <param name="action"></param>
+        /// <returns></returns>
+        public DomainBuilder< T > Do( Func< T, TaskStatus > action, Action< T > forceStopAction = null )
 	    {
 		    if ( Pointer is IPrimitiveTask task )
 		    {
@@ -158,16 +190,16 @@ namespace FluidHTN
 		    return this;
 	    }
 
-	    // ========================================================= EFFECTS
+        // ========================================================= EFFECTS
 
-		/// <summary>
-		/// Effects can be added to a primitive task, called Action.
-		/// </summary>
-		/// <param name="name"></param>
-		/// <param name="effectType"></param>
-		/// <param name="action"></param>
-		/// <returns></returns>
-	    public DomainBuilder< T > Effect( string name, EffectType effectType, Action< T, EffectType > action )
+        /// <summary>
+        /// Effects can be added to an Action / primitive task.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="effectType"></param>
+        /// <param name="action"></param>
+        /// <returns></returns>
+        public DomainBuilder< T > Effect( string name, EffectType effectType, Action< T, EffectType > action )
 		{
 			if ( Pointer is IPrimitiveTask task )
 			{
@@ -239,28 +271,5 @@ namespace FluidHTN
 	    {
 		    return _domain;
 	    }
-
-		/// <summary>
-		/// Builds the designed domain and saves it to a json file, then returns the domain instance.
-		/// </summary>
-		/// <param name="fileName"></param>
-		public Domain<T> BuildAndSave( string fileName )
-		{
-			var domain = Build();
-			domain.Save( fileName );
-			return domain;
-		}
-
-		/// <summary>
-		/// Loads a designed domain from a json file and returns a domain instance of it.
-		/// </summary>
-		/// <param name="fileName"></param>
-		/// <returns></returns>
-		public Domain< T > Load( string fileName )
-		{
-			var domain = new Domain< T >(string.Empty);
-			domain.Load( fileName );
-			return domain;
-		}
     }
 }

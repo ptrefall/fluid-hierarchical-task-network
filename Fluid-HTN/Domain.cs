@@ -22,17 +22,5 @@ namespace FluidHTN
 			parent.AddChild( child );
 			child.Parent = parent;
 		}
-
-		// ========================================================= SERIALIZATION
-
-		public void Save( string fileName )
-		{
-
-		}
-
-		public void Load( string fileName )
-		{
-
-		}
 	}
 }

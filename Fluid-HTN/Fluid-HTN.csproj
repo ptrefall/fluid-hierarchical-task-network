@@ -53,10 +53,8 @@
     <Compile Include="Effects\IEffect.cs" />
     <Compile Include="Tasks\ITask.cs" />
     <Compile Include="Tasks\CompoundTasks\ICompoundTask.cs" />
-    <Compile Include="Mockups\Dummy\DummyTest.cs" />
     <Compile Include="Effects\EffectType.cs" />
     <Compile Include="Contexts\IContext.cs" />
-    <Compile Include="Mockups\TrollBridge\DomainDefinitions.cs" />
     <Compile Include="Operators\FuncOperator.cs" />
     <Compile Include="Operators\IOperator.cs" />
     <Compile Include="Planners\Planner.cs" />
