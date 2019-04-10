@@ -66,6 +66,7 @@ var domain = new DomainBuilder<MyContext>( "MyDomain" )
             .End()
         .End()
     .End()
+    .Build();
 ```
 Now that we have a domain, we can start to generate plans. We do that through the Planner API.
 ```C#
