@@ -142,7 +142,7 @@ We can easily integrate the concept of partial planning into our domains. We cal
 .End()
 ```
 ### Sub-domains and domain splicing
-We can define sub-domains and splice them together to form new domains. This can be quite handy for re-use of sub-domains, and prevent a single domain definition from growing too large.
+We can define sub-domains and splice them together to form new domains, but they must share the same context type to be compatible. This can be quite handy for re-use of sub-domains, and prevent a single domain definition from growing too large.
 ```C#
 var subDomain = new DomainBuilder<MyContext>("SubDomain")
     .Select("B")
