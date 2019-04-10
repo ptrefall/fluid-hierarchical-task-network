@@ -106,14 +106,10 @@ ctx.Init();
 ```
 Next, let's tick the planner until the Done flag in our context is set to false.
 ```C#
-while (!c.Done)
+while (!ctx.Done)
 {
-    planner.TickPlan(domain, c);
+    planner.TickPlan(domain, ctx);
 }
-```
-If this little example is being integrated into a C# console app, we can add a pause after the while loop to prevent the console from shutting down immediately.
-```C#
-Console.ReadKey();
 ```
 Now, if we run this example, we should see the following print to our console:
 ```
@@ -124,13 +120,13 @@ Done
 
 ```
 ### Partial planning
-We can easily integrate the concept of partial planning into our domains. We call it a Partial Split, and it must be set inside a sequence to be valid. It allows the planner to only plan up to a certain point, then continue from there once the partial plan has been completed.
+We can easily integrate the concept of partial planning into our domains. We call it a Pause Plan, and it must be set inside a sequence to be valid. It allows the planner to only plan up to a certain point, then continue from there once the partial plan has been completed.
 ```C#
 .Sequence("A")
     .Action("1")
         //...
     .End()
-    .PartialSplit()
+    .PausePlan()
     .Action("2")
         //...
     .End()
