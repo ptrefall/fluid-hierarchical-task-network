@@ -39,7 +39,7 @@ public class MyContext : BaseContext
     }
 }
 ```
-For convenience we extend our context with some specialized world state manipulation methods now that we have defined our world state.
+Out of convenience we extend our context with some specialized world state manipulation methods now that we have defined our world state.
 ```C#
 public class MyContext : BaseContext
     {
