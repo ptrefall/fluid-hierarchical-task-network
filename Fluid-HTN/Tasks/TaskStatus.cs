@@ -1,9 +1,9 @@
 ﻿namespace FluidHTN
 {
-	public enum TaskStatus
-	{
-		Continue,
-		Success,
-		Failure
-	}
+    public enum TaskStatus
+    {
+        Continue,
+        Success,
+        Failure
+    }
 }

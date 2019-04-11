@@ -1,41 +1,43 @@
-﻿
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using FluidHTN.Compounds;
+﻿using System.Collections.Generic;
 using FluidHTN.PrimitiveTasks;
 
 namespace FluidHTN
 {
     /// <summary>
-    /// A planner is a responsible for handling the management of finding plans in a domain, replan when the state of the running plan
-    /// demands it, or look for a new potential plan if the world state gets dirty.
+    ///     A planner is a responsible for handling the management of finding plans in a domain, replan when the state of the
+    ///     running plan
+    ///     demands it, or look for a new potential plan if the world state gets dirty.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-	public class Planner<T> where T : IContext
-	{
-        private Queue<ITask> _plan = new Queue<ITask>();
+    public class Planner<T> where T : IContext
+    {
+        // ========================================================= FIELDS
+
         private ITask _currentTask;
+        private readonly Queue<ITask> _plan = new Queue<ITask>();
+
+        // ========================================================= TICK PLAN
 
         /// <summary>
-        /// Call this with a domain and context instance to have the planner manage plan and task handling for the domain at runtime.
-        /// If the plan completes or fails, the planner will find a new plan, or if the context is marked dirty, the planner will attempt
-        /// a replan to see whether we can find a better plan now that the state of the world has changed.
-        /// 
-        /// This planner can also be used as a blueprint for writing a custom planner.
+        ///     Call this with a domain and context instance to have the planner manage plan and task handling for the domain at
+        ///     runtime.
+        ///     If the plan completes or fails, the planner will find a new plan, or if the context is marked dirty, the planner
+        ///     will attempt
+        ///     a replan to see whether we can find a better plan now that the state of the world has changed.
+        ///     This planner can also be used as a blueprint for writing a custom planner.
         /// </summary>
         /// <param name="domain"></param>
         /// <param name="ctx"></param>
-        public void TickPlan( Domain<T> domain, T ctx )
+        public void TickPlan(Domain<T> domain, T ctx)
         {
             // Check whether state has changed or the current plan has finished running.
             // and if so, try to find a new plan.
-            if ((_currentTask == null && (_plan == null || _plan.Count == 0)) || ctx.IsDirty)
+            if (_currentTask == null && (_plan == null || _plan.Count == 0) || ctx.IsDirty)
             {
                 var partialPlanTemp = ctx.PlanStartTaskParent;
                 var partialPlanIndexTemp = ctx.PlanStartTaskChildIndex;
 
-                bool worldStateDirtyReplan = ctx.IsDirty;
+                var worldStateDirtyReplan = ctx.IsDirty;
                 ctx.IsDirty = false;
 
                 if (worldStateDirtyReplan)
@@ -54,17 +56,10 @@ namespace FluidHTN
                     if (partialPlanTemp != null)
                     {
                         ctx.LastMTR.Clear();
-                        foreach (var record in ctx.MethodTraversalRecord)
-                        {
-                            ctx.LastMTR.Add(record);
-
-                        }
+                        foreach (var record in ctx.MethodTraversalRecord) ctx.LastMTR.Add(record);
 
                         ctx.LastMTRDebug.Clear();
-                        foreach (var record in ctx.MTRDebug)
-                        {
-                            ctx.LastMTRDebug.Add(record);
-                        }
+                        foreach (var record in ctx.MTRDebug) ctx.LastMTRDebug.Add(record);
                     }
                 }
 
@@ -72,10 +67,7 @@ namespace FluidHTN
                 if (newPlan != null)
                 {
                     _plan.Clear();
-                    while (newPlan.Count > 0)
-                    {
-                        _plan.Enqueue(newPlan.Dequeue());
-                    }
+                    while (newPlan.Count > 0) _plan.Enqueue(newPlan.Dequeue());
 
                     if (_currentTask != null && _currentTask is IPrimitiveTask t)
                     {
@@ -88,16 +80,10 @@ namespace FluidHTN
                     if (ctx.MethodTraversalRecord != null)
                     {
                         ctx.LastMTR.Clear();
-                        foreach (var record in ctx.MethodTraversalRecord)
-                        {
-                            ctx.LastMTR.Add(record);
-                        }
+                        foreach (var record in ctx.MethodTraversalRecord) ctx.LastMTR.Add(record);
 
                         ctx.LastMTRDebug.Clear();
-                        foreach (var record in ctx.MTRDebug)
-                        {
-                            ctx.LastMTRDebug.Add(record);
-                        }
+                        foreach (var record in ctx.MTRDebug) ctx.LastMTRDebug.Add(record);
                     }
                 }
                 else if (partialPlanTemp != null)
@@ -108,17 +94,11 @@ namespace FluidHTN
                     if (ctx.LastMTR.Count > 0)
                     {
                         ctx.MethodTraversalRecord.Clear();
-                        foreach (var record in ctx.LastMTR)
-                        {
-                            ctx.MethodTraversalRecord.Add(record);
-                        }
+                        foreach (var record in ctx.LastMTR) ctx.MethodTraversalRecord.Add(record);
                         ctx.LastMTR.Clear();
 
                         ctx.MTRDebug.Clear();
-                        foreach (var record in ctx.LastMTRDebug)
-                        {
-                            ctx.MTRDebug.Add(record);
-                        }
+                        foreach (var record in ctx.LastMTRDebug) ctx.MTRDebug.Add(record);
                         ctx.LastMTRDebug.Clear();
                     }
                 }
@@ -128,9 +108,7 @@ namespace FluidHTN
             {
                 _currentTask = _plan?.Dequeue();
                 if (_currentTask != null)
-                {
                     foreach (var condition in _currentTask.Conditions)
-                    {
                         // If a condition failed, then the plan failed to progress! A replan is required.
                         if (condition.IsValid(ctx) == false)
                         {
@@ -142,12 +120,9 @@ namespace FluidHTN
 
                             return;
                         }
-                    }
-                }
             }
 
             if (_currentTask != null)
-            {
                 if (_currentTask is IPrimitiveTask task)
                 {
                     if (task.Operator != null)
@@ -159,12 +134,8 @@ namespace FluidHTN
                         {
                             // All effects that is a result of running this task should be applied when the task is a success.
                             foreach (var effect in task.Effects)
-                            {
                                 if (effect.Type == EffectType.PlanAndExecute)
-                                {
                                     effect.Apply(ctx);
-                                }
-                            }
 
                             _currentTask = null;
                             if (_plan.Count == 0)
@@ -196,14 +167,15 @@ namespace FluidHTN
                         _currentTask = null;
                     }
                 }
-            }
         }
 
+        // ========================================================= GETTERS
+
         /// <summary>
-        /// Get the current plan.
+        ///     Get the current plan.
         /// </summary>
         /// <returns></returns>
-		public Queue<ITask> GetPlan()
+        public Queue<ITask> GetPlan()
         {
             return _plan;
         }
@@ -212,5 +184,5 @@ namespace FluidHTN
         {
             return _currentTask;
         }
-	}
+    }
 }

@@ -1,38 +1,35 @@
-﻿using FluidHTN.Compounds;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using FluidHTN.Compounds;
 
 namespace FluidHTN
 {
-	public class Domain<T> where T : IContext
-	{
-		// ========================================================= PROPERTIES
+    public class Domain<T> where T : IContext
+    {
+        // ========================================================= CONSTRUCTION
 
-		public TaskRoot Root { get; }
+        public Domain(string name)
+        {
+            Root = new TaskRoot {Name = name, Parent = null};
+        }
+        // ========================================================= PROPERTIES
 
-		// ========================================================= CONSTRUCTION
+        public TaskRoot Root { get; }
 
-		public Domain( string name )
-		{
-			Root = new TaskRoot() { Name = name, Parent = null };
-		}
+        // ========================================================= HIERARCHY HANDLING
 
-		// ========================================================= HIERARCHY HANDLING
-
-		public void Add( ICompoundTask parent, ITask child )
-		{
-			parent.AddChild( child );
-			child.Parent = parent;
-		}
+        public void Add(ICompoundTask parent, ITask child)
+        {
+            parent.AddChild(child);
+            child.Parent = parent;
+        }
 
         // ========================================================= PLANNING
 
         public Queue<ITask> FindPlan(T ctx)
         {
             if (ctx.MethodTraversalRecord == null)
-            {
                 throw new Exception("We require the Method Traversal Record to have a valid instance.");
-            }
 
             ctx.ContextState = ContextState.Planning;
 
@@ -56,7 +53,7 @@ namespace FluidHTN
                 ctx.PlanStartTaskChildIndex = 0;
 
                 plan = root.Decompose(ctx, startIndex);
-                if ((plan == null || plan.Count == 0))
+                if (plan == null || plan.Count == 0)
                 {
                     ctx.MethodTraversalRecord.Clear();
                     ctx.MTRDebug.Clear();
@@ -84,7 +81,8 @@ namespace FluidHTN
 
                 // If we found a new plan, let's make sure we remove any partial plan tracking, unless
                 // the new plan replaced our partial plan tracking with a new partial plan.
-                if (lastPlanStartTaskParent != null && plan != null && plan.Count > 0 && ctx.PlanStartTaskParent == lastPlanStartTaskParent)
+                if (lastPlanStartTaskParent != null && plan != null && plan.Count > 0 &&
+                    ctx.PlanStartTaskParent == lastPlanStartTaskParent)
                 {
                     ctx.PlanStartTaskParent = null;
                     ctx.PlanStartTaskChildIndex = 0;
@@ -98,18 +96,13 @@ namespace FluidHTN
             if (isMTRsEqual)
             {
                 for (var i = 0; i < ctx.MethodTraversalRecord.Count; i++)
-                {
                     if (ctx.MethodTraversalRecord[i] < ctx.LastMTR[i])
                     {
                         isMTRsEqual = false;
                         break;
                     }
-                }
 
-                if (isMTRsEqual)
-                {
-                    plan = null;
-                }
+                if (isMTRsEqual) plan = null;
             }
 
             if (plan != null)
@@ -136,10 +129,7 @@ namespace FluidHTN
                 for (var i = 0; i < ctx.WorldStateChangeStack.Length; i++)
                 {
                     var stack = ctx.WorldStateChangeStack[i];
-                    if (stack != null && stack.Count > 0)
-                    {
-                        stack.Clear();
-                    }
+                    if (stack != null && stack.Count > 0) stack.Clear();
                 }
             }
 

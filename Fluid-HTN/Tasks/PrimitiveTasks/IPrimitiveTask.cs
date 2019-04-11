@@ -3,15 +3,15 @@ using FluidHTN.Operators;
 
 namespace FluidHTN.PrimitiveTasks
 {
-	public interface IPrimitiveTask : ITask
-	{
-		IOperator Operator { get; }
-		void SetOperator( IOperator action );
+    public interface IPrimitiveTask : ITask
+    {
+        IOperator Operator { get; }
 
-		List<IEffect> Effects { get; }
-		ITask AddEffect( IEffect effect );
-		void ApplyEffects( IContext ctx );
+        List<IEffect> Effects { get; }
+        void SetOperator(IOperator action);
+        ITask AddEffect(IEffect effect);
+        void ApplyEffects(IContext ctx);
 
-		void Stop( IContext ctx );
-	}
+        void Stop(IContext ctx);
+    }
 }

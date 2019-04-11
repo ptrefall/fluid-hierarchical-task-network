@@ -1,9 +1,8 @@
-﻿using System.Collections.Generic;
-using FluidHTN.Compounds;
+﻿using FluidHTN.Compounds;
 
 namespace FluidHTN
 {
-	public class TaskRoot : Selector
-	{
-	}
+    public class TaskRoot : Selector
+    {
+    }
 }

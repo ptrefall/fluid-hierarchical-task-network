@@ -42,13 +42,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Contexts\BaseContext.cs" />
+    <Compile Include="DomainBuilder.cs" />
     <Compile Include="Tasks\CompoundTasks\IDecomposeAll.cs" />
     <Compile Include="Tasks\CompoundTasks\PartialSplitTask.cs" />
     <Compile Include="Tasks\CompoundTasks\Selector.cs" />
     <Compile Include="Tasks\CompoundTasks\Sequence.cs" />
     <Compile Include="Conditions\FuncCondition.cs" />
     <Compile Include="Domain.cs" />
-    <Compile Include="DomainBuilder.cs" />
+    <Compile Include="BaseDomainBuilder.cs" />
     <Compile Include="Conditions\ICondition.cs" />
     <Compile Include="Effects\ActionEffect.cs" />
     <Compile Include="Effects\IEffect.cs" />

@@ -3,106 +3,106 @@ using FluidHTN.PrimitiveTasks;
 
 namespace FluidHTN.Compounds
 {
-	public class Selector : CompoundTask
-	{
-		public override bool IsValid( IContext ctx )
-		{
-			// Check that our preconditions are valid first.
-			if ( base.IsValid( ctx ) == false )
-				return false;
+    public class Selector : CompoundTask
+    {
+        // ========================================================= FIELDS
 
-			// Selector requires there to be children to successfully select from.
-			if ( Children.Count == 0 )
-				return false;
+        protected readonly Queue<ITask> Plan = new Queue<ITask>();
 
-			return true;
-		}
+        // ========================================================= VALIDITY
 
-		protected readonly Queue< ITask > Plan = new Queue< ITask >();
+        public override bool IsValid(IContext ctx)
+        {
+            // Check that our preconditions are valid first.
+            if (base.IsValid(ctx) == false)
+                return false;
 
-		/// <summary>
-		/// In a Selector decomposition, just a single sub-task must be valid and successfully decompose for the Selector to be successfully decomposed.
-		/// </summary>
-		/// <param name="ctx"></param>
-		/// <returns></returns>
-		protected override Queue<ITask> OnDecompose( IContext ctx, int startIndex )
-		{
-			Plan.Clear();
+            // Selector requires there to be children to successfully select from.
+            if (Children.Count == 0)
+                return false;
 
-			for(var taskIndex = startIndex; taskIndex < Children.Count; taskIndex++)
-			{
-				// If the last plan is still running, we need to check whether the
-				// new decomposition can possibly beat it.
-				if (ctx.LastMTR != null && ctx.LastMTR.Count > 0)
-				{
-					// To reliably compare, we need the new decomposition record count to
-					// at least be smaller than the last plan's record.
-					if (ctx.MethodTraversalRecord.Count < ctx.LastMTR.Count)
-					{
-						// If the last plan's traversal record for this decomposition layer 
-						// has a smaller index than the current task index we're about to
-						// decompose, then the new decomposition can't possibly beat the
-						// running plan, so we cancel finding a new plan.
-						var currentDecompositionIndex = ctx.MethodTraversalRecord.Count;
-						if (ctx.LastMTR[currentDecompositionIndex] < taskIndex)
-						{
-							ctx.MethodTraversalRecord.Add(-1);
-							ctx.MTRDebug.Add( $"REPLAN FAIL {Children[taskIndex].Name}" );
-							return null;
-						}
-					}
-				}
+            return true;
+        }
 
-				var task = Children[taskIndex];
+        // ========================================================= DECOMPOSITION
 
-				if ( task.IsValid( ctx ) == false )
-					continue;
+        /// <summary>
+        ///     In a Selector decomposition, just a single sub-task must be valid and successfully decompose for the Selector to be
+        ///     successfully decomposed.
+        /// </summary>
+        /// <param name="ctx"></param>
+        /// <returns></returns>
+        protected override Queue<ITask> OnDecompose(IContext ctx, int startIndex)
+        {
+            Plan.Clear();
 
-				if ( task is ICompoundTask compoundTask )
-				{
-					// We need to record the task index before we decompose the task,
-					// so that the traversal record is set up in the right order.
-					ctx.MethodTraversalRecord.Add(taskIndex);
-					ctx.MTRDebug.Add( task.Name );
+            for (var taskIndex = startIndex; taskIndex < Children.Count; taskIndex++)
+            {
+                // If the last plan is still running, we need to check whether the
+                // new decomposition can possibly beat it.
+                if (ctx.LastMTR != null && ctx.LastMTR.Count > 0)
+                    if (ctx.MethodTraversalRecord.Count < ctx.LastMTR.Count)
+                    {
+                        // If the last plan's traversal record for this decomposition layer 
+                        // has a smaller index than the current task index we're about to
+                        // decompose, then the new decomposition can't possibly beat the
+                        // running plan, so we cancel finding a new plan.
+                        var currentDecompositionIndex = ctx.MethodTraversalRecord.Count;
+                        if (ctx.LastMTR[currentDecompositionIndex] < taskIndex)
+                        {
+                            ctx.MethodTraversalRecord.Add(-1);
+                            ctx.MTRDebug.Add($"REPLAN FAIL {Children[taskIndex].Name}");
+                            return null;
+                        }
+                    }
 
-					var result = compoundTask.Decompose( ctx, 0 );
+                var task = Children[taskIndex];
 
-					// If result is null, that means the entire planning procedure should cancel.
-					if (result == null)
-					{
-						return null;
-					}
+                if (task.IsValid(ctx) == false)
+                    continue;
 
-					// If the decomposition failed
-					if ( result.Count == 0 )
-					{
-						// Remove the taskIndex if it failed to decompose.
-						ctx.MethodTraversalRecord.RemoveAt(ctx.MethodTraversalRecord.Count-1);
-						ctx.MTRDebug.RemoveAt( ctx.MTRDebug.Count-1 );
-						continue;
-					}
+                if (task is ICompoundTask compoundTask)
+                {
+                    // We need to record the task index before we decompose the task,
+                    // so that the traversal record is set up in the right order.
+                    ctx.MethodTraversalRecord.Add(taskIndex);
+                    ctx.MTRDebug.Add(task.Name);
 
-					int i = result.Count;
-					while ( result.Count > 0 )
-					{
-						var res = result.Dequeue();
-						Plan.Enqueue( res );
-						i--;
-						if (i < 0)
-							break;
-					}
-				}
-				else if( task is IPrimitiveTask primitiveTask )
-				{
-					primitiveTask.ApplyEffects( ctx );
-					Plan.Enqueue( task );
-				}
+                    var result = compoundTask.Decompose(ctx, 0);
 
-				// Break the moment we've selected a single sub-task that was successfully decomposed / validated.
-				break;
-			}
+                    // If result is null, that means the entire planning procedure should cancel.
+                    if (result == null) return null;
 
-			return Plan;
-		}
-	}
+                    // If the decomposition failed
+                    if (result.Count == 0)
+                    {
+                        // Remove the taskIndex if it failed to decompose.
+                        ctx.MethodTraversalRecord.RemoveAt(ctx.MethodTraversalRecord.Count - 1);
+                        ctx.MTRDebug.RemoveAt(ctx.MTRDebug.Count - 1);
+                        continue;
+                    }
+
+                    var i = result.Count;
+                    while (result.Count > 0)
+                    {
+                        var res = result.Dequeue();
+                        Plan.Enqueue(res);
+                        i--;
+                        if (i < 0)
+                            break;
+                    }
+                }
+                else if (task is IPrimitiveTask primitiveTask)
+                {
+                    primitiveTask.ApplyEffects(ctx);
+                    Plan.Enqueue(task);
+                }
+
+                // Break the moment we've selected a single sub-task that was successfully decomposed / validated.
+                break;
+            }
+
+            return Plan;
+        }
+    }
 }

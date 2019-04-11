@@ -6,63 +6,61 @@ using FluidHTN.Operators;
 
 namespace FluidHTN.PrimitiveTasks
 {
-	public class PrimitiveTask : IPrimitiveTask
-	{
-		public int DomainIndex { get; }
+    public class PrimitiveTask : IPrimitiveTask
+    {
+        // ========================================================= PROPERTIES
 
-		public string Name { get; set; }
+        public string Name { get; set; }
+        public ICompoundTask Parent { get; set; }
+        public List<ICondition> Conditions { get; } = new List<ICondition>();
+        public TaskStatus LastStatus { get; }
+        public IOperator Operator { get; private set; }
+        public List<IEffect> Effects { get; } = new List<IEffect>();
 
-		public ICompoundTask Parent { get; set; }
+        // ========================================================= ADDERS
 
-		public List< ICondition > Conditions { get; } = new List< ICondition >();
-		public ITask AddCondition( ICondition condition )
-		{
-			Conditions.Add( condition );
-			return this;
-		}
+        public ITask AddCondition(ICondition condition)
+        {
+            Conditions.Add(condition);
+            return this;
+        }
 
-		public TaskStatus LastStatus { get; }
-		public bool IsValid( IContext ctx )
-		{
-			foreach ( var condition in Conditions )
-			{
-				if ( condition.IsValid( ctx ) == false )
-					return false;
-			}
+        public ITask AddEffect(IEffect effect)
+        {
+            Effects.Add(effect);
+            return this;
+        }
 
-			return true;
-		}
+        // ========================================================= SETTERS
 
-		public IOperator Operator { get; private set; }
-		public void SetOperator( IOperator action )
-		{
-			if ( Operator != null )
-			{
-				throw new Exception("A Primitive Task can only contain a single Operator!");
-			}
+        public void SetOperator(IOperator action)
+        {
+            if (Operator != null) throw new Exception("A Primitive Task can only contain a single Operator!");
 
-			Operator = action;
-		}
+            Operator = action;
+        }
 
-		public List< IEffect > Effects { get; } = new List< IEffect >();
+        // ========================================================= FUNCTIONALITY
 
-		public ITask AddEffect( IEffect effect )
-		{
-			Effects.Add( effect );
-			return this;
-		}
+        public void ApplyEffects(IContext ctx)
+        {
+            foreach (var effect in Effects) effect.Apply(ctx);
+        }
 
-		public void ApplyEffects( IContext ctx )
-		{
-			foreach ( var effect in Effects )
-			{
-				effect.Apply( ctx );
-			}
-		}
+        public void Stop(IContext ctx)
+        {
+            Operator?.Stop(ctx);
+        }
 
-		public void Stop( IContext ctx )
-		{
-			Operator?.Stop( ctx );
-		}
-	}
+        // ========================================================= VALIDITY
+
+        public bool IsValid(IContext ctx)
+        {
+            foreach (var condition in Conditions)
+                if (condition.IsValid(ctx) == false)
+                    return false;
+
+            return true;
+        }
+    }
 }

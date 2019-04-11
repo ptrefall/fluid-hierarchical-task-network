@@ -5,35 +5,40 @@ using FluidHTN.Conditions;
 
 namespace FluidHTN
 {
-	public class PartialSplitTask : ITask
-	{
-		public int DomainIndex { get; }
+    public class PartialSplitTask : ITask
+    {
+        // ========================================================= PROPERTIES
 
-		public string Name { get; set; }
+        public List<IEffect> Effects { get; } = null;
+        public int DomainIndex { get; }
+        public string Name { get; set; }
+        public ICompoundTask Parent { get; set; }
+        public List<ICondition> Conditions { get; } = null;
+        public TaskStatus LastStatus { get; }
 
-		public ICompoundTask Parent { get; set; }
+        // ========================================================= ADDERS
 
-		public List< ICondition > Conditions { get; } = null;
-		public ITask AddCondition( ICondition condition )
-		{
-			throw new Exception("Partial Split tasks does not support conditions.");
-		}
+        public ITask AddCondition(ICondition condition)
+        {
+            throw new Exception("Partial Split tasks does not support conditions.");
+        }
 
-		public TaskStatus LastStatus { get; }
-		public bool IsValid( IContext ctx )
-		{
-			return true;
-		}
+        public ITask AddEffect(IEffect effect)
+        {
+            throw new Exception("Partial Split tasks does not support effects.");
+        }
 
-		public List< IEffect > Effects { get; } = null;
+        // ========================================================= FUNCTIONALITY
 
-		public ITask AddEffect( IEffect effect )
-		{
-			throw new Exception("Partial Split tasks does not support effects.");
-		}
+        public void ApplyEffects(IContext ctx)
+        {
+        }
 
-		public void ApplyEffects( IContext ctx )
-		{
-		}
-	}
+        // ========================================================= VALIDITY
+
+        public bool IsValid(IContext ctx)
+        {
+            return true;
+        }
+    }
 }
