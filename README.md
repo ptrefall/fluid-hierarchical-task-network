@@ -188,6 +188,34 @@ public class MyDomainBuilder : BaseDomainBuilder<MyDomainBuilder, MyContext>
     }
 }
 ```
+#### Custom condition in domain builder
+To add a custom condition, we need to override the ICondition interface.
+```C#
+public class IfEnemyCondition : ICondition
+{
+    public string Name { get; } = "If Enemy";
+    
+    public bool IsValid(ICondition ctx)
+    {
+        if(ctx is MyContext c)
+        {
+            return c.HasState(WorldState.HasEnemy);
+        }
+        
+        throw new Exception("Unexpected context type!");
+    }
+}
+```
+Next, we can extend our MyDomainBuilder with a new function that expose this condition
+```C#
+public MyDomainBuilder IfEnemy()
+{
+    var condition = new IfEnemyCondition();
+    Pointer.AddCondition(condition);
+    
+    return this;
+}
+```
 ### Using Fluid HTN with Unity
 In UnityProject/Packages/manifest.json add the following line under dependencies, and edit the path to point to where you have cloned the Fluid HTN repository.
 ```json
