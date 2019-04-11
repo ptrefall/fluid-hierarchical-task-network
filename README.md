@@ -151,6 +151,10 @@ var myDomain = new DomainBuilder<MyContext>("MyDomain")
     .End()
     .Build();
 ```
+### Creating custom reusable extensions to the Domain Builder
+A powerful feature of the Fluid HTN, is how easy it is to extend the domain builder with specialized task types for a project's problem domain.
+Bundled with the library, we have generic implementations of Condition, Operator and Effect, making it trivial to add lambda-styled domain definitions, as expressed in the example earlier in this document. These bundled features are just a starting point, however. It's easy to extend the planner with custom conditions, operators and effects, and it might make your custom domain builder read better, and be more designer friendly.
+
 ### Using Fluid HTN with Unity
 In UnityProject/Packages/manifest.json add the following line under dependencies, and edit the path to point to where you have cloned the Fluid HTN repository.
 ```json
