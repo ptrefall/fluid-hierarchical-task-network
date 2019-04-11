@@ -104,17 +104,17 @@ namespace FluidHTN
         ///     http://www.gameaipro.com/GameAIPro/GameAIPro_Chapter12_Exploring_HTN_Planners_through_Example.pdf
         /// </summary>
         /// <returns></returns>
-        protected DB PartialSplitTask()
+        protected DB PausePlanTask()
         {
             if (Pointer is IDecomposeAll compoundTask)
             {
-                var parent = new PartialSplitTask {Name = "Partial Split"};
+                var parent = new PausePlanTask() {Name = "Pause Plan"};
                 _domain.Add(compoundTask, parent);
             }
             else
             {
                 throw new Exception(
-                    "Pointer is not a decompose-all compound task type, like a Sequence. Maybe you tried to partial split a Selector, or forget an End() after a Primitive Task Action was defined?");
+                    "Pointer is not a decompose-all compound task type, like a Sequence. Maybe you tried to Pause Plan a Selector, or forget an End() after a Primitive Task Action was defined?");
             }
 
             return (DB) this;
@@ -247,7 +247,7 @@ namespace FluidHTN
         }
 
         /// <summary>
-        ///     We can add a partial split anywhere in our domain definition,
+        ///     We can add a Pause Plan when in a sequence in our domain definition,
         ///     and this will give us partial planning.
         ///     It means that we can tell our planner to only plan up to a certain point,
         ///     then stop. If the partial plan completes execution successfully, the next
@@ -259,9 +259,9 @@ namespace FluidHTN
         ///     still want to plan what to do when reaching the destination, however, and
         ///     this is where partial plans come into play.
         /// </summary>
-        public DB PartialSplit()
+        public DB PausePlan()
         {
-            return PartialSplitTask();
+            return PausePlanTask();
         }
 
         /// <summary>

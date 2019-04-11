@@ -44,7 +44,7 @@
     <Compile Include="Contexts\BaseContext.cs" />
     <Compile Include="DomainBuilder.cs" />
     <Compile Include="Tasks\CompoundTasks\IDecomposeAll.cs" />
-    <Compile Include="Tasks\CompoundTasks\PartialSplitTask.cs" />
+    <Compile Include="Tasks\CompoundTasks\PausePlanTask.cs" />
     <Compile Include="Tasks\CompoundTasks\Selector.cs" />
     <Compile Include="Tasks\CompoundTasks\Sequence.cs" />
     <Compile Include="Conditions\FuncCondition.cs" />

@@ -80,7 +80,7 @@ namespace FluidHTN.Compounds
                     primitiveTask.ApplyEffects(ctx);
                     Plan.Enqueue(task);
                 }
-                else if (task is PartialSplitTask partialSplit)
+                else if (task is PausePlanTask)
                 {
                     ctx.PlanStartTaskParent = this;
                     ctx.PlanStartTaskChildIndex = taskIndex + 1;
