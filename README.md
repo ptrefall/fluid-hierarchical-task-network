@@ -278,6 +278,21 @@ public class MoveToOperator : IOperator
     }
 }
 ```
+Next, we can extend our MyDomainBuilder with a new function that expose this operator
+```C#
+public MyDomainBuilder MoveTo(Location location, Speed speed)
+{
+    Action($"MoveTo({location}, {speed})");
+    
+    if(Pointer is IPrimitiveTask task)
+    {
+        var op = new MoveToOperator(location, speed);
+        task.SetOperator(op);
+    }
+    return this;
+}
+```
+Note that we both called Action(...), which sets the Pointer, and  the SetOperator(...), but we didn't call End() to close the Pointer. This is so that we could be free to add Effects and Conditions to the action, but it means that the user must remember to call End() manually.
 ### Using Fluid HTN with Unity
 In UnityProject/Packages/manifest.json add the following line under dependencies, and edit the path to point to where you have cloned the Fluid HTN repository.
 ```json
