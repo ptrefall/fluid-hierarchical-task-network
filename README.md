@@ -395,7 +395,7 @@ public DB RandomSelect(string name)
 ### Using Fluid HTN with Unity
 In UnityProject/Packages/manifest.json add the following line under dependencies, and edit the path to point to where you have cloned the Fluid HTN repository.
 ```json
-"fluid.htn": "file:path/to/fluid-hierarchial-task-network"
+"fluid.htn": "file:path/to/fluid-hierarchial-task-network/FluidHTN"
 ```
 Your Unity project should now have integrated Fluid HTN, and you should be able to proceed with the getting started example above. Slightly more elaborate examples based on Unity is also available in the Examples section below.
 
