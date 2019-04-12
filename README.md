@@ -335,6 +335,63 @@ public MyDomainBuilder MoveTo(Location location, Speed speed)
 }
 ```
 Note that we both called Action(...), which sets the Pointer, and  the SetOperator(...), but we didn't call End() to close the Pointer. This is so that we could be free to add Effects and Conditions to the action, but it means that the user must remember to call End() manually.
+#### Custom selectors in domain builder
+We're not limited to extend the domain builder with just conditions, effects and operators. We can also extend the capabilities of our selectors and sequences. Let's implement a Random Selector that will decompose into a random sub-task.
+```C#
+using System;
+using System.Collections.Generic;
+using FluidHTN.PrimitiveTasks;
+
+namespace FluidHTN.Compounds
+{
+    public class RandomSelector : Selector
+    {
+        protected Random _random = new Random();
+
+        protected override Queue<ITask> OnDecompose(IContext ctx, int startIndex)
+        {
+                Plan.Clear();
+
+                var taskIndex = _random.Next(startIndex, Children.Count - 1);
+                var task = Children[taskIndex];
+
+                if (task.IsValid(ctx) == false)
+                    return Plan;
+
+                if (task is ICompoundTask compoundTask)
+                {
+                    var result = compoundTask.Decompose(ctx, 0);
+
+                    // If result is null, that means the entire planning procedure should cancel.
+                    if (result == null) return null;
+
+                    // If the decomposition failed
+                    if (result.Count == 0) return Plan;
+
+                    while (result.Count > 0)
+                    {
+                        var res = result.Dequeue();
+                        Plan.Enqueue(res);
+                    }
+                }
+                else if (task is IPrimitiveTask primitiveTask)
+                {
+                    primitiveTask.ApplyEffects(ctx);
+                    Plan.Enqueue(task);
+                }
+
+                return Plan;
+        }
+    }
+}
+```
+We can now extend our MyDomainBuilder with this new type of selector.
+```C#
+public DB RandomSelect(string name)
+{
+    return CompoundTask<RandomSelector>(name);
+}
+```
 ### Using Fluid HTN with Unity
 In UnityProject/Packages/manifest.json add the following line under dependencies, and edit the path to point to where you have cloned the Fluid HTN repository.
 ```json
