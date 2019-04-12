@@ -27,7 +27,7 @@ namespace FluidHTN
 
         // ========================================================= PROPERTIES
 
-        protected ITask Pointer
+        public ITask Pointer
         {
             get
             {

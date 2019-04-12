@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.329
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28803.156
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fluid-HTN", "Fluid-HTN\Fluid-HTN.csproj", "{B6908CED-5C0B-415C-9564-85F66A8B5025}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fluid-HTN.UnitTests", "Fluid-HTN.UnitTests\Fluid-HTN.UnitTests.csproj", "{A6DAA5DB-FC2B-4D08-87A1-0E667A39CF21}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{B6908CED-5C0B-415C-9564-85F66A8B5025}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B6908CED-5C0B-415C-9564-85F66A8B5025}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B6908CED-5C0B-415C-9564-85F66A8B5025}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A6DAA5DB-FC2B-4D08-87A1-0E667A39CF21}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A6DAA5DB-FC2B-4D08-87A1-0E667A39CF21}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A6DAA5DB-FC2B-4D08-87A1-0E667A39CF21}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A6DAA5DB-FC2B-4D08-87A1-0E667A39CF21}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
