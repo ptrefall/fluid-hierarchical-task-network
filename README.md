@@ -216,6 +216,68 @@ public MyDomainBuilder IfEnemy()
     return this;
 }
 ```
+#### Custom operator in domain builder
+To add a custom operator, we need to override the IOperator interface.
+```C#
+public class MoveToOperator : IOperator
+{
+    private Location _location;
+    private Speed _speed;
+    
+    public MoveToOperator(Location location, Speed speed)
+    {
+        _location = location;
+        _speed = speed;
+    }
+    
+    public TaskStatus Update(IContext ctx)
+    {
+        if(ctx is MyContext c) 
+        {
+            if(c.NavAgent.isStopped)
+                return InitiateMovement(c);
+                
+            return TickMovement(c);
+        }
+        throw new Exception("Unexpected context type!");
+    }
+    
+    public void Stop(IContext ctx)
+    {
+        if(ctx is MyContext c) 
+        {
+            c.NavAgent.isStopped = true;
+        }
+        throw new Exception("Unexpected context type!");
+    }
+    
+    private TaskStatus InitiateMovement(MyContext c)
+    {
+        c.NavAgent.speed = _speed == Speed.Walk ? WalkSpeed : RunSpeed;
+        switch(_location)
+        {
+            case Location.Enemy:
+                if (ctx.NavAgent.SetDestination(ctx.BridgeLocation))
+                {
+                    ctx.NavAgent.isStopped = false;
+                    return TaskStatus.Continue;
+                }
+                else
+                    return TaskStatus.Failure;
+        }
+        return TaskStatus.Failure;
+    }
+    
+    private TaskStatus TickMovement(MyContext c)
+    {
+        if(c.NavAgent.remainingDistance > c.NavAgent.stoppingDistance)
+            return TaskStatus.Continue;
+        
+        c.NavAgent.isStopped = true;
+        return TaskStatus.Success;
+    }
+}
+```
 ### Using Fluid HTN with Unity
 In UnityProject/Packages/manifest.json add the following line under dependencies, and edit the path to point to where you have cloned the Fluid HTN repository.
 ```json
