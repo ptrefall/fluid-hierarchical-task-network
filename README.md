@@ -159,8 +159,8 @@ var domain = new MyDomainBuilder("Trunk Thumper")
     .Sequence("Attack enemy")
         .IfEnemy()
         .MoveTo(Location.Enemy, Speed.Sprint)
-            .AtLocation(Location.Enemy)
-            .IsTired()
+            .SetLocation(Location.Enemy)
+            .SetIsTired()
         .End()
         .TrunkSlam()
             .IfLocation(Location.Enemy)
@@ -170,11 +170,11 @@ var domain = new MyDomainBuilder("Trunk Thumper")
         .FindBridge()
         .End()
         .MoveTo(Location.Bridge, Speed.Walk)
-            .AtLocation(Location.Bridge)
+            .SetLocation(Location.Bridge)
         .End()
         .CheckBridgeAction()
             .IfLocation(Location.Bridge)
-            .GetBored()
+            .SetBored()
         .End()
     .End()
     .Build();
@@ -212,6 +212,46 @@ public MyDomainBuilder IfEnemy()
 {
     var condition = new IfEnemyCondition();
     Pointer.AddCondition(condition);
+    
+    return this;
+}
+```
+#### Custom effect in domain builder
+To add a custom effect, we need to override the IEffect interface.
+```C#
+public class SetLocationEffect : IEffect
+{
+    private Location _location;
+    
+    public SetLocation(Location location)
+    {
+        _location = location;
+    }
+    
+    public string Name { get; } = "Set Location";
+    public EffectType Type { get; } = EffectType.PlanOnly;
+    
+    public void Apply(IContext ctx)
+    {
+        if (ctx is T c)
+            c.SetState(WorldState.Location, _location);
+        else
+            throw new Exception("Unexpected context type!");
+    }
+}
+```
+Note how this is a plan-only effect. This is because we predict that we will arrive at this location when we attempt to move there, but we actually don't know whether we ever get there during plan execution. In the MoveTo example below we continue the task until we arrive at the destination, but there are cases where we'd want to just set the destination and return success for movement, as we might want to perform other tasks while moving. Because of this, we rely on some system external from this effect to set the state on arrival.
+
+Next, we can extend our MyDomainBuilder with a new function that expose this effect
+```C#
+public MyDomainBuilder SetLocation(Location location)
+{
+    if(Pointer is IPrimitiveTask task)
+    {
+        var effect = new SetLocationEffect(location);
+        task.AddEffect(effect);
+    }
+    else throw new Exception("Tried to add an Effect, but the Pointer is not a Primitive Task!");
     
     return this;
 }
@@ -289,6 +329,8 @@ public MyDomainBuilder MoveTo(Location location, Speed speed)
         var op = new MoveToOperator(location, speed);
         task.SetOperator(op);
     }
+    else throw new Exception("Tried to add an Operator, but the Pointer is not a Primitive Task!");
+    
     return this;
 }
 ```
