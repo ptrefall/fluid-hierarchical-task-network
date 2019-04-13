@@ -27,7 +27,7 @@ namespace FluidHTN.Conditions
             if (ctx is T c)
             {
                 var result = _func?.Invoke(c) ?? false;
-                if (result == false) ctx.DecompositionLog.Push(Name);
+                if (c.LogDecomposition) ctx.DecompositionLog.Push($"{Name}: {result}");
                 return result;
             }
 

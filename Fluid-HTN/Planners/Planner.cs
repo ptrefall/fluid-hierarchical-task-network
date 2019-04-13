@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using FluidHTN.Conditions;
 using FluidHTN.PrimitiveTasks;
 
 namespace FluidHTN
@@ -15,6 +17,25 @@ namespace FluidHTN
 
         private ITask _currentTask;
         private readonly Queue<ITask> _plan = new Queue<ITask>();
+
+        // ========================================================= CALLBACKS
+
+		/// <summary>
+		///		OnReplacePlan(oldPlan, newPlan) is called when we're about to replace the
+		///		current plan with a new plan. The current plan might be empty / completed.
+		/// </summary>
+        public Action<Queue<ITask>, Queue<ITask>> OnReplacePlan = null;
+
+		/// <summary>
+		///		OnNewTask(task) is called after we popped a new task off the current plan.
+		/// </summary>
+		public Action<ITask> OnNewTask = null;
+
+		/// <summary>
+		///		OnNewTaskConditionFailed(task, failedCondition) is called when we failed to
+		///		validate a condition on a new task.
+		/// </summary>
+		public Action<ITask, ICondition> OnNewTaskConditionFailed = null;
 
         // ========================================================= TICK PLAN
 
@@ -58,14 +79,19 @@ namespace FluidHTN
                         ctx.LastMTR.Clear();
                         foreach (var record in ctx.MethodTraversalRecord) ctx.LastMTR.Add(record);
 
-                        ctx.LastMTRDebug.Clear();
-                        foreach (var record in ctx.MTRDebug) ctx.LastMTRDebug.Add(record);
+                        if (ctx.DebugMTR)
+                        {
+	                        ctx.LastMTRDebug.Clear();
+	                        foreach (var record in ctx.MTRDebug) ctx.LastMTRDebug.Add(record);
+                        }
                     }
                 }
 
                 var newPlan = domain.FindPlan(ctx);
                 if (newPlan != null)
                 {
+					OnReplacePlan?.Invoke(_plan, newPlan);
+
                     _plan.Clear();
                     while (newPlan.Count > 0) _plan.Enqueue(newPlan.Dequeue());
 
@@ -82,8 +108,11 @@ namespace FluidHTN
                         ctx.LastMTR.Clear();
                         foreach (var record in ctx.MethodTraversalRecord) ctx.LastMTR.Add(record);
 
-                        ctx.LastMTRDebug.Clear();
-                        foreach (var record in ctx.MTRDebug) ctx.LastMTRDebug.Add(record);
+                        if (ctx.DebugMTR)
+                        {
+	                        ctx.LastMTRDebug.Clear();
+	                        foreach (var record in ctx.MTRDebug) ctx.LastMTRDebug.Add(record);
+                        }
                     }
                 }
                 else if (partialPlanTemp != null)
@@ -97,9 +126,12 @@ namespace FluidHTN
                         foreach (var record in ctx.LastMTR) ctx.MethodTraversalRecord.Add(record);
                         ctx.LastMTR.Clear();
 
-                        ctx.MTRDebug.Clear();
-                        foreach (var record in ctx.LastMTRDebug) ctx.MTRDebug.Add(record);
-                        ctx.LastMTRDebug.Clear();
+                        if (ctx.DebugMTR)
+                        {
+	                        ctx.MTRDebug.Clear();
+	                        foreach (var record in ctx.LastMTRDebug) ctx.MTRDebug.Add(record);
+	                        ctx.LastMTRDebug.Clear();
+                        }
                     }
                 }
             }
@@ -108,18 +140,22 @@ namespace FluidHTN
             {
                 _currentTask = _plan?.Dequeue();
                 if (_currentTask != null)
-                    foreach (var condition in _currentTask.Conditions)
-                        // If a condition failed, then the plan failed to progress! A replan is required.
-                        if (condition.IsValid(ctx) == false)
-                        {
-                            _currentTask = null;
-                            _plan.Clear();
+                {
+	                OnNewTask?.Invoke(_currentTask);
+	                foreach (var condition in _currentTask.Conditions)
+		                // If a condition failed, then the plan failed to progress! A replan is required.
+		                if (condition.IsValid(ctx) == false)
+		                {
+			                _currentTask = null;
+			                _plan.Clear();
 
-                            ctx.LastMTR.Clear();
-                            ctx.LastMTRDebug.Clear();
+			                ctx.LastMTR.Clear();
+			                if (ctx.DebugMTR) ctx.LastMTRDebug.Clear();
 
-                            return;
-                        }
+			                OnNewTaskConditionFailed?.Invoke(_currentTask, condition);
+			                return;
+		                }
+                }
             }
 
             if (_currentTask != null)
@@ -141,7 +177,7 @@ namespace FluidHTN
                             if (_plan.Count == 0)
                             {
                                 ctx.LastMTR.Clear();
-                                ctx.LastMTRDebug.Clear();
+                                if (ctx.DebugMTR) ctx.LastMTRDebug.Clear();
 
                                 ctx.IsDirty = false;
 
@@ -156,7 +192,7 @@ namespace FluidHTN
                             _plan.Clear();
 
                             ctx.LastMTR.Clear();
-                            ctx.LastMTRDebug.Clear();
+                            if (ctx.DebugMTR) ctx.LastMTRDebug.Clear();
                         }
 
                         // Otherwise the operation isn't done yet and need to continue.

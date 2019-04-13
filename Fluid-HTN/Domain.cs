@@ -56,7 +56,7 @@ namespace FluidHTN
                 if (plan == null || plan.Count == 0)
                 {
                     ctx.MethodTraversalRecord.Clear();
-                    ctx.MTRDebug.Clear();
+                    if (ctx.DebugMTR) ctx.MTRDebug.Clear();
 
                     Root.Decompose(ctx, 0);
 
@@ -75,7 +75,7 @@ namespace FluidHTN
 
                 // We only erase the MTR if we start from the root task of the domain.
                 ctx.MethodTraversalRecord.Clear();
-                ctx.MTRDebug.Clear();
+                if (ctx.DebugMTR) ctx.MTRDebug.Clear();
 
                 plan = Root.Decompose(ctx, 0);
 

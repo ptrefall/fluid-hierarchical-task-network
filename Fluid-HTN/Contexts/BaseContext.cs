@@ -11,12 +11,12 @@ namespace FluidHTN.Contexts
         public bool IsDirty { get; set; }
         public ContextState ContextState { get; set; }
         public List<int> MethodTraversalRecord { get; set; } = new List<int>();
-        public List<string> MTRDebug { get; set; } = new List<string>();
-
         public List<int> LastMTR { get; } = new List<int>();
-
-        public List<string> LastMTRDebug { get; set; } = new List<string>();
-        public Stack<string> DecompositionLog { get; set; } = new Stack<string>();
+        public abstract List<string> MTRDebug { get; set; }
+        public abstract List<string> LastMTRDebug { get; set; }
+		public abstract bool DebugMTR { get; }
+        public abstract Stack<string> DecompositionLog { get; set; }
+		public abstract bool LogDecomposition { get; }
         public ICompoundTask PlanStartTaskParent { get; set; }
         public int PlanStartTaskChildIndex { get; set; }
 
@@ -28,9 +28,23 @@ namespace FluidHTN.Contexts
 
         public virtual void Init()
         {
-            WorldStateChangeStack = new Stack<KeyValuePair<EffectType, byte>>[WorldState.Length];
-            for (var i = 0; i < WorldState.Length; i++)
-                WorldStateChangeStack[i] = new Stack<KeyValuePair<EffectType, byte>>();
+	        if (WorldStateChangeStack == null)
+	        {
+		        WorldStateChangeStack = new Stack<KeyValuePair<EffectType, byte>>[WorldState.Length];
+		        for (var i = 0; i < WorldState.Length; i++)
+			        WorldStateChangeStack[i] = new Stack<KeyValuePair<EffectType, byte>>();
+	        }
+
+	        if (DebugMTR)
+            {
+				if(MTRDebug == null) MTRDebug = new List<string>();
+				if(LastMTRDebug == null) LastMTRDebug = new List<string>();
+            }
+
+            if (LogDecomposition)
+            {
+				if(DecompositionLog == null) DecompositionLog = new Stack<string>();
+            }
         }
 
         // ========================================================= STATE HANDLING
@@ -103,8 +117,11 @@ namespace FluidHTN.Contexts
             MethodTraversalRecord?.Clear();
             LastMTR?.Clear();
 
-            MTRDebug?.Clear();
-            LastMTRDebug?.Clear();
+            if (DebugMTR)
+            {
+	            MTRDebug?.Clear();
+	            LastMTRDebug?.Clear();
+            }
         }
     }
 }
