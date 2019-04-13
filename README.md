@@ -27,8 +27,15 @@ public enum MyWorldState : byte
 
 public class MyContext : BaseContext
 {
+    public override List<string> MTRDebug { get; set; } = null;
+    public override List<string> LastMTRDebug { get; set; } = null;
+    public override bool DebugMTR { get; } = false;
+    public override Stack<string> DecompositionLog { get; set; } = null;
+    public override bool LogDecomposition { get; } = false;
+        
     private byte[] _worldState = new byte[Enum.GetValues(typeof(MyWorldState)).Length];
     public override byte[] WorldState => _worldState;
+    
     
     // Custom state
     public bool Done { get; set; } = false;
@@ -41,6 +48,8 @@ public class MyContext : BaseContext
     }
 }
 ```
+You might notice that we had to override the debug properties. We set the collections to null and the boolean flags to false for now. We will cover debugging later in this document.
+
 Out of convenience we extend our context with some specialized world state manipulation methods now that we have defined our world state.
 ```C#
 public class MyContext : BaseContext
@@ -108,7 +117,7 @@ Next, let's tick the planner until the Done flag in our context is set to false.
 ```C#
 while (!ctx.Done)
 {
-    planner.TickPlan(domain, ctx);
+    planner.Tick(domain, ctx);
 }
 ```
 Now, if we run this example, we should see the following print to our console:
@@ -152,7 +161,7 @@ var myDomain = new DomainBuilder<MyContext>("MyDomain")
     .Build();
 ```
 ### Extending the Domain Builder
-A powerful feature of the Fluid HTN, is how easy it is to extend the domain builder with specialized task types for a project's problem domain.
+A powerful feature of Fluid HTN, is how easy it is to extend the domain builder with specialized task types for a project's problem domain.
 Bundled with the library, we have generic implementations of Condition, Operator and Effect, making it trivial to add lambda-styled domain definitions, as expressed in the example earlier in this document. These bundled features are just a starting point, however. It's easy to extend the planner with custom conditions, operators and effects, and it might make your domain definitions easier to read, and be more designer friendly.
 ```C#
 var domain = new MyDomainBuilder("Trunk Thumper")
@@ -172,7 +181,7 @@ var domain = new MyDomainBuilder("Trunk Thumper")
         .MoveTo(Location.Bridge, Speed.Walk)
             .SetLocation(Location.Bridge)
         .End()
-        .CheckBridgeAction()
+        .CheckBridge()
             .IfLocation(Location.Bridge)
             .SetBored()
         .End()
@@ -304,6 +313,8 @@ public class MoveToOperator : IOperator
                 }
                 else
                     return TaskStatus.Failure;
+            case Location.Bridge:
+                // ...
         }
         return TaskStatus.Failure;
     }
@@ -392,12 +403,49 @@ public DB RandomSelect(string name)
     return CompoundTask<RandomSelector>(name);
 }
 ```
+### Debugging the planner
+Sometimes we need to see what's going on under the hood to understand why the planner ends up with the plans we are given.
+We have some debug options in our context definition, as mentioned earlier. We can set LogDecomposition to true. What this does, is it allows our planning procedure to store information into our context about condition success and failure during decomposition. This can be a big help in understanding how the domain was decomposed into a plan. We can then read out the logs from DecompositionLog in our context. BaseContext will attempt to instantiate the debug collections automatically if the debug flags are set to true when its Init() function is called.
+```C#
+while(ctx.DecompositionLog.Count > 0)
+{
+    var log = ctx.DecompositionLog.Pop();
+    Console.WriteLine(log);
+}
+```
+The planning system will encode our traversal through the HTN domain as we search for a plan. This method traversal record (MTR) simply stores the method index chosen for each selector that was decomposed to create the plan, recording branching in our decomposition. We can set our context up so that the planner will also provide us with a debug version of this traversal record, which record more information. We simply set DebugMTR to true in our context.
+```C#
+foreach(var log in ctx.MTRDebug)
+{
+    Console.WriteLine(log);
+}
+```
+When DebugMTR is true, we will also track the previous traversal record in LastMTRDebug. This can be useful to compare the current and previous traversal record when a plan was replaced, for instance.
+```C#
+foreach(var log in ctx.LastMTRDebug)
+{
+    Console.WriteLine(log);
+}
+```
+The reason these debug properties are all abstract in BaseContext, is because Fluid HTN must be generic enough to be used varied environments. In Unity, for instance, a user might want to have these debug flags enabled only when in the editor, or when running the game in a special dev-mode. Or maybe the user doesn't use Unity at all, and other policies are applied for when to debug.
+#### Callback hooks in the planner
+Sometimes these debug logs won't be enough to understand how the planner flows and gives us the results it does. Or maybe there is a need to hook up to certain events in the planner for other purposes. The planner exposes multiple callbacks that we can hook up to.
+```C#
+/// <summary>
+/// OnPreReplacePlan(oldPlan, newPlan) is called when we're about to replace the
+/// current plan with a new plan. The current plan might be empty / completed.
+/// </summary>
+public Action<Queue<ITask>, Queue<ITask>> OnReplacePlan = null;
+```
+
 ### Using Fluid HTN with Unity
 In UnityProject/Packages/manifest.json add the following line under dependencies, and edit the path to point to where you have cloned the Fluid HTN repository.
 ```json
 "fluid.htn": "file:path/to/fluid-hierarchial-task-network/FluidHTN"
 ```
-Your Unity project should now have integrated Fluid HTN, and you should be able to proceed with the getting started example above. Slightly more elaborate examples based on Unity is also available in the Examples section below.
+Your Unity project should now have integrated Fluid HTN via the Package Manager, and you should be able to proceed with the Getting Started example above. Slightly more elaborate examples based on Unity is also available in the Examples section below.
+
+If preferred, the FluidHTN folder of the planner can also be copy/pasted somewhere into your Unity project's Assets folder.
 
 ## Extensions
 The [Fluid HTN Extension library](https://github.com/ptrefall/fluid-hierarchial-task-network-ext) adds extended selector implementations, like Random Select and Utility Select, as well as JSON serialization of HTN Domains.
