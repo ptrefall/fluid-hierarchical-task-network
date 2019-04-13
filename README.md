@@ -27,8 +27,15 @@ public enum MyWorldState : byte
 
 public class MyContext : BaseContext
 {
+    public override List<string> MTRDebug { get; set; } = null;
+    public override List<string> LastMTRDebug { get; set; } = null;
+    public override bool DebugMTR { get; } = false;
+    public override Stack<string> DecompositionLog { get; set; } = null;
+    public override bool LogDecomposition { get; } = false;
+        
     private byte[] _worldState = new byte[Enum.GetValues(typeof(MyWorldState)).Length];
     public override byte[] WorldState => _worldState;
+    
     
     // Custom state
     public bool Done { get; set; } = false;
@@ -41,6 +48,8 @@ public class MyContext : BaseContext
     }
 }
 ```
+You might notice that we had to override the debug properties. We set the collections to null and the boolean flags to false for now. We will cover debugging later in this document.
+
 Out of convenience we extend our context with some specialized world state manipulation methods now that we have defined our world state.
 ```C#
 public class MyContext : BaseContext
@@ -402,7 +411,7 @@ while(ctx.DecompositionLog.Count > 0)
     Console.WriteLine(log);
 }
 ```
-The planning system will encode our traversal through the HTN domain as we search for a plan. This method traversal record (MTR) simply stores the method index chosen for each selector that was decomposed to create the plan, recording branching in our decomposition. We can set our context up so that the planner will also provide us with a debug version of this traversal record, which record more information. Simply set DebugMTR to true in our context.
+The planning system will encode our traversal through the HTN domain as we search for a plan. This method traversal record (MTR) simply stores the method index chosen for each selector that was decomposed to create the plan, recording branching in our decomposition. We can set our context up so that the planner will also provide us with a debug version of this traversal record, which record more information. We simply set DebugMTR to true in our context.
 ```C#
 foreach(var log in ctx.MTRDebug)
 {
@@ -416,6 +425,7 @@ foreach(var log in ctx.LastMTRDebug)
     Console.WriteLine(log);
 }
 ```
+The reason these debug properties are all abstract in BaseContext, is because Fluid HTN must be generic enough to be used varied environments. In Unity, for instance, a user might want to have these debug flags enabled only when in the editor, or when running the game in a special dev-mode. Or maybe the user doesn't use Unity at all, and other policies are applied for when to debug.
 ### Using Fluid HTN with Unity
 In UnityProject/Packages/manifest.json add the following line under dependencies, and edit the path to point to where you have cloned the Fluid HTN repository.
 ```json
