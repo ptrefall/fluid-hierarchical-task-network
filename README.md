@@ -394,9 +394,9 @@ public DB RandomSelect(string name)
 ```
 ### Debugging the planner
 Sometimes we need to see what's going on under the hood to understand why the planner ends up with the plans we are given.
-First we can pass the planner constructor a true for debugDecomposition. What this does, is it allows our planning procedure to store information into our context about condition success and failure. This can be a big help in understanding how the domain was decomposed into a plan.
+First we can pass the planner constructor a true for logDecomposition. What this does, is it allows our planning procedure to store information into our context about condition success and failure. This can be a big help in understanding how the domain was decomposed into a plan.
 ```C#
-var planner = new Planner(debugDecomposition: true);
+var planner = new Planner(logDecomposition: true);
 planner.Tick(domain, ctx);
 while(ctx.DecompositionLog.Count > 0)
 {
