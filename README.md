@@ -405,7 +405,7 @@ public DB RandomSelect(string name)
 ```
 ### Debugging the planner
 Sometimes we need to see what's going on under the hood to understand why the planner ends up with the plans we are given.
-We have some debug options in our context definition, as mentioned earlier. We can set LogDecomposition to true. What this does, is it allows our planning procedure to store information into our context about condition success and failure during decomposition. This can be a big help in understanding how the domain was decomposed into a plan. We can then read out the logs from DecompositionLog in our context.
+We have some debug options in our context definition, as mentioned earlier. We can set LogDecomposition to true. What this does, is it allows our planning procedure to store information into our context about condition success and failure during decomposition. This can be a big help in understanding how the domain was decomposed into a plan. We can then read out the logs from DecompositionLog in our context. Remember to instantiate the debug collections as well (that we set to null when we defined MyContext at the start of this document).
 ```C#
 while(ctx.DecompositionLog.Count > 0)
 {
