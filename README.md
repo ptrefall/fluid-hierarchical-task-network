@@ -394,13 +394,25 @@ public DB RandomSelect(string name)
 ```
 ### Debugging the planner
 Sometimes we need to see what's going on under the hood to understand why the planner ends up with the plans we are given.
-First we can pass the planner constructor a true for logDecomposition. What this does, is it allows our planning procedure to store information into our context about condition success and failure. This can be a big help in understanding how the domain was decomposed into a plan.
+We have some debug options in our context definition, as mentioned earlier. We can set LogDecomposition to true. What this does, is it allows our planning procedure to store information into our context about condition success and failure during decomposition. This can be a big help in understanding how the domain was decomposed into a plan. We can then read out the logs from DecompositionLog in our context.
 ```C#
-var planner = new Planner(logDecomposition: true);
-planner.Tick(domain, ctx);
 while(ctx.DecompositionLog.Count > 0)
 {
     var log = ctx.DecompositionLog.Pop();
+    Console.WriteLine(log);
+}
+```
+The planning system will encode our traversal through the HTN domain as we search for a plan. This method traversal record (MTR) simply stores the method index chosen for each selector that was decomposed to create the plan, recording branching in our decomposition. We can set our context up so that the planner will also provide us with a debug version of this traversal record, which record more information. Simply set DebugMTR to true in our context.
+```C#
+foreach(var log in ctx.MTRDebug)
+{
+    Console.WriteLine(log);
+}
+```
+When DebugMTR is true, we will also track the previous traversal record in LastMTRDebug. This can be useful to compare the current and previous traversal record when a plan was replaced, for instance.
+```C#
+foreach(var log in ctx.LastMTRDebug)
+{
     Console.WriteLine(log);
 }
 ```
