@@ -431,6 +431,11 @@ The reason these debug properties are all abstract in BaseContext, is because Fl
 #### Callback hooks in the planner
 Sometimes these debug logs won't be enough to understand how the planner flows and gives us the results it does. Or maybe there is a need to hook up to certain events in the planner for other purposes. The planner exposes multiple callbacks that we can hook up to.
 ```C#
+/// <summary>
+/// OnPreReplacePlan(oldPlan, newPlan) is called when we're about to replace the
+/// current plan with a new plan. The current plan might be empty / completed.
+/// </summary>
+public Action<Queue<ITask>, Queue<ITask>> OnPreReplacePlan { get; set; } = null;
 ```
 
 ### Using Fluid HTN with Unity
