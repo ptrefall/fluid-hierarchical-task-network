@@ -392,6 +392,18 @@ public DB RandomSelect(string name)
     return CompoundTask<RandomSelector>(name);
 }
 ```
+### Debugging the planner
+Sometimes we need to see what's going on under the hood to understand why the planner ends up with the plans we are given.
+First we can pass the planner constructor a true for debugDecomposition. What this does, is it allows our planning procedure to store information into our context about condition success and failure. This can be a big help in understanding how the domain was decomposed into a plan.
+```C#
+var planner = new Planner(debugDecomposition: true);
+planner.Tick(domain, ctx);
+while(ctx.DecompositionLog.Count > 0)
+{
+    var log = ctx.DecompositionLog.Pop();
+    Console.WriteLine(log);
+}
+```
 ### Using Fluid HTN with Unity
 In UnityProject/Packages/manifest.json add the following line under dependencies, and edit the path to point to where you have cloned the Fluid HTN repository.
 ```json
