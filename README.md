@@ -436,6 +436,17 @@ Sometimes these debug logs won't be enough to understand how the planner flows a
 /// current plan with a new plan. The current plan might be empty / completed.
 /// </summary>
 public Action<Queue<ITask>, Queue<ITask>> OnReplacePlan = null;
+
+/// <summary>
+///		OnNewTask(task) is called after we popped a new task off the current plan.
+/// </summary>
+public Action<ITask> OnNewTask = null;
+
+/// <summary>
+///		OnNewTaskConditionFailed(task, failedCondition) is called when we failed to
+///		validate a condition on a new task.
+/// </summary>
+public Action<ITask, ICondition> OnNewTaskConditionFailed = null;
 ```
 
 ### Using Fluid HTN with Unity
