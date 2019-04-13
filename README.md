@@ -313,6 +313,8 @@ public class MoveToOperator : IOperator
                 }
                 else
                     return TaskStatus.Failure;
+            case Location.Bridge:
+                // ...
         }
         return TaskStatus.Failure;
     }
