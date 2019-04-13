@@ -117,7 +117,7 @@ Next, let's tick the planner until the Done flag in our context is set to false.
 ```C#
 while (!ctx.Done)
 {
-    planner.TickPlan(domain, ctx);
+    planner.Tick(domain, ctx);
 }
 ```
 Now, if we run this example, we should see the following print to our console:
