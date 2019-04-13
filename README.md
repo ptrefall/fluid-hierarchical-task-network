@@ -435,7 +435,7 @@ Sometimes these debug logs won't be enough to understand how the planner flows a
 /// OnPreReplacePlan(oldPlan, newPlan) is called when we're about to replace the
 /// current plan with a new plan. The current plan might be empty / completed.
 /// </summary>
-public Action<Queue<ITask>, Queue<ITask>> OnPreReplacePlan = null;
+public Action<Queue<ITask>, Queue<ITask>> OnReplacePlan = null;
 ```
 
 ### Using Fluid HTN with Unity
