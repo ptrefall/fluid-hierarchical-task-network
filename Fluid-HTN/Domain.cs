@@ -36,7 +36,7 @@ namespace FluidHTN
             Queue<ITask> plan = null;
 
             // We first check whether we have a stored start task. This is true
-            // if we had a partial plan split somewhere in our plan, and we now
+            // if we had a partial plan pause somewhere in our plan, and we now
             // want to continue where we left off.
             // If this is the case, we don't erase the MTR, but continue building it.
             // However, if we have a partial plan, but LastMTR is not 0, that means

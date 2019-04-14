@@ -13,6 +13,7 @@ namespace FluidHTN.PrimitiveTasks
         public string Name { get; set; }
         public ICompoundTask Parent { get; set; }
         public List<ICondition> Conditions { get; } = new List<ICondition>();
+        public List<ICondition> ExecutingConditions { get; } = new List<ICondition>();
         public TaskStatus LastStatus { get; }
         public IOperator Operator { get; private set; }
         public List<IEffect> Effects { get; } = new List<IEffect>();
@@ -23,6 +24,12 @@ namespace FluidHTN.PrimitiveTasks
         {
             Conditions.Add(condition);
             return this;
+        }
+
+        public ITask AddExecutingConditions(ICondition condition)
+        {
+			ExecutingConditions.Add(condition);
+			return this;
         }
 
         public ITask AddEffect(IEffect effect)

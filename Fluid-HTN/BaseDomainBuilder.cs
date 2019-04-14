@@ -172,6 +172,29 @@ namespace FluidHTN
             return (DB) this;
         }
 
+        /// <summary>
+        ///     An executing condition is a boolean statement validated before every call to the current
+        ///		primitive task's operator update tick. It's only supported inside primitive tasks / Actions.
+        ///		Note that this condition is never validated during planning, only during execution.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="condition"></param>
+        /// <returns></returns>
+        public DB ExecutingCondition(string name, Func<T, bool> condition)
+        {
+	        if (Pointer is IPrimitiveTask task)
+	        {
+		        var cond = new FuncCondition<T>(name, condition);
+		        task.AddExecutingConditions(cond);
+	        }
+	        else
+	        {
+		        throw new Exception("Tried to add an Executing Condition, but the Pointer is not a Primitive Task!");
+	        }
+
+	        return (DB) this;
+        }
+
         // ========================================================= OPERATORS
 
         /// <summary>
