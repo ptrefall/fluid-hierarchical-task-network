@@ -19,6 +19,20 @@ It is highly recommended to read and watch the following resources on HTN planni
 
 If you want an in-depth look into ai planning, the University of Edinburgh has a great series on the topic
 * [University of Edinburgh's AI Planning series](https://www.youtube.com/watch?v=7Vy8970q0Xc&list=PLwJ2VKmefmxpUJEGB1ff6yUZ5Zd7Gegn2)
+### Library concepts
+#### Compound Tasks
+Compound tasks are where HTN get their “hierarchical” nature. You can think of a compound task as a high level task that has multiple ways of being accomplished. There are primarily two types of compound tasks. Selectors and Sequencers. A Selector must be able to decompose a single sub-task, while a Sequence must be able to decompose all of its sub-tasks successfully for itself to have decomposed successfully. There is nothing stopping you from extending this toolset with RandomSelect, UtilitySelect, etc. These tasks are decomposed until we're left with only Primitive Tasks, which represent a final plan.
+#### Primitive Tasks
+There are two types of tasks that are used to build a HTN, called compound tasks and primitive tasks. Primitive tasks represent a single step that can be performed by our NPC.  A set of primitive tasks is the plan that we are ultimately getting out of the HTN.Primitive tasks are comprised of an operator and sets of effects and conditions.
+#### Conditions
+Conditions are boolean validators that can be used to validate the decomposition of a compound task, or the validity of a primary task. Primary Tasks also have Executing Conditions, which special conditions we tick before every update to the primary task's operator during execution of a plan.
+#### Operators
+Operators are the logic operation a primary task should perform during plan execution. Every time an operator updates, it returns a status whether it succeeded, failed or need to continue next tick.
+#### Effects
+Effects applies world state change during planning, and optionally during execution. There are three types of effects. 
+* PlanOnly effects temporarily change the world state during planning, used as a prediciton about the future. Its change on the world state is removed before plan execution. This can be useful when we need other systems to set the world state during execution.
+* PlanAndExecute effects work just like PlanOnly effects, only that during execution, when the task they represent complete its execution successfully, the effect is re-applied. This is useful in the cases where you don't have other systems to set the world state during execution.
+* Permanent effects are applied during planning, but not removed from the world state before execution. This can be very useful when there's some state we change only during planning, e.g. do this thing three times then do this other thing.
 ### Coding with Fluid HTN
 First we need to set up a WorldState enum and a Context. This is the blackboard the planner uses to access state during its planning procedure.
 ```C#
@@ -137,20 +151,6 @@ Get C
 Done
 
 ```
-### Library concepts
-#### Compound Tasks
-Compound tasks are where HTN get their “hierarchical” nature. You can think of a compound task as a high level task that has multiple ways of being accomplished. There are primarily two types of compound tasks. Selectors and Sequencers. A Selector must be able to decompose a single sub-task, while a Sequence must be able to decompose all of its sub-tasks successfully for itself to have decomposed successfully. There is nothing stopping you from extending this toolset with RandomSelect, UtilitySelect, etc. These tasks are decomposed until we're left with only Primitive Tasks, which represent a final plan.
-#### Primitive Tasks
-There are two types of tasks that are used to build a HTN, called compound tasks and primitive tasks. Primitive tasks represent a single step that can be performed by our NPC.  A set of primitive tasks is the plan that we are ultimately getting out of the HTN.Primitive tasks are comprised of an operator and sets of effects and conditions.
-#### Conditions
-Conditions are boolean validators that can be used to validate the decomposition of a compound task, or the validity of a primary task. Primary Tasks also have Executing Conditions, which special conditions we tick before every update to the primary task's operator during execution of a plan.
-#### Operators
-Operators are the logic operation a primary task should perform during plan execution. Every time an operator updates, it returns a status whether it succeeded, failed or need to continue next tick.
-#### Effects
-Effects applies world state change during planning, and optionally during execution. There are three types of effects. 
-* PlanOnly effects temporarily change the world state during planning, used as a prediciton about the future. Its change on the world state is removed before plan execution. This can be useful when we need other systems to set the world state during execution.
-* PlanAndExecute effects work just like PlanOnly effects, only that during execution, when the task they represent complete its execution successfully, the effect is re-applied. This is useful in the cases where you don't have other systems to set the world state during execution.
-* Permanent effects are applied during planning, but not removed from the world state before execution. This can be very useful when there's some state we change only during planning, e.g. do this thing three times then do this other thing.
 ### Partial planning
 We can easily integrate the concept of partial planning into our domains. We call it a Pause Plan, and it must be set inside a sequence to be valid. It allows the planner to only plan up to a certain point, then continue from there once the partial plan has been completed.
 ```C#
