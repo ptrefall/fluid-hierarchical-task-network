@@ -16,7 +16,8 @@ It is highly recommended to read and watch the following resources on HTN planni
 * [AI and Games' Horizon Zero Dawn coverage](https://www.youtube.com/watch?v=XxuSFBVQULY)
 * [AI and Games' Transformers coverage](https://www.youtube.com/watch?v=kXm467TFTcY)
 * [AiGameDev's Planning in games overview](http://aigamedev.com/open/review/planning-in-games/)
-and if you want an in-depth look into ai planning, the University of Edinburgh has a great series on the topic
+
+If you want an in-depth look into ai planning, the University of Edinburgh has a great series on the topic
 * [University of Edinburgh's AI Planning](https://www.youtube.com/watch?v=7Vy8970q0Xc&list=PLwJ2VKmefmxpUJEGB1ff6yUZ5Zd7Gegn2)
 ### Coding with Fluid HTN
 First we need to set up a WorldState enum and a Context. This is the blackboard the planner uses to access state during its planning procedure.
