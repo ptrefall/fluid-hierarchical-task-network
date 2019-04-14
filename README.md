@@ -431,7 +431,11 @@ The reason these debug properties are all abstract in BaseContext, is because Fl
 #### Callback hooks in the planner
 Sometimes these debug logs won't be enough to understand how the planner flows and gives us the results it does. Or maybe there is a need to hook up to certain events in the planner for other purposes. The planner exposes multiple callbacks that we can hook up to.
 
-OnReplacePlan(oldPlan, newPlan) is called when we're about to replace the current plan with a new plan. The current plan might be empty / completed.
+OnNewPlan(newPlan) is called when we found a new plan, and there is no old plan to replace.
+```C#
+public Action<Queue<ITask>> OnNewPlan = null;
+```
+OnReplacePlan(oldPlan, newPlan) is called when we're about to replace the current plan with a new plan.
 ```C#
 public Action<Queue<ITask>, Queue<ITask>> OnReplacePlan = null;
 ```
@@ -442,6 +446,26 @@ public Action<ITask> OnNewTask = null;
 OnNewTaskConditionFailed(task, failedCondition) is called when we failed to validate a condition on a new task.
 ```C#
 public Action<ITask, ICondition> OnNewTaskConditionFailed = null;
+```
+OnStopCurrentTask(task) is called when the currently running task was stopped forcefully.
+```C#
+public Action<IPrimitiveTask> OnStopCurrentTask = null;
+```
+OnCurrentTaskCompletedSuccessfully(task) is called when the currently running task completes successfully, and before its effects are applied.
+```C#
+public Action<IPrimitiveTask> OnCurrentTaskCompletedSuccessfully = null;
+```
+OnApplyEffect(effect) is called for each effect of the type PlanAndExecute on a completed task.
+```C#
+public Action<IEffect> OnApplyEffect = null;
+```
+OnCurrentTaskFailed(task) is called when the currently running task fails to complete.
+```C#
+public Action<IPrimitiveTask> OnCurrentTaskFailed = null;
+```
+OnCurrentTaskContinues(task) is called every tick that a currently running task needs to continue.
+```C#
+public Action<IPrimitiveTask> OnCurrentTaskContinues = null;
 ```
 
 ### Using Fluid HTN with Unity
