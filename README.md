@@ -10,6 +10,12 @@ A simple HTN planner based around the principles of the Builder pattern, inspire
 * Comes with Unity Package Module definitions for seamless integration into Unity projects.
 
 ## Getting started
+### What is Hierarchial Task Network planning
+It is highly recommended to read and watch the following resources on HTN planning before using this planner.
+* [Troy Humphrey's GameAIPro article](http://www.gameaipro.com/GameAIPro/GameAIPro_Chapter12_Exploring_HTN_Planners_through_Example.pdf)
+* [AI and Games' Horizon Zero Dawn coverage](https://www.youtube.com/watch?v=XxuSFBVQULY)
+* [AI and Games' Transformers coverage](https://www.youtube.com/watch?v=kXm467TFTcY)
+* [AiGameDev's Planning in games overview](http://aigamedev.com/open/review/planning-in-games/)
 ### Coding with Fluid HTN
 First we need to set up a WorldState enum and a Context. This is the blackboard the planner uses to access state during its planning procedure.
 ```C#
