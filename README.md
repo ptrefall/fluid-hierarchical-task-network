@@ -430,22 +430,17 @@ foreach(var log in ctx.LastMTRDebug)
 The reason these debug properties are all abstract in BaseContext, is because Fluid HTN must be generic enough to be used varied environments. In Unity, for instance, a user might want to have these debug flags enabled only when in the editor, or when running the game in a special dev-mode. Or maybe the user doesn't use Unity at all, and other policies are applied for when to debug.
 #### Callback hooks in the planner
 Sometimes these debug logs won't be enough to understand how the planner flows and gives us the results it does. Or maybe there is a need to hook up to certain events in the planner for other purposes. The planner exposes multiple callbacks that we can hook up to.
+
+OnReplacePlan(oldPlan, newPlan) is called when we're about to replace the current plan with a new plan. The current plan might be empty / completed.
 ```C#
-/// <summary>
-/// OnPreReplacePlan(oldPlan, newPlan) is called when we're about to replace the
-/// current plan with a new plan. The current plan might be empty / completed.
-/// </summary>
 public Action<Queue<ITask>, Queue<ITask>> OnReplacePlan = null;
-
-/// <summary>
-///		OnNewTask(task) is called after we popped a new task off the current plan.
-/// </summary>
+```
+OnNewTask(task) is called after we popped a new task off the current plan.
+```C#
 public Action<ITask> OnNewTask = null;
-
-/// <summary>
-///		OnNewTaskConditionFailed(task, failedCondition) is called when we failed to
-///		validate a condition on a new task.
-/// </summary>
+```
+OnNewTaskConditionFailed(task, failedCondition) is called when we failed to validate a condition on a new task.
+```C#
 public Action<ITask, ICondition> OnNewTaskConditionFailed = null;
 ```
 
