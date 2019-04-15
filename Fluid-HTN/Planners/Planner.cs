@@ -271,7 +271,7 @@ namespace FluidHTN
 
                                 ctx.IsDirty = false;
 
-                                TickPlan(domain, ctx);
+                                Tick(domain, ctx);
                             }
                         }
 

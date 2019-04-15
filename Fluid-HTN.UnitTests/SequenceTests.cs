@@ -463,12 +463,96 @@ namespace Fluid_HTN.UnitTests
                 {
                     plan.Enqueue(p.Dequeue());
                 }
+
+                if (ctx.HasPausedPartialPlan)
+                    break;
             }
 
             Assert.IsTrue(plan != null);
             Assert.IsTrue(plan.Count == 2);
             Assert.AreEqual("Sub-task2", plan.Dequeue().Name);
             Assert.AreEqual("Sub-task4", plan.Dequeue().Name);
+        }
+
+        [TestMethod]
+        public void ContinueMultipleNestedPausePlan_ExpectedBehavior()
+        {
+            var ctx = new MyContext();
+            ctx.Init();
+
+            var task = new Sequence() { Name = "Test" };
+            var task2 = new Selector() { Name = "Test2" };
+            var task3 = new Sequence() { Name = "Test3" };
+            var task4 = new Sequence() { Name = "Test4" };
+            task3.AddSubtask(new PrimitiveTask() { Name = "Sub-task1" });
+            task3.AddSubtask(new PausePlanTask());
+            task3.AddSubtask(new PrimitiveTask() { Name = "Sub-task2" });
+
+            task2.AddSubtask(task3);
+            task2.AddSubtask(new PrimitiveTask() { Name = "Sub-task3" });
+
+            task4.AddSubtask(new PrimitiveTask() { Name = "Sub-task5" });
+            task4.AddSubtask(new PausePlanTask());
+            task4.AddSubtask(new PrimitiveTask() { Name = "Sub-task6" });
+
+            task.AddSubtask(task2);
+            task.AddSubtask(new PrimitiveTask() { Name = "Sub-task4" });
+            task.AddSubtask(task4);
+            task.AddSubtask(new PrimitiveTask() { Name = "Sub-task7" });
+
+            var plan = task.Decompose(ctx, 0);
+
+            Assert.IsTrue(plan != null);
+            Assert.IsTrue(plan.Count == 1);
+            Assert.AreEqual("Sub-task1", plan.Dequeue().Name);
+            Assert.IsTrue(ctx.HasPausedPartialPlan);
+            Assert.IsTrue(ctx.PartialPlanQueue.Count == 2);
+            var queueAsArray = ctx.PartialPlanQueue.ToArray();
+            Assert.AreEqual(task3, queueAsArray[0].Task);
+            Assert.AreEqual(2, queueAsArray[0].TaskIndex);
+            Assert.AreEqual(task, queueAsArray[1].Task);
+            Assert.AreEqual(1, queueAsArray[1].TaskIndex);
+
+            ctx.HasPausedPartialPlan = false;
+            plan = new Queue<ITask>();
+            while (ctx.PartialPlanQueue.Count > 0)
+            {
+                var kvp = ctx.PartialPlanQueue.Dequeue();
+                var p = kvp.Task.Decompose(ctx, kvp.TaskIndex);
+                while (p.Count > 0)
+                {
+                    plan.Enqueue(p.Dequeue());
+                }
+
+                if (ctx.HasPausedPartialPlan)
+                    break;
+            }
+
+            Assert.IsTrue(plan != null);
+            Assert.IsTrue(plan.Count == 3);
+            Assert.AreEqual("Sub-task2", plan.Dequeue().Name);
+            Assert.AreEqual("Sub-task4", plan.Dequeue().Name);
+            Assert.AreEqual("Sub-task5", plan.Dequeue().Name);
+
+            ctx.HasPausedPartialPlan = false;
+            plan = new Queue<ITask>();
+            while (ctx.PartialPlanQueue.Count > 0)
+            {
+                var kvp = ctx.PartialPlanQueue.Dequeue();
+                var p = kvp.Task.Decompose(ctx, kvp.TaskIndex);
+                while (p.Count > 0)
+                {
+                    plan.Enqueue(p.Dequeue());
+                }
+
+                if (ctx.HasPausedPartialPlan)
+                    break;
+            }
+
+            Assert.IsTrue(plan != null);
+            Assert.IsTrue(plan.Count == 2);
+            Assert.AreEqual("Sub-task6", plan.Dequeue().Name);
+            Assert.AreEqual("Sub-task7", plan.Dequeue().Name);
         }
     }
 }

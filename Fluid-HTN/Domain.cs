@@ -62,6 +62,11 @@ namespace FluidHTN
                             plan.Enqueue(p.Dequeue());
                         }
                     }
+
+                    // While continuing a partial plan, we might encounter
+                    // a new pause.
+                    if (ctx.HasPausedPartialPlan)
+                        break;
                 }
 
                 // If we failed to continue the paused partial plan,
