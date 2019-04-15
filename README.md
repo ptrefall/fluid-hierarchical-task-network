@@ -1,4 +1,4 @@
-# Fluid Hierarchial Task Network
+# Fluid Hierarchical Task Network
 A simple HTN planner based around the principles of the Builder pattern, inspired by [Fluid Behaviour Tree](https://github.com/ashblue/fluid-behavior-tree).
 
 ## Features
@@ -8,9 +8,10 @@ A simple HTN planner based around the principles of the Builder pattern, inspire
 * Domain splicing
 * Easy to extend with new features, as demonstrated in the [extension library](https://github.com/ptrefall/fluid-hierarchial-task-network-ext).
 * Comes with Unity Package Module definitions for seamless integration into Unity projects.
+* Unit tests
 
 ## Getting started
-### What is Hierarchial Task Network planning
+### What is Hierarchical Task Network planning
 It is highly recommended to read and watch the following resources on HTN planning before using this planner.
 * [Troy Humphrey's GameAIPro article](http://www.gameaipro.com/GameAIPro/GameAIPro_Chapter12_Exploring_HTN_Planners_through_Example.pdf)
 * [AI and Games' Horizon Zero Dawn coverage](https://www.youtube.com/watch?v=XxuSFBVQULY)
@@ -21,7 +22,7 @@ If you want an in-depth look into ai planning, the University of Edinburgh has a
 * [University of Edinburgh's AI Planning series](https://www.youtube.com/watch?v=7Vy8970q0Xc&list=PLwJ2VKmefmxpUJEGB1ff6yUZ5Zd7Gegn2)
 ### Library concepts
 #### Compound Tasks
-Compound tasks are where HTN get their “hierarchical” nature. You can think of a compound task as a high level task that has multiple ways of being accomplished. There are primarily two types of compound tasks. Selectors and Sequencers. A Selector must be able to decompose a single sub-task, while a Sequence must be able to decompose all of its sub-tasks successfully for itself to have decomposed successfully. There is nothing stopping you from extending this toolset with RandomSelect, UtilitySelect, etc. These tasks are decomposed until we're left with only Primitive Tasks, which represent a final plan.
+Compound tasks are where HTN get their “hierarchical” nature. You can think of a compound task as a high level task that has multiple ways of being accomplished. There are primarily two types of compound tasks. Selectors and Sequencers. A Selector must be able to decompose a single sub-task, while a Sequence must be able to decompose all its sub-tasks successfully for itself to have decomposed successfully. There is nothing stopping you from extending this toolset with RandomSelect, UtilitySelect, etc. These tasks are decomposed until we're left with only Primitive Tasks, which represent a final plan.
 #### Primitive Tasks
 There are two types of tasks that are used to build a HTN, called compound tasks and primitive tasks. Primitive tasks represent a single step that can be performed by our NPC.  A set of primitive tasks is the plan that we are ultimately getting out of the HTN.Primitive tasks are comprised of an operator and sets of effects and conditions.
 #### Conditions
@@ -29,8 +30,8 @@ Conditions are boolean validators that can be used to validate the decomposition
 #### Operators
 Operators are the logic operation a primary task should perform during plan execution. Every time an operator updates, it returns a status whether it succeeded, failed or need to continue next tick.
 #### Effects
-Effects applies world state change during planning, and optionally during execution. There are three types of effects. 
-* PlanOnly effects temporarily change the world state during planning, used as a prediciton about the future. Its change on the world state is removed before plan execution. This can be useful when we need other systems to set the world state during execution.
+Effects apply world state change during planning, and optionally during execution. There are three types of effects. 
+* PlanOnly effects temporarily change the world state during planning, used as a prediction about the future. Its change on the world state is removed before plan execution. This can be useful when we need other systems to set the world state during execution.
 * PlanAndExecute effects work just like PlanOnly effects, only that during execution, when the task they represent complete its execution successfully, the effect is re-applied. This is useful in the cases where you don't have other systems to set the world state during execution.
 * Permanent effects are applied during planning, but not removed from the world state before execution. This can be very useful when there's some state we change only during planning, e.g. do this thing three times then do this other thing.
 ### Coding with Fluid HTN
@@ -130,7 +131,7 @@ var domain = new DomainBuilder<MyContext>("MyDomain")
     .End()
     .Build();
 ```
-Now that we have a domain, we can start to generate plans. First we need to instantiate our planner and the context.
+Now that we have a domain, we can start to generate plans. First, we need to instantiate our planner and the context.
 ```C#
 var ctx = new MyContext();
 var planner = new Planner();
@@ -165,7 +166,7 @@ We can easily integrate the concept of partial planning into our domains. We cal
 .End()
 ```
 ### Sub-domains and domain splicing
-We can define sub-domains and splice them together to form new domains, but they must share the same context type to be compatible. This can be quite handy for re-use of sub-domains, and prevent a single domain definition from growing too large.
+We can define sub-domains and splice them together to form new domains, but they must share the same context type to be compatible. This can be quite handy for re-use of sub-domains and prevent a single domain definition from growing too large.
 ```C#
 var subDomain = new DomainBuilder<MyContext>("SubDomain")
     .Select("B")
@@ -185,7 +186,7 @@ var myDomain = new DomainBuilder<MyContext>("MyDomain")
 ```
 ### Extending the Domain Builder
 A powerful feature of Fluid HTN, is how easy it is to extend the domain builder with specialized task types for a project's problem domain.
-Bundled with the library, we have generic implementations of Condition, Operator and Effect, making it trivial to add lambda-styled domain definitions, as expressed in the example earlier in this document. These bundled features are just a starting point, however. It's easy to extend the planner with custom conditions, operators and effects, and it might make your domain definitions easier to read, and be more designer friendly.
+Bundled with the library, we have generic implementations of Condition, Operator and Effect, making it trivial to add lambda-styled domain definitions, as expressed in the example earlier in this document. These bundled features are just a starting point, however. It's easy to extend the planner with custom conditions, operators and effects, and it might make your domain definitions easier to read and be more designer friendly.
 ```C#
 var domain = new MyDomainBuilder("Trunk Thumper")
     .Sequence("Attack enemy")
@@ -272,7 +273,7 @@ public class SetLocationEffect : IEffect
     }
 }
 ```
-Note how this is a plan-only effect. This is because we predict that we will arrive at this location when we attempt to move there, but we actually don't know whether we ever get there during plan execution. In the MoveTo example below we continue the task until we arrive at the destination, but there are cases where we'd want to just set the destination and return success for movement, as we might want to perform other tasks while moving. Because of this, we rely on some system external from this effect to set the state on arrival.
+Note how this is a plan-only effect. This is because we predict that we will arrive at this location when we attempt to move there, but we don't know whether we ever get there during plan execution. In the MoveTo example below we continue the task until we arrive at the destination, but there are cases where we'd want to just set the destination and return success for movement, as we might want to perform other tasks while moving. Because of this, we rely on some system external from this effect to set the state on arrival.
 
 Next, we can extend our MyDomainBuilder with a new function that expose this effect
 ```C#
@@ -368,7 +369,7 @@ public MyDomainBuilder MoveTo(Location location, Speed speed)
     return this;
 }
 ```
-Note that we both called Action(...), which sets the Pointer, and  the SetOperator(...), but we didn't call End() to close the Pointer. This is so that we could be free to add Effects and Conditions to the action, but it means that the user must remember to call End() manually.
+Note that we both called Action(...), which sets the Pointer, and the SetOperator(...), but we didn't call End() to close the Pointer. This is so that we could be free to add Effects and Conditions to the action, but it means that the user must remember to call End() manually.
 #### Custom selectors in domain builder
 We're not limited to extend the domain builder with just conditions, effects and operators. We can also extend the capabilities of our selectors and sequences. Let's implement a Random Selector that will decompose into a random sub-task.
 ```C#
@@ -492,7 +493,7 @@ public Action<IPrimitiveTask> OnCurrentTaskContinues = null;
 ```
 
 ### Using Fluid HTN with Unity
-In UnityProject/Packages/manifest.json add the following line under dependencies, and edit the path to point to where you have cloned the Fluid HTN repository.
+In UnityProject/Packages/manifest.json add the following line under dependencies and edit the path to point to where you have cloned the Fluid HTN repository.
 ```json
 "fluid.htn": "file:path/to/fluid-hierarchial-task-network/FluidHTN"
 ```
