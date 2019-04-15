@@ -8,6 +8,7 @@ A simple HTN planner based around the principles of the Builder pattern, inspire
 * Domain splicing
 * Easy to extend with new features, as demonstrated in the [extension library](https://github.com/ptrefall/fluid-hierarchial-task-network-ext).
 * Comes with Unity Package Module definitions for seamless integration into Unity projects.
+* Unit tests
 
 ## Getting started
 ### What is Hierarchical Task Network planning
