@@ -11,7 +11,7 @@ namespace FluidHTN.Compounds
         public ICompoundTask Parent { get; set; }
         public List<ICondition> Conditions { get; } = new List<ICondition>();
         public TaskStatus LastStatus { get; private set; }
-        public List<ITask> Children { get; } = new List<ITask>();
+        public List<ITask> Subtasks { get; } = new List<ITask>();
 
         // ========================================================= ADDERS
 
@@ -21,9 +21,9 @@ namespace FluidHTN.Compounds
             return this;
         }
 
-        public ICompoundTask AddChild(ITask child)
+        public ICompoundTask AddSubtask(ITask child)
         {
-            Children.Add(child);
+            Subtasks.Add(child);
             return this;
         }
 

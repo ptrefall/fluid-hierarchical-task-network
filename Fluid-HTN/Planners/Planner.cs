@@ -90,14 +90,13 @@ namespace FluidHTN
         /// </summary>
         /// <param name="domain"></param>
         /// <param name="ctx"></param>
-        public void TickPlan(Domain<T> domain, T ctx)
+        public void Tick(Domain<T> domain, T ctx)
         {
             // Check whether state has changed or the current plan has finished running.
             // and if so, try to find a new plan.
             if (_currentTask == null && (_plan.Count == 0) || ctx.IsDirty)
             {
-                var partialPlanTemp = ctx.PlanStartTaskParent;
-                var partialPlanIndexTemp = ctx.PlanStartTaskChildIndex;
+                Queue<PartialPlanEntry> lastPartialPlanQueue = null;
 
                 var worldStateDirtyReplan = ctx.IsDirty;
                 ctx.IsDirty = false;
@@ -109,13 +108,20 @@ namespace FluidHTN
                     // right now, but rather see whether the world state changed to a degree where
                     // we should pursue a better plan. Thus, if this replan fails to find a better
                     // plan, we have to add back the partial plan temps cached above.
-                    ctx.PlanStartTaskParent = null;
-                    ctx.PlanStartTaskChildIndex = 0;
+                    if (ctx.HasPausedPartialPlan)
+                    {
+                        ctx.HasPausedPartialPlan = false;
+                        lastPartialPlanQueue = new Queue<PartialPlanEntry>(); // TODO: Use a pool
+                        while (ctx.PartialPlanQueue.Count > 0)
+                        {
+                            lastPartialPlanQueue.Enqueue(ctx.PartialPlanQueue.Dequeue());
+                        }
+                    }
 
                     // We also need to ensure that the last mtr is up to date with the on-going MTR of the partial plan,
                     // so that any new potential plan that is decomposing from the domain root has to beat the currently
                     // running partial plan.
-                    if (partialPlanTemp != null)
+                    if (lastPartialPlanQueue != null)
                     {
                         ctx.LastMTR.Clear();
                         foreach (var record in ctx.MethodTraversalRecord) ctx.LastMTR.Add(record);
@@ -164,10 +170,14 @@ namespace FluidHTN
                         }
                     }
                 }
-                else if (partialPlanTemp != null)
+                else if (lastPartialPlanQueue != null)
                 {
-                    ctx.PlanStartTaskParent = partialPlanTemp;
-                    ctx.PlanStartTaskChildIndex = partialPlanIndexTemp;
+                    ctx.HasPausedPartialPlan = true;
+                    ctx.PartialPlanQueue.Clear();
+                    while (lastPartialPlanQueue.Count > 0)
+                    {
+                        ctx.PartialPlanQueue.Enqueue(lastPartialPlanQueue.Dequeue());
+                    }
 
                     if (ctx.LastMTR.Count > 0)
                     {
@@ -203,8 +213,8 @@ namespace FluidHTN
 			                ctx.LastMTR.Clear();
 			                if (ctx.DebugMTR) ctx.LastMTRDebug.Clear();
 
-			                ctx.PlanStartTaskParent = null;
-			                ctx.PlanStartTaskChildIndex = 0;
+                            ctx.HasPausedPartialPlan = false;
+                            ctx.PartialPlanQueue.Clear();
 			                ctx.IsDirty = false;
 
 			                return;
@@ -229,9 +239,9 @@ namespace FluidHTN
 			                    ctx.LastMTR.Clear();
 			                    if (ctx.DebugMTR) ctx.LastMTRDebug.Clear();
 
-			                    ctx.PlanStartTaskParent = null;
-			                    ctx.PlanStartTaskChildIndex = 0;
-			                    ctx.IsDirty = false;
+                                ctx.HasPausedPartialPlan = false;
+                                ctx.PartialPlanQueue.Clear();
+                                ctx.IsDirty = false;
 
 			                    return;
 		                    }
@@ -276,8 +286,8 @@ namespace FluidHTN
                             ctx.LastMTR.Clear();
                             if (ctx.DebugMTR) ctx.LastMTRDebug.Clear();
 
-                            ctx.PlanStartTaskParent = null;
-                            ctx.PlanStartTaskChildIndex = 0;
+                            ctx.HasPausedPartialPlan = false;
+                            ctx.PartialPlanQueue.Clear();
                             ctx.IsDirty = false;
                         }
 

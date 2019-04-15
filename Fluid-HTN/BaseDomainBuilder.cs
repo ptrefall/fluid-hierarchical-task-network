@@ -185,7 +185,7 @@ namespace FluidHTN
 	        if (Pointer is IPrimitiveTask task)
 	        {
 		        var cond = new FuncCondition<T>(name, condition);
-		        task.AddExecutingConditions(cond);
+		        task.AddExecutingCondition(cond);
 	        }
 	        else
 	        {

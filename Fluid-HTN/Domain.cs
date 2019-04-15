@@ -20,7 +20,7 @@ namespace FluidHTN
 
         public void Add(ICompoundTask parent, ITask child)
         {
-            parent.AddChild(child);
+            parent.AddSubtask(child);
             child.Parent = parent;
         }
 
@@ -44,34 +44,48 @@ namespace FluidHTN
             // When this happens, we have to plan from the domain root (we're not
             // continuing the current plan), so that we're open for other plans to replace
             // the running partial plan.
-            if (ctx.PlanStartTaskParent != null && ctx.LastMTR.Count == 0)
+            if (ctx.HasPausedPartialPlan && ctx.LastMTR.Count == 0)
             {
-                var root = ctx.PlanStartTaskParent;
-                ctx.PlanStartTaskParent = null;
+                ctx.HasPausedPartialPlan = false;
+                while (ctx.PartialPlanQueue.Count > 0)
+                {
+                    var kvp = ctx.PartialPlanQueue.Dequeue();
+                    if (plan == null)
+                    {
+                        plan = kvp.Task.Decompose(ctx, kvp.TaskIndex);
+                    }
+                    else
+                    {
+                        var p = kvp.Task.Decompose(ctx, kvp.TaskIndex);
+                        while (p.Count > 0)
+                        {
+                            plan.Enqueue(p.Dequeue());
+                        }
+                    }
+                }
 
-                var startIndex = ctx.PlanStartTaskChildIndex;
-                ctx.PlanStartTaskChildIndex = 0;
-
-                plan = root.Decompose(ctx, startIndex);
+                // If we failed to continue the paused partial plan,
+                // then we have to start planning from the root.
                 if (plan == null || plan.Count == 0)
                 {
                     ctx.MethodTraversalRecord.Clear();
                     if (ctx.DebugMTR) ctx.MTRDebug.Clear();
 
                     Root.Decompose(ctx, 0);
-
-                    // If we found a new plan, let's make sure we remove any partial plan tracking, unless
-                    // the new plan replaced our partial plan tracking with a new partial plan.
-                    if (root != null && plan != null && plan.Count > 0 && ctx.PlanStartTaskParent == root)
-                    {
-                        ctx.PlanStartTaskParent = null;
-                        ctx.PlanStartTaskChildIndex = 0;
-                    }
                 }
             }
             else
             {
-                var lastPlanStartTaskParent = ctx.PlanStartTaskParent;
+                Queue<PartialPlanEntry> lastPartialPlanQueue = null;
+                if (ctx.HasPausedPartialPlan)
+                {
+                    ctx.HasPausedPartialPlan = false;
+                    lastPartialPlanQueue = new Queue<PartialPlanEntry>(); // TODO: Use a pool
+                    while (ctx.PartialPlanQueue.Count > 0)
+                    {
+                        lastPartialPlanQueue.Enqueue(ctx.PartialPlanQueue.Dequeue());
+                    }
+                }
 
                 // We only erase the MTR if we start from the root task of the domain.
                 ctx.MethodTraversalRecord.Clear();
@@ -79,13 +93,19 @@ namespace FluidHTN
 
                 plan = Root.Decompose(ctx, 0);
 
-                // If we found a new plan, let's make sure we remove any partial plan tracking, unless
-                // the new plan replaced our partial plan tracking with a new partial plan.
-                if (lastPlanStartTaskParent != null && plan != null && plan.Count > 0 &&
-                    ctx.PlanStartTaskParent == lastPlanStartTaskParent)
+                // If we failed to find a new plan, we have to restore the old plan,
+                // if it was a partial plan.
+                if (lastPartialPlanQueue != null)
                 {
-                    ctx.PlanStartTaskParent = null;
-                    ctx.PlanStartTaskChildIndex = 0;
+                    if(plan == null || plan.Count == 0)
+                    {
+                        ctx.HasPausedPartialPlan = true;
+                        ctx.PartialPlanQueue.Clear();
+                        while (lastPartialPlanQueue.Count > 0)
+                        {
+                            ctx.PartialPlanQueue.Enqueue(lastPartialPlanQueue.Dequeue());
+                        }
+                    }
                 }
             }
 

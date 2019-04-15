@@ -4,8 +4,8 @@ namespace FluidHTN.Compounds
 {
     public interface ICompoundTask : ITask
     {
-        List<ITask> Children { get; }
-        ICompoundTask AddChild(ITask child);
+        List<ITask> Subtasks { get; }
+        ICompoundTask AddSubtask(ITask child);
 
         /// <summary>
         ///     Decompose the task onto the tasks to process queue, mind it's depth first

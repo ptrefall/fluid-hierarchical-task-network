@@ -17,8 +17,8 @@ namespace FluidHTN.Contexts
 		public abstract bool DebugMTR { get; }
         public abstract Stack<string> DecompositionLog { get; set; }
 		public abstract bool LogDecomposition { get; }
-        public ICompoundTask PlanStartTaskParent { get; set; }
-        public int PlanStartTaskChildIndex { get; set; }
+        public Queue<PartialPlanEntry> PartialPlanQueue { get; set; } = new Queue<PartialPlanEntry>();
+        public bool HasPausedPartialPlan { get; set; } = false;
 
         public abstract byte[] WorldState { get; }
 
@@ -103,6 +103,9 @@ namespace FluidHTN.Contexts
 
         public void TrimToStackDepth(int[] stackDepth)
         {
+            if (ContextState == ContextState.Executing)
+                throw new Exception("Can not trim a context when in execution mode");
+
             for (var i = 0; i < stackDepth.Length; i++)
             {
                 var stack = WorldStateChangeStack[i];

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using FluidHTN;
 using FluidHTN.Contexts;
 
@@ -9,9 +10,14 @@ public enum MyWorldState : byte
     HasC
 }
 
-public class MyContext : BaseContext
+internal class MyContext : BaseContext
 {
     private byte[] _worldState = new byte[Enum.GetValues(typeof(MyWorldState)).Length];
+    public override List<string> MTRDebug { get; set; } = null;
+    public override List<string> LastMTRDebug { get; set; } = null;
+    public override bool DebugMTR { get; } = false;
+    public override Stack<string> DecompositionLog { get; set; } = null;
+    public override bool LogDecomposition { get; } = false;
     public override byte[] WorldState => _worldState;
 
     // Custom state
@@ -38,4 +44,16 @@ public class MyContext : BaseContext
     {
         SetState((int)state, (byte)(value ? 1 : 0), true, type);
     }
+
+    public byte GetState(MyWorldState state)
+    {
+        return GetState((int) state);
+    }
+}
+
+internal class MyDebugContext : MyContext
+{
+    public override bool DebugMTR { get; } = true;
+
+    public override bool LogDecomposition { get; } = true;
 }

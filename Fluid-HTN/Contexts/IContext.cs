@@ -12,6 +12,12 @@ namespace FluidHTN
         Executing
     }
 
+    public struct PartialPlanEntry
+    {
+        public ICompoundTask Task;
+        public int TaskIndex;
+    }
+
     public interface IContext
     {
         bool IsDirty { get; set; }
@@ -59,16 +65,11 @@ namespace FluidHTN
 		bool LogDecomposition { get; }
 
         /// <summary>
-        ///     The parent task of the partial split. The next child to be decomposed is marked by the
-        ///     PlanStartTaskChildIndex marker.
+        /// 
         /// </summary>
-        ICompoundTask PlanStartTaskParent { get; set; }
+        Queue<PartialPlanEntry> PartialPlanQueue { get; set; }
 
-        /// <summary>
-        ///     The marker for where to continue in a decompose-all compound task, like a Sequence task,
-        ///     after a partial split.
-        /// </summary>
-        int PlanStartTaskChildIndex { get; set; }
+        bool HasPausedPartialPlan { get; set; }
 
         byte[] WorldState { get; }
 

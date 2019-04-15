@@ -53,6 +53,12 @@
     <Compile Include="MyContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="FuncConditionTests.cs" />
+    <Compile Include="ActionEffectTests.cs" />
+    <Compile Include="FuncOperatorTests.cs" />
+    <Compile Include="BaseContextTests.cs" />
+    <Compile Include="PrimitiveTaskTests.cs" />
+    <Compile Include="SelectorTests.cs" />
+    <Compile Include="SequenceTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

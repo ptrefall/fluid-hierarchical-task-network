@@ -18,7 +18,7 @@ namespace FluidHTN.Compounds
                 return false;
 
             // Selector requires there to be children to successfully select from.
-            if (Children.Count == 0)
+            if (Subtasks.Count == 0)
                 return false;
 
             return true;
@@ -39,9 +39,9 @@ namespace FluidHTN.Compounds
             //var oldCtx = ctx.Duplicate();
             var oldStackDepth = ctx.GetWorldStateChangeDepth();
 
-            for (var taskIndex = startIndex; taskIndex < Children.Count; taskIndex++)
+            for (var taskIndex = startIndex; taskIndex < Subtasks.Count; taskIndex++)
             {
-                var task = Children[taskIndex];
+                var task = Subtasks[taskIndex];
 
                 if (task.IsValid(ctx) == false)
                 {
@@ -74,6 +74,20 @@ namespace FluidHTN.Compounds
                     }
 
                     while (result.Count > 0) Plan.Enqueue(result.Dequeue());
+
+                    if (ctx.HasPausedPartialPlan)
+                    {
+                        if (taskIndex < Subtasks.Count - 1)
+                        {
+                            ctx.PartialPlanQueue.Enqueue(new PartialPlanEntry()
+                            {
+                                Task = this,
+                                TaskIndex = taskIndex + 1,
+                            });
+                        }
+
+                        return Plan;
+                    }
                 }
                 else if (task is IPrimitiveTask primitiveTask)
                 {
@@ -82,8 +96,13 @@ namespace FluidHTN.Compounds
                 }
                 else if (task is PausePlanTask)
                 {
-                    ctx.PlanStartTaskParent = this;
-                    ctx.PlanStartTaskChildIndex = taskIndex + 1;
+                    ctx.HasPausedPartialPlan = true;
+                    ctx.PartialPlanQueue.Enqueue(new PartialPlanEntry()
+                    {
+                        Task = this,
+                        TaskIndex = taskIndex + 1,
+                    });
+
                     return Plan;
                 }
             }

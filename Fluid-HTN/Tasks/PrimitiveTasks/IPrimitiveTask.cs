@@ -17,7 +17,7 @@ namespace FluidHTN.PrimitiveTasks
 	    /// </summary>
 	    /// <param name="condition"></param>
 	    /// <returns></returns>
-	    ITask AddExecutingConditions(ICondition condition);
+	    ITask AddExecutingCondition(ICondition condition);
 
         IOperator Operator { get; }
         void SetOperator(IOperator action);

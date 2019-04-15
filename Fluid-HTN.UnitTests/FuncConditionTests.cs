@@ -34,5 +34,16 @@ namespace Fluid_HTN.UnitTests
 
             c.IsValid(null);
         }
+
+        [TestMethod]
+        public void IsValidCallsInternalFunctionPtr_ExpectedBehavior()
+        {
+            var ctx = new MyContext();
+            var c = new FuncCondition<MyContext>("Done == false", (context) => context.Done == false);
+
+            var result = c.IsValid(ctx);
+
+            Assert.AreEqual(true, result);
+        }
     }
 }

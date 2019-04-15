@@ -26,7 +26,7 @@ namespace FluidHTN.PrimitiveTasks
             return this;
         }
 
-        public ITask AddExecutingConditions(ICondition condition)
+        public ITask AddExecutingCondition(ICondition condition)
         {
 			ExecutingConditions.Add(condition);
 			return this;

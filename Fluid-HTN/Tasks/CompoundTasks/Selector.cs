@@ -17,8 +17,8 @@ namespace FluidHTN.Compounds
             if (base.IsValid(ctx) == false)
                 return false;
 
-            // Selector requires there to be children to successfully select from.
-            if (Children.Count == 0)
+            // Selector requires there to be at least one sub-task to successfully select from.
+            if (Subtasks.Count == 0)
                 return false;
 
             return true;
@@ -36,7 +36,7 @@ namespace FluidHTN.Compounds
         {
             Plan.Clear();
 
-            for (var taskIndex = startIndex; taskIndex < Children.Count; taskIndex++)
+            for (var taskIndex = startIndex; taskIndex < Subtasks.Count; taskIndex++)
             {
                 // If the last plan is still running, we need to check whether the
                 // new decomposition can possibly beat it.
@@ -51,12 +51,12 @@ namespace FluidHTN.Compounds
                         if (ctx.LastMTR[currentDecompositionIndex] < taskIndex)
                         {
                             ctx.MethodTraversalRecord.Add(-1);
-                            if(ctx.DebugMTR) ctx.MTRDebug.Add($"REPLAN FAIL {Children[taskIndex].Name}");
+                            if(ctx.DebugMTR) ctx.MTRDebug.Add($"REPLAN FAIL {Subtasks[taskIndex].Name}");
                             return null;
                         }
                     }
 
-                var task = Children[taskIndex];
+                var task = Subtasks[taskIndex];
 
                 if (task.IsValid(ctx) == false)
                     continue;
@@ -82,14 +82,15 @@ namespace FluidHTN.Compounds
                         continue;
                     }
 
-                    var i = result.Count;
                     while (result.Count > 0)
                     {
                         var res = result.Dequeue();
                         Plan.Enqueue(res);
-                        i--;
-                        if (i < 0)
-                            break;
+                    }
+
+                    if (ctx.HasPausedPartialPlan)
+                    {
+                        return Plan;
                     }
                 }
                 else if (task is IPrimitiveTask primitiveTask)
