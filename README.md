@@ -29,7 +29,7 @@ Conditions are boolean validators that can be used to validate the decomposition
 #### Operators
 Operators are the logic operation a primary task should perform during plan execution. Every time an operator updates, it returns a status whether it succeeded, failed or need to continue next tick.
 #### Effects
-Effects applies world state change during planning, and optionally during execution. There are three types of effects. 
+Effects apply world state change during planning, and optionally during execution. There are three types of effects. 
 * PlanOnly effects temporarily change the world state during planning, used as a prediciton about the future. Its change on the world state is removed before plan execution. This can be useful when we need other systems to set the world state during execution.
 * PlanAndExecute effects work just like PlanOnly effects, only that during execution, when the task they represent complete its execution successfully, the effect is re-applied. This is useful in the cases where you don't have other systems to set the world state during execution.
 * Permanent effects are applied during planning, but not removed from the world state before execution. This can be very useful when there's some state we change only during planning, e.g. do this thing three times then do this other thing.
