@@ -59,6 +59,7 @@
     <Compile Include="PrimitiveTaskTests.cs" />
     <Compile Include="SelectorTests.cs" />
     <Compile Include="SequenceTests.cs" />
+    <Compile Include="DomainTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
