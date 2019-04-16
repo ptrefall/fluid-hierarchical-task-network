@@ -18,12 +18,15 @@ namespace FluidHTN
         private ITask _currentTask;
         private readonly Queue<ITask> _plan = new Queue<ITask>();
 
+        // ========================================================= FIELDS
+        public TaskStatus LastStatus { get; protected set; }
+
         // ========================================================= CALLBACKS
 
-		/// <summary>
-		///		OnNewPlan(newPlan) is called when we found a new plan, and there is no
-		///		old plan to replace.
-		/// </summary>
+        /// <summary>
+        ///		OnNewPlan(newPlan) is called when we found a new plan, and there is no
+        ///		old plan to replace.
+        /// </summary>
         public Action<Queue<ITask>> OnNewPlan = null;
 
 		/// <summary>
@@ -90,7 +93,7 @@ namespace FluidHTN
         /// </summary>
         /// <param name="domain"></param>
         /// <param name="ctx"></param>
-        public void Tick(Domain<T> domain, T ctx)
+        public void Tick(Domain<T> domain, T ctx, bool allowImmediateReplan = true)
         {
             // Check whether state has changed or the current plan has finished running.
             // and if so, try to find a new plan.
@@ -246,21 +249,21 @@ namespace FluidHTN
 			                    return;
 		                    }
 
-                        var status = task.Operator.Update(ctx);
+                        LastStatus = task.Operator.Update(ctx);
 
                         // If the operation finished successfully, we set task to null so that we dequeue the next task in the plan the following tick.
-                        if (status == TaskStatus.Success)
+                        if (LastStatus == TaskStatus.Success)
                         {
-	                        OnCurrentTaskCompletedSuccessfully?.Invoke(task);
+                            OnCurrentTaskCompletedSuccessfully?.Invoke(task);
 
                             // All effects that is a result of running this task should be applied when the task is a success.
                             foreach (var effect in task.Effects)
                             {
-	                            if (effect.Type == EffectType.PlanAndExecute)
-	                            {
-									OnApplyEffect?.Invoke(effect);
-		                            effect.Apply(ctx);
-	                            }
+                                if (effect.Type == EffectType.PlanAndExecute)
+                                {
+                                    OnApplyEffect?.Invoke(effect);
+                                    effect.Apply(ctx);
+                                }
                             }
 
                             _currentTask = null;
@@ -271,14 +274,14 @@ namespace FluidHTN
 
                                 ctx.IsDirty = false;
 
-                                Tick(domain, ctx);
+                                if(allowImmediateReplan) Tick(domain, ctx, allowImmediateReplan: false);
                             }
                         }
 
                         // If the operation failed to finish, we need to fail the entire plan, so that we will replan the next tick.
-                        else if (status == TaskStatus.Failure)
+                        else if (LastStatus == TaskStatus.Failure)
                         {
-							OnCurrentTaskFailed?.Invoke(task);
+                            OnCurrentTaskFailed?.Invoke(task);
 
                             _currentTask = null;
                             _plan.Clear();
@@ -292,12 +295,16 @@ namespace FluidHTN
                         }
 
                         // Otherwise the operation isn't done yet and need to continue.
-						OnCurrentTaskContinues?.Invoke(task);
+                        else
+                        {
+                            OnCurrentTaskContinues?.Invoke(task);
+                        }
                     }
                     else
                     {
                         // This should not really happen if a domain is set up properly.
                         _currentTask = null;
+                        LastStatus = TaskStatus.Failure;
                     }
                 }
         }

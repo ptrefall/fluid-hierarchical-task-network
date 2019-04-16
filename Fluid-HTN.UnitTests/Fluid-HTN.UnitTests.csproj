@@ -60,6 +60,7 @@
     <Compile Include="SelectorTests.cs" />
     <Compile Include="SequenceTests.cs" />
     <Compile Include="DomainTests.cs" />
+    <Compile Include="PlannerTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
