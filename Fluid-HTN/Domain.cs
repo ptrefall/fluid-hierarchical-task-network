@@ -18,10 +18,13 @@ namespace FluidHTN
 
         // ========================================================= HIERARCHY HANDLING
 
-        public void Add(ICompoundTask parent, ITask child)
+        public void Add(ICompoundTask parent, ITask subtask)
         {
-            parent.AddSubtask(child);
-            child.Parent = parent;
+            if (parent == subtask)
+                throw new Exception("Parent-task and Sub-task can't be the same instance!");
+
+            parent.AddSubtask(subtask);
+            subtask.Parent = parent;
         }
 
         // ========================================================= PLANNING
