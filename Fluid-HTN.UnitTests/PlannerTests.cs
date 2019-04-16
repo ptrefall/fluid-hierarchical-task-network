@@ -152,7 +152,7 @@ namespace Fluid_HTN.UnitTests
             var ctx = new MyContext();
             ctx.Init();
             var planner = new Planner<MyContext>();
-            planner.OnNewPlan = (p) => { test = true; };
+            planner.OnNewPlan = (p) => { test = p.Count == 1; };
             var domain = new Domain<MyContext>("Test");
             var task1 = new Selector() { Name = "Test" };
             var task2 = new PrimitiveTask() { Name = "Sub-task" };
