@@ -182,7 +182,192 @@ namespace Fluid_HTN.UnitTests
         [TestMethod]
         public void PausePlan_ExpectedBehavior()
         {
+            var ctx = new MyContext();
+            ctx.Init();
+            var domain = new Domain<MyContext>("Test");
+            var task = new Sequence() { Name = "Test" };
+            domain.Add(domain.Root, task);
+            domain.Add(task, new PrimitiveTask() { Name = "Sub-task1" });
+            domain.Add(task, new PausePlanTask());
+            domain.Add(task, new PrimitiveTask() { Name = "Sub-task2" });
 
+            var plan = domain.FindPlan(ctx);
+
+            Assert.IsTrue(plan != null);
+            Assert.IsTrue(plan.Count == 1);
+            Assert.AreEqual("Sub-task1", plan.Peek().Name);
+            Assert.IsTrue(ctx.HasPausedPartialPlan);
+            Assert.IsTrue(ctx.PartialPlanQueue.Count == 1);
+            Assert.AreEqual(task, ctx.PartialPlanQueue.Peek().Task);
+            Assert.AreEqual(2, ctx.PartialPlanQueue.Peek().TaskIndex);
+        }
+
+        [TestMethod]
+        public void ContinuePausedPlan_ExpectedBehavior()
+        {
+            var ctx = new MyContext();
+            ctx.Init();
+
+            var domain = new Domain<MyContext>("Test");
+            var task = new Sequence() { Name = "Test" };
+            domain.Add(domain.Root, task);
+            domain.Add(task, new PrimitiveTask() { Name = "Sub-task1" });
+            domain.Add(task, new PausePlanTask());
+            domain.Add(task, new PrimitiveTask() { Name = "Sub-task2" });
+
+            var plan = domain.FindPlan(ctx);
+
+            Assert.IsTrue(plan != null);
+            Assert.IsTrue(plan.Count == 1);
+            Assert.AreEqual("Sub-task1", plan.Dequeue().Name);
+            Assert.IsTrue(ctx.HasPausedPartialPlan);
+            Assert.IsTrue(ctx.PartialPlanQueue.Count == 1);
+            Assert.AreEqual(task, ctx.PartialPlanQueue.Peek().Task);
+            Assert.AreEqual(2, ctx.PartialPlanQueue.Peek().TaskIndex);
+
+            plan = domain.FindPlan(ctx);
+
+            Assert.IsTrue(plan != null);
+            Assert.IsTrue(plan.Count == 1);
+            Assert.AreEqual("Sub-task2", plan.Peek().Name);
+        }
+
+        [TestMethod]
+        public void NestedPausePlan_ExpectedBehavior()
+        {
+            var ctx = new MyContext();
+            ctx.Init();
+
+            var domain = new Domain<MyContext>("Test");
+            var task = new Sequence() { Name = "Test" };
+            var task2 = new Selector() { Name = "Test2" };
+            var task3 = new Sequence() { Name = "Test3" };
+
+            domain.Add(domain.Root, task);
+            domain.Add(task, task2);
+            domain.Add(task, new PrimitiveTask() { Name = "Sub-task4" });
+
+            domain.Add(task2, task3);
+            domain.Add(task2, new PrimitiveTask() { Name = "Sub-task3" });
+
+            domain.Add(task3, new PrimitiveTask() { Name = "Sub-task1" });
+            domain.Add(task3, new PausePlanTask());
+            domain.Add(task3, new PrimitiveTask() { Name = "Sub-task2" });
+
+            var plan = domain.FindPlan(ctx);
+
+            Assert.IsTrue(plan != null);
+            Assert.IsTrue(plan.Count == 1);
+            Assert.AreEqual("Sub-task1", plan.Peek().Name);
+            Assert.IsTrue(ctx.HasPausedPartialPlan);
+            Assert.IsTrue(ctx.PartialPlanQueue.Count == 2);
+            var queueAsArray = ctx.PartialPlanQueue.ToArray();
+            Assert.AreEqual(task3, queueAsArray[0].Task);
+            Assert.AreEqual(2, queueAsArray[0].TaskIndex);
+            Assert.AreEqual(task, queueAsArray[1].Task);
+            Assert.AreEqual(1, queueAsArray[1].TaskIndex);
+        }
+
+        [TestMethod]
+        public void ContinueNestedPausePlan_ExpectedBehavior()
+        {
+            var ctx = new MyContext();
+            ctx.Init();
+            var domain = new Domain<MyContext>("Test");
+
+            var task = new Sequence() { Name = "Test" };
+            var task2 = new Selector() { Name = "Test2" };
+            var task3 = new Sequence() { Name = "Test3" };
+
+            domain.Add(domain.Root, task);
+            domain.Add(task, task2);
+            domain.Add(task, new PrimitiveTask() { Name = "Sub-task4" });
+
+            domain.Add(task2, task3);
+            domain.Add(task2, new PrimitiveTask() { Name = "Sub-task3" });
+
+            domain.Add(task3, new PrimitiveTask() { Name = "Sub-task1" });
+            domain.Add(task3, new PausePlanTask());
+            domain.Add(task3, new PrimitiveTask() { Name = "Sub-task2" });
+
+            var plan = domain.FindPlan(ctx);
+
+            Assert.IsTrue(plan != null);
+            Assert.IsTrue(plan.Count == 1);
+            Assert.AreEqual("Sub-task1", plan.Dequeue().Name);
+            Assert.IsTrue(ctx.HasPausedPartialPlan);
+            Assert.IsTrue(ctx.PartialPlanQueue.Count == 2);
+            var queueAsArray = ctx.PartialPlanQueue.ToArray();
+            Assert.AreEqual(task3, queueAsArray[0].Task);
+            Assert.AreEqual(2, queueAsArray[0].TaskIndex);
+            Assert.AreEqual(task, queueAsArray[1].Task);
+            Assert.AreEqual(1, queueAsArray[1].TaskIndex);
+
+            plan = domain.FindPlan(ctx);
+
+            Assert.IsTrue(plan != null);
+            Assert.IsTrue(plan.Count == 2);
+            Assert.AreEqual("Sub-task2", plan.Dequeue().Name);
+            Assert.AreEqual("Sub-task4", plan.Dequeue().Name);
+        }
+
+        [TestMethod]
+        public void ContinueMultipleNestedPausePlan_ExpectedBehavior()
+        {
+            var ctx = new MyContext();
+            ctx.Init();
+            var domain = new Domain<MyContext>("Test");
+
+            var task = new Sequence() { Name = "Test" };
+            var task2 = new Selector() { Name = "Test2" };
+            var task3 = new Sequence() { Name = "Test3" };
+            var task4 = new Sequence() { Name = "Test4" };
+
+            domain.Add(domain.Root, task);
+
+            domain.Add(task3, new PrimitiveTask() { Name = "Sub-task1" });
+            domain.Add(task3, new PausePlanTask());
+            domain.Add(task3, new PrimitiveTask() { Name = "Sub-task2" });
+
+            domain.Add(task2, task3);
+            domain.Add(task2, new PrimitiveTask() { Name = "Sub-task3" });
+
+            domain.Add(task4, new PrimitiveTask() { Name = "Sub-task5" });
+            domain.Add(task4, new PausePlanTask());
+            domain.Add(task4, new PrimitiveTask() { Name = "Sub-task6" });
+
+            domain.Add(task, task2);
+            domain.Add(task, new PrimitiveTask() { Name = "Sub-task4" });
+            domain.Add(task, task4);
+            domain.Add(task, new PrimitiveTask() { Name = "Sub-task7" });
+
+            var plan = domain.FindPlan(ctx);
+
+            Assert.IsTrue(plan != null);
+            Assert.IsTrue(plan.Count == 1);
+            Assert.AreEqual("Sub-task1", plan.Dequeue().Name);
+            Assert.IsTrue(ctx.HasPausedPartialPlan);
+            Assert.IsTrue(ctx.PartialPlanQueue.Count == 2);
+            var queueAsArray = ctx.PartialPlanQueue.ToArray();
+            Assert.AreEqual(task3, queueAsArray[0].Task);
+            Assert.AreEqual(2, queueAsArray[0].TaskIndex);
+            Assert.AreEqual(task, queueAsArray[1].Task);
+            Assert.AreEqual(1, queueAsArray[1].TaskIndex);
+
+            plan = domain.FindPlan(ctx);
+
+            Assert.IsTrue(plan != null);
+            Assert.IsTrue(plan.Count == 3);
+            Assert.AreEqual("Sub-task2", plan.Dequeue().Name);
+            Assert.AreEqual("Sub-task4", plan.Dequeue().Name);
+            Assert.AreEqual("Sub-task5", plan.Dequeue().Name);
+
+            plan = domain.FindPlan(ctx);
+
+            Assert.IsTrue(plan != null);
+            Assert.IsTrue(plan.Count == 2);
+            Assert.AreEqual("Sub-task6", plan.Dequeue().Name);
+            Assert.AreEqual("Sub-task7", plan.Dequeue().Name);
         }
     }
 }
