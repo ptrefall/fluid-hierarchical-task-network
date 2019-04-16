@@ -144,5 +144,25 @@ namespace Fluid_HTN.UnitTests
             Assert.IsTrue(currentTask != null);
             Assert.IsTrue(planner.LastStatus == TaskStatus.Continue);
         }
+
+        [TestMethod]
+        public void OnNewPlan_ExpectedBehavior()
+        {
+            bool test = false;
+            var ctx = new MyContext();
+            ctx.Init();
+            var planner = new Planner<MyContext>();
+            planner.OnNewPlan = (p) => { test = true; };
+            var domain = new Domain<MyContext>("Test");
+            var task1 = new Selector() { Name = "Test" };
+            var task2 = new PrimitiveTask() { Name = "Sub-task" };
+            task2.SetOperator(new FuncOperator<MyContext>((context) => TaskStatus.Continue));
+            domain.Add(domain.Root, task1);
+            domain.Add(task1, task2);
+
+            planner.Tick(domain, ctx);
+
+            Assert.IsTrue(test);
+        }
     }
 }
