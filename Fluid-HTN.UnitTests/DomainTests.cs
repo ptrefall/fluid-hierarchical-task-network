@@ -178,5 +178,11 @@ namespace Fluid_HTN.UnitTests
             Assert.IsTrue(ctx.MethodTraversalRecord.Count == 1);
             Assert.IsTrue(ctx.MethodTraversalRecord[0] == ctx.LastMTR[0]);
         }
+
+        [TestMethod]
+        public void PausePlan_ExpectedBehavior()
+        {
+
+        }
     }
 }
