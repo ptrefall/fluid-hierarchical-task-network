@@ -459,9 +459,9 @@ OnNewPlan(newPlan) is called when we found a new plan, and there is no old plan 
 ```C#
 public Action<Queue<ITask>> OnNewPlan = null;
 ```
-OnReplacePlan(oldPlan, newPlan) is called when we're about to replace the current plan with a new plan.
+OnReplacePlan(oldPlan, currentTask, newPlan) is called when we're about to replace the current plan with a new plan.
 ```C#
-public Action<Queue<ITask>, Queue<ITask>> OnReplacePlan = null;
+public Action<Queue<ITask>, ITask, Queue<ITask>> OnReplacePlan = null;
 ```
 OnNewTask(task) is called after we popped a new task off the current plan.
 ```C#
