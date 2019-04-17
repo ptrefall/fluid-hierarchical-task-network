@@ -30,10 +30,10 @@ namespace FluidHTN
         public Action<Queue<ITask>> OnNewPlan = null;
 
 		/// <summary>
-		///		OnReplacePlan(oldPlan, newPlan) is called when we're about to replace the
+		///		OnReplacePlan(oldPlan, currentTask, newPlan) is called when we're about to replace the
 		///		current plan with a new plan.
 		/// </summary>
-        public Action<Queue<ITask>, Queue<ITask>> OnReplacePlan = null;
+        public Action<Queue<ITask>, ITask, Queue<ITask>> OnReplacePlan = null;
 
 		/// <summary>
 		///		OnNewTask(task) is called after we popped a new task off the current plan.
@@ -140,9 +140,9 @@ namespace FluidHTN
                 var newPlan = domain.FindPlan(ctx);
                 if (newPlan != null)
                 {
-	                if (OnReplacePlan != null && _plan.Count > 0)
+	                if (OnReplacePlan != null && (_plan.Count > 0 || _currentTask != null))
 	                {
-		                OnReplacePlan.Invoke(_plan, newPlan);
+		                OnReplacePlan.Invoke(_plan, _currentTask, newPlan);
 	                }
 					else if (OnNewPlan != null && _plan.Count == 0)
 	                {
