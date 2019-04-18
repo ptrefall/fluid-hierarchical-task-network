@@ -3,7 +3,7 @@ A simple HTN planner based around the principles of the Builder pattern, inspire
 
 ## Features
 * Comes with a Domain Builder to simplify the design of code-oriented HTN domains.
-* Fluid HTN is a total-order forward decomposition planner, as described by Troy Humphrey in his [GameAIPro article](http://www.gameaipro.com/GameAIPro/GameAIPro_Chapter12_Exploring_HTN_Planners_through_Example.pdf).
+* Fluid HTN is a total-order forward decomposition planner, as described by Troy Humphreys in his [GameAIPro article](http://www.gameaipro.com/GameAIPro/GameAIPro_Chapter12_Exploring_HTN_Planners_through_Example.pdf).
 * Partial planning
 * Domain splicing
 * Easy to extend with new features, as demonstrated in the [extension library](https://github.com/ptrefall/fluid-hierarchial-task-network-ext).
@@ -13,7 +13,7 @@ A simple HTN planner based around the principles of the Builder pattern, inspire
 ## Getting started
 ### What is Hierarchical Task Network planning
 It is highly recommended to read and watch the following resources on HTN planning before using this planner.
-* [Troy Humphrey's GameAIPro article](http://www.gameaipro.com/GameAIPro/GameAIPro_Chapter12_Exploring_HTN_Planners_through_Example.pdf)
+* [Troy Humphreys' GameAIPro article](http://www.gameaipro.com/GameAIPro/GameAIPro_Chapter12_Exploring_HTN_Planners_through_Example.pdf)
 * [AI and Games' Horizon Zero Dawn coverage](https://www.youtube.com/watch?v=XxuSFBVQULY)
 * [AI and Games' Transformers coverage](https://www.youtube.com/watch?v=kXm467TFTcY)
 * [AiGameDev's Planning in games overview](http://aigamedev.com/open/review/planning-in-games/)
