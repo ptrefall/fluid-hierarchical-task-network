@@ -39,13 +39,13 @@ namespace FluidHTN
         // ========================================================= HIERARCHY HANDLING
 
         /// <summary>
-        ///     Compound tasks are where HTN get their “hierarchical” nature. You can think of compound task as
-        ///     a high level task that has multiple ways of being accomplished. There are primarily two types of
-        ///     compound tasks. Selectors and Sequencers. A Selector must be able to decompose a single sub-task,
-        ///     while a Sequence must be able to decompose all of its sub-tasks successfully for itself to have
-        ///     decomposed successfully. There is nothing stopping you from extending this toolset with RandomSelect,
-        ///     UtilitySelect, etc. These tasks are decomposed until we're left with only Primitive Tasks, which represent
-        ///     a final plan.
+        ///     Compound tasks are where HTN get their “hierarchical” nature. You can think of a compound task as 
+        ///     a high level task that has multiple ways of being accomplished. There are primarily two types of 
+        ///     compound tasks. Selectors and Sequencers. A Selector must be able to decompose a single sub-task, 
+        ///     while a Sequence must be able to decompose all its sub-tasks successfully for itself to have decomposed 
+        ///     successfully. There is nothing stopping you from extending this toolset with RandomSelect, UtilitySelect,
+        ///     etc. These tasks are decomposed until we're left with only Primitive Tasks, which represent a final plan. 
+        ///     Compound tasks are comprised of a set of subtasks and a set of conditions.
         ///     http://www.gameaipro.com/GameAIPro/GameAIPro_Chapter12_Exploring_HTN_Planners_through_Example.pdf
         /// </summary>
         /// <typeparam name="P">The type of compound task</typeparam>
@@ -69,10 +69,9 @@ namespace FluidHTN
         }
 
         /// <summary>
-        ///     There are two types of tasks that are used to build a HTN, called compound tasks and primitive tasks.
-        ///     Primitive tasks represent a single step that can be performed by our NPC.  A set of primitive tasks
-        ///     is the plan that we are ultimately getting out of the HTN.Primitive tasks are comprised of an operator
-        ///     and sets of effects and conditions.
+        ///     Primitive tasks represent a single step that can be performed by our AI. A set of primitive tasks is 
+        ///     the plan that we are ultimately getting out of the HTN. Primitive tasks are comprised of an operator, 
+        ///     a set of effects, a set of conditions and a set of executing conditions.
         ///     http://www.gameaipro.com/GameAIPro/GameAIPro_Chapter12_Exploring_HTN_Planners_through_Example.pdf
         /// </summary>
         /// <typeparam name="P">The type of primitive task</typeparam>

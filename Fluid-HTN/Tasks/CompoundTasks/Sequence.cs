@@ -17,7 +17,7 @@ namespace FluidHTN.Compounds
             if (base.IsValid(ctx) == false)
                 return false;
 
-            // Selector requires there to be children to successfully select from.
+            // Selector requires there to be subtasks to successfully select from.
             if (Subtasks.Count == 0)
                 return false;
 

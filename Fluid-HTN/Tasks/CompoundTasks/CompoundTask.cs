@@ -21,9 +21,9 @@ namespace FluidHTN.Compounds
             return this;
         }
 
-        public ICompoundTask AddSubtask(ITask child)
+        public ICompoundTask AddSubtask(ITask subtask)
         {
-            Subtasks.Add(child);
+            Subtasks.Add(subtask);
             return this;
         }
 
