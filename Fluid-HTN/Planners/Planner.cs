@@ -114,25 +114,22 @@ namespace FluidHTN
                     if (ctx.HasPausedPartialPlan)
                     {
                         ctx.HasPausedPartialPlan = false;
-                        lastPartialPlanQueue = new Queue<PartialPlanEntry>(); // TODO: Use a pool
+                        lastPartialPlanQueue = ctx.Factory.CreateQueue<PartialPlanEntry>();
                         while (ctx.PartialPlanQueue.Count > 0)
                         {
                             lastPartialPlanQueue.Enqueue(ctx.PartialPlanQueue.Dequeue());
                         }
-                    }
 
-                    // We also need to ensure that the last mtr is up to date with the on-going MTR of the partial plan,
-                    // so that any new potential plan that is decomposing from the domain root has to beat the currently
-                    // running partial plan.
-                    if (lastPartialPlanQueue != null)
-                    {
+                        // We also need to ensure that the last mtr is up to date with the on-going MTR of the partial plan,
+                        // so that any new potential plan that is decomposing from the domain root has to beat the currently
+                        // running partial plan.
                         ctx.LastMTR.Clear();
                         foreach (var record in ctx.MethodTraversalRecord) ctx.LastMTR.Add(record);
 
                         if (ctx.DebugMTR)
                         {
-	                        ctx.LastMTRDebug.Clear();
-	                        foreach (var record in ctx.MTRDebug) ctx.LastMTRDebug.Add(record);
+                            ctx.LastMTRDebug.Clear();
+                            foreach (var record in ctx.MTRDebug) ctx.LastMTRDebug.Add(record);
                         }
                     }
                 }
@@ -181,6 +178,7 @@ namespace FluidHTN
                     {
                         ctx.PartialPlanQueue.Enqueue(lastPartialPlanQueue.Dequeue());
                     }
+                    ctx.Factory.FreeQueue(ref lastPartialPlanQueue);
 
                     if (ctx.LastMTR.Count > 0)
                     {

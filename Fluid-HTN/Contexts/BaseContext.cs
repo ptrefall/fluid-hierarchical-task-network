@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using FluidHTN.Compounds;
+using FluidHTN.Factory;
 
 namespace FluidHTN.Contexts
 {
@@ -10,6 +10,7 @@ namespace FluidHTN.Contexts
 
         public bool IsDirty { get; set; }
         public ContextState ContextState { get; set; }
+        public abstract IFactory Factory { get; set; }
         public List<int> MethodTraversalRecord { get; set; } = new List<int>();
         public List<int> LastMTR { get; } = new List<int>();
         public abstract List<string> MTRDebug { get; set; }
@@ -83,9 +84,9 @@ namespace FluidHTN.Contexts
 
         // ========================================================= STATE STACK HANDLING
 
-        public int[] GetWorldStateChangeDepth()
+        public int[] GetWorldStateChangeDepth(IFactory factory)
         {
-            var stackDepth = new int[WorldStateChangeStack.Length]; // TODO: These should be pooled.
+            var stackDepth = factory.CreateArray<int>(WorldStateChangeStack.Length);
             for (var i = 0; i < WorldStateChangeStack.Length; i++) stackDepth[i] = WorldStateChangeStack[i]?.Count ?? 0;
 
             return stackDepth;

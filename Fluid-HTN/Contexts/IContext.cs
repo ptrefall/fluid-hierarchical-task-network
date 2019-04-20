@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using FluidHTN.Compounds;
+using FluidHTN.Factory;
 
 namespace FluidHTN
 {
@@ -22,6 +23,8 @@ namespace FluidHTN
     {
         bool IsDirty { get; set; }
         ContextState ContextState { get; set; }
+
+        IFactory Factory { get; set; }
 
         /// <summary>
         ///     The Method Traversal Record is used while decomposing a domain and
@@ -91,6 +94,6 @@ namespace FluidHTN
         byte GetState(int state);
         void SetState(int state, byte value, bool setAsDirty = true, EffectType e = EffectType.Permanent);
 
-        int[] GetWorldStateChangeDepth();
+        int[] GetWorldStateChangeDepth(IFactory factory);
     }
 }

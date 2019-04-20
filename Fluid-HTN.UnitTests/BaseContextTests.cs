@@ -122,11 +122,11 @@ namespace Fluid_HTN.UnitTests
             ctx.Init();
             ctx.ContextState = ContextState.Executing;
             ctx.SetState(MyWorldState.HasB, true, EffectType.Permanent);
-            var changeDepthExecuting = ctx.GetWorldStateChangeDepth();
+            var changeDepthExecuting = ctx.GetWorldStateChangeDepth(ctx.Factory);
 
             ctx.ContextState = ContextState.Planning;
             ctx.SetState(MyWorldState.HasB, true, EffectType.Permanent);
-            var changeDepthPlanning = ctx.GetWorldStateChangeDepth();
+            var changeDepthPlanning = ctx.GetWorldStateChangeDepth(ctx.Factory);
 
             Assert.AreEqual(ctx.WorldStateChangeStack.Length, changeDepthExecuting.Length);
             Assert.AreEqual(0, changeDepthExecuting[(int)MyWorldState.HasA]);
@@ -175,7 +175,7 @@ namespace Fluid_HTN.UnitTests
             ctx.SetState(MyWorldState.HasA, true, EffectType.PlanAndExecute);
             ctx.SetState(MyWorldState.HasB, true, EffectType.Permanent);
             ctx.SetState(MyWorldState.HasC, true, EffectType.PlanOnly);
-            var stackDepth = ctx.GetWorldStateChangeDepth();
+            var stackDepth = ctx.GetWorldStateChangeDepth(ctx.Factory);
 
             ctx.SetState(MyWorldState.HasA, false, EffectType.PlanAndExecute);
             ctx.SetState(MyWorldState.HasB, false, EffectType.Permanent);
@@ -195,7 +195,7 @@ namespace Fluid_HTN.UnitTests
 
             ctx.Init();
             ctx.ContextState = ContextState.Executing;
-            var stackDepth = ctx.GetWorldStateChangeDepth();
+            var stackDepth = ctx.GetWorldStateChangeDepth(ctx.Factory);
             ctx.TrimToStackDepth(stackDepth);
         }
     }

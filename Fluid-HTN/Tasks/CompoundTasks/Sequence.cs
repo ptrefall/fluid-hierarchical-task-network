@@ -37,7 +37,7 @@ namespace FluidHTN.Compounds
             Plan.Clear();
 
             //var oldCtx = ctx.Duplicate();
-            var oldStackDepth = ctx.GetWorldStateChangeDepth();
+            var oldStackDepth = ctx.GetWorldStateChangeDepth(ctx.Factory);
 
             for (var taskIndex = startIndex; taskIndex < Subtasks.Count; taskIndex++)
             {
@@ -61,6 +61,7 @@ namespace FluidHTN.Compounds
                         Plan.Clear();
                         //ctx.Copy( oldCtx );
                         ctx.TrimToStackDepth(oldStackDepth);
+                        ctx.Factory.FreeArray(ref oldStackDepth);
                         return null;
                     }
 
@@ -86,6 +87,7 @@ namespace FluidHTN.Compounds
                             });
                         }
 
+                        ctx.Factory.FreeArray(ref oldStackDepth);
                         return Plan;
                     }
                 }
@@ -103,10 +105,12 @@ namespace FluidHTN.Compounds
                         TaskIndex = taskIndex + 1,
                     });
 
+                    ctx.Factory.FreeArray(ref oldStackDepth);
                     return Plan;
                 }
             }
 
+            ctx.Factory.FreeArray(ref oldStackDepth);
             return Plan;
         }
     }

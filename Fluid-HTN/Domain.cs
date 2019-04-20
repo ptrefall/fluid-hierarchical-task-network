@@ -88,7 +88,7 @@ namespace FluidHTN
                 if (ctx.HasPausedPartialPlan)
                 {
                     ctx.HasPausedPartialPlan = false;
-                    lastPartialPlanQueue = new Queue<PartialPlanEntry>(); // TODO: Use a pool
+                    lastPartialPlanQueue = ctx.Factory.CreateQueue<PartialPlanEntry>();
                     while (ctx.PartialPlanQueue.Count > 0)
                     {
                         lastPartialPlanQueue.Enqueue(ctx.PartialPlanQueue.Dequeue());
@@ -113,6 +113,7 @@ namespace FluidHTN
                         {
                             ctx.PartialPlanQueue.Enqueue(lastPartialPlanQueue.Dequeue());
                         }
+                        ctx.Factory.FreeQueue(ref lastPartialPlanQueue);
                     }
                 }
             }
