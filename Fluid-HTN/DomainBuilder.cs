@@ -1,4 +1,6 @@
-﻿namespace FluidHTN
+﻿using FluidHTN.Factory;
+
+namespace FluidHTN
 {
     /// <summary>
     ///     A simple domain builder for easy use when one just need the core functionality
@@ -11,7 +13,11 @@
     {
         // ========================================================= CONSTRUCTION
 
-        public DomainBuilder(string domainName) : base(domainName)
+        public DomainBuilder(string domainName) : base(domainName, new DefaultFactory())
+        {
+        }
+
+        public DomainBuilder(string domainName, IFactory factory) : base(domainName, factory)
         {
         }
     }

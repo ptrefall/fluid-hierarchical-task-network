@@ -17,11 +17,25 @@ namespace Fluid_HTN.UnitTests
             var builder = new DomainBuilder<MyContext>("Test");
 
             // Act
+            var ptr = builder.Pointer;
             var domain = builder.Build();
 
             Assert.IsTrue(domain.Root != null);
-            Assert.IsTrue(builder.Pointer == domain.Root);
+            Assert.IsTrue(ptr == domain.Root);
             Assert.AreEqual("Test", domain.Root.Name);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(NullReferenceException), AllowDerivedTypes = false)]
+        public void BuildInvalidatesPointer_ForgotEnd()
+        {
+            // Arrange
+            var builder = new DomainBuilder<MyContext>("Test");
+
+            // Act
+            var domain = builder.Build();
+
+            Assert.IsTrue(builder.Pointer == domain.Root);
         }
 
         [TestMethod]

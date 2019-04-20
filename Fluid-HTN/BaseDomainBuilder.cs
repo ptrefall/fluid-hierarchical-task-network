@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using FluidHTN.Compounds;
 using FluidHTN.Conditions;
 using FluidHTN.Effects;
+using FluidHTN.Factory;
 using FluidHTN.Operators;
 using FluidHTN.PrimitiveTasks;
 
@@ -15,13 +16,16 @@ namespace FluidHTN
         // ========================================================= FIELDS
 
         protected readonly Domain<T> _domain;
-        protected readonly List<ITask> _pointers = new List<ITask>();
+        protected List<ITask> _pointers;
+        protected readonly IFactory _factory;
 
         // ========================================================= CONSTRUCTION
 
-        public BaseDomainBuilder(string domainName)
+        public BaseDomainBuilder(string domainName, IFactory factory)
         {
+            _factory = factory;
             _domain = new Domain<T>(domainName);
+            _pointers = _factory.CreateList<ITask>();
             _pointers.Add(_domain.Root);
         }
 
@@ -292,6 +296,7 @@ namespace FluidHTN
         /// <returns></returns>
         public Domain<T> Build()
         {
+            _factory.FreeList(ref _pointers);
             return _domain;
         }
     }
