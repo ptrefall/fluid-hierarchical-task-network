@@ -7,6 +7,7 @@ A simple HTN planner based around the principles of the Builder pattern, inspire
 * Partial planning
 * Domain splicing
 * Easy to extend with new features, as demonstrated in the [extension library](https://github.com/ptrefall/fluid-hierarchial-task-network-ext).
+* Uses a Factory interface internally to create and free arrays/collections, allowing the user to add pooling, or other memory management schemes.
 * Comes with Unity Package Module definitions for seamless integration into Unity projects.
 * 137 unit tests
 
@@ -41,6 +42,7 @@ using System.Collections.Generic;
 using FluidHTN;
 using FluidHTN.Compounds;
 using FluidHTN.Contexts;
+using FluidHTN.Factory;
 
 public enum MyWorldState : byte
 {
@@ -56,10 +58,10 @@ public class MyContext : BaseContext
     public override bool DebugMTR { get; } = false;
     public override Stack<string> DecompositionLog { get; set; } = null;
     public override bool LogDecomposition { get; } = false;
-        
+    
+    public override IFactory Factory { get; set; } = new DefaultFactory();
     private byte[] _worldState = new byte[Enum.GetValues(typeof(MyWorldState)).Length];
     public override byte[] WorldState => _worldState;
-    
     
     // Custom state
     public bool Done { get; set; } = false;
@@ -426,6 +428,9 @@ public DB RandomSelect(string name)
     return CompoundTask<RandomSelector>(name);
 }
 ```
+#### Custom factory
+When we implemented MyContext earlier, you might have noticed that we did an override to implement Factory, and set it to DefaultFactory. This is where you're free to implement your own factory methods, like PooledFactory, and have Fluid HTN use it via the IFactory interface. DefaultFactory will just do normal new operations and set the collection reference to null when the Free* API is called. The Create* and Free* API of the IFactory is used internally with the support of pooling in mind.
+
 ### Debugging the planner
 Sometimes we need to see what's going on under the hood to understand why the planner ends up with the plans we are given.
 We have some debug options in our context definition, as mentioned earlier. We can set LogDecomposition to true. What this does, is it allows our planning procedure to store information into our context about condition success and failure during decomposition. This can be a big help in understanding how the domain was decomposed into a plan. We can then read out the logs from DecompositionLog in our context. BaseContext will attempt to instantiate the debug collections automatically if the debug flags are set to true when its Init() function is called.
