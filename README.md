@@ -214,11 +214,11 @@ var domain = new MyDomainBuilder("Trunk Thumper")
     .End()
     .Build();
 ```
-Let us look at how parts of this was made. First, we write our custom Domain Builder class.
+Let us look at how parts of this was made. First, we write our custom Domain Builder class. We instantiate a DefaultFactory into base, but we'll cover custom factory implementations later.
 ```C#
 public class MyDomainBuilder : BaseDomainBuilder<MyDomainBuilder, MyContext>
 {
-    public MyDomainBuilder(string domainName) : base(domainName)
+    public MyDomainBuilder(string domainName) : base(domainName, new DefaultFactory())
     {
     }
 }
@@ -429,7 +429,7 @@ public DB RandomSelect(string name)
 }
 ```
 #### Custom factory
-When we implemented MyContext earlier, you might have noticed that we did an override to implement Factory, and set it to DefaultFactory. This is where you're free to implement your own factory methods, like PooledFactory, and have Fluid HTN use it via the IFactory interface. DefaultFactory will just do normal new operations and set the collection reference to null when the Free* API is called. The Create* and Free* API of the IFactory is used internally with the support of pooling in mind.
+When we implemented MyContext earlier, you might have noticed that we did an override to implement Factory, and set it to DefaultFactory. We also sent a DefaultFactory to BaseDomainBuilder when we looked at extending domain builders. This is where you're free to implement your own factory methods, like PooledFactory, and have Fluid HTN use it via the IFactory interface. DefaultFactory will just do normal new operations and set the collection reference to null when the Free* API is called. The Create* and Free* API of the IFactory is used internally with the support of pooling in mind, but we leave it up to the user how they prefer to do this.
 
 ### Debugging the planner
 Sometimes we need to see what's going on under the hood to understand why the planner ends up with the plans we are given.
