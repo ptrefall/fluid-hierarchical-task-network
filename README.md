@@ -6,7 +6,7 @@ A simple HTN planner based around the principles of the Builder pattern, inspire
 * Fluid HTN is a total-order forward decomposition planner, as described by Troy Humphreys in his [GameAIPro article](http://www.gameaipro.com/GameAIPro/GameAIPro_Chapter12_Exploring_HTN_Planners_through_Example.pdf).
 * Partial planning
 * Domain splicing
-* Easy to extend with new features, as demonstrated in the [extension library](https://github.com/ptrefall/fluid-hierarchial-task-network-ext).
+* Easy to extend with new features, as demonstrated in the [extension library](https://github.com/ptrefall/fluid-hierarchical-task-network-ext).
 * Uses a Factory interface internally to create and free arrays/collections, allowing the user to add pooling, or other memory management schemes.
 * Comes with Unity Package Module definitions for seamless integration into Unity projects.
 * 137 unit tests
@@ -506,7 +506,7 @@ Your Unity project should now have integrated Fluid HTN via the Package Manager,
 If preferred, the FluidHTN folder of the planner can also be copy/pasted somewhere into your Unity project's Assets folder.
 
 ## Extensions
-The [Fluid HTN Extension library](https://github.com/ptrefall/fluid-hierarchial-task-network-ext) adds extended selector implementations, like Random Select and Utility Select. There is also a JSON serialization of HTN Domains in the works.
+The [Fluid HTN Extension library](https://github.com/ptrefall/fluid-hierarchical-task-network-ext) adds extended selector implementations, like Random Select and Utility Select. There is also a JSON serialization of HTN Domains in the works.
 
 ## Examples
 Example projects have been pulled into their own repositories, as not to clutter the core library. They are still work in progress, so please check back here to see when they become available.
