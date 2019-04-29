@@ -1,4 +1,4 @@
-# Fluid Hierarchical Task Network
+![Fluid Hierarchical Task Network](https://i.imgur.com/wxCpIKP.png)
 A simple HTN planner based around the principles of the Builder pattern, inspired by [Fluid Behaviour Tree](https://github.com/ashblue/fluid-behavior-tree).
 
 ## Features
