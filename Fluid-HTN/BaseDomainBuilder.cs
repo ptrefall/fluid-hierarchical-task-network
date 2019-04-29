@@ -296,6 +296,9 @@ namespace FluidHTN
         /// <returns></returns>
         public Domain<T> Build()
         {
+            if(Pointer != _domain.Root)
+                throw new Exception($"The domain definition lacks one or more End() statements. Pointer is '{Pointer.Name}', but expected '{_domain.Root.Name}'.");
+
             _factory.FreeList(ref _pointers);
             return _domain;
         }

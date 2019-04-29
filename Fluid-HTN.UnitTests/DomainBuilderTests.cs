@@ -67,6 +67,18 @@ namespace Fluid_HTN.UnitTests
         }
 
         [TestMethod]
+        [ExpectedException(typeof(Exception), AllowDerivedTypes = false)]
+        public void SelectorBuild_ForgotEnd()
+        {
+            // Arrange
+            var builder = new DomainBuilder<MyContext>("Test");
+
+            // Act
+            builder.Select("select test");
+            var domain = builder.Build();
+        }
+
+        [TestMethod]
         public void Selector_CompoundTask()
         {
             // Arrange
