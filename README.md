@@ -11,6 +11,9 @@ A simple HTN planner based around the principles of the Builder pattern, inspire
 * Comes with Unity Package Module definitions for seamless integration into Unity projects.
 * 137 unit tests
 
+## Support
+Join the [discord channel](https://discord.gg/u45nmb) to share your experience and get support on the usage of Fluid HTN.
+
 ## Getting started
 ### What is Hierarchical Task Network planning
 It is highly recommended to read and watch the following resources on HTN planning before using this planner.
