@@ -512,7 +512,8 @@ If preferred, the FluidHTN folder of the planner can also be copy/pasted somewhe
 The [Fluid HTN Extension library](https://github.com/ptrefall/fluid-hierarchical-task-network-ext) adds extended selector implementations, like Random Select and Utility Select. There is also a JSON serialization of HTN Domains in the works.
 
 ## Examples
-Example projects have been pulled into their own repositories, as not to clutter the core library. They are still work in progress, so please check back here to see when they become available.
+Example projects have been pulled into their own repositories, as not to clutter the core library. More examples are still in progress, so please check back here to see when they become available.
+* [Fluid Text Adventure](https://github.com/ptrefall/fluid-text-adventure)
 
 ## TODO
 * Improve documentation
