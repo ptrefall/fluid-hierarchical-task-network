@@ -12,7 +12,7 @@ A simple HTN planner based around the principles of the Builder pattern, inspire
 * 137 unit tests
 
 ## Support
-Join the [discord channel](https://discord.gg/u45nmb) to share your experience and get support on the usage of Fluid HTN.
+Join the [discord channel](https://discord.gg/MuccnAz) to share your experience and get support on the usage of Fluid HTN.
 
 ## Getting started
 ### What is Hierarchical Task Network planning
