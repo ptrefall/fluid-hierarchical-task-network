@@ -1,5 +1,5 @@
 ![Fluid Hierarchical Task Network](https://i.imgur.com/xKfIV0f.png)
-A simple HTN planner based around the principles of the Builder pattern, inspired by [Fluid Behaviour Tree](https://github.com/ashblue/fluid-behavior-tree).
+A simple HTN planner based around the principles of the Builder pattern, inspired by [Fluid Behaviour Tree](https://github.com/ashblue/fluid-behavior-tree). Please expand this readme if you're on mobile for more information.
 
 ## Features
 * Comes with a Domain Builder to simplify the design of code-oriented HTN domains.
