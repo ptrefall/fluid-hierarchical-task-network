@@ -7,7 +7,7 @@ namespace FluidHTN.Compounds
     {
         // ========================================================= FIELDS
 
-        private readonly Queue<ITask> Plan = new Queue<ITask>();
+        protected readonly Queue<ITask> Plan = new Queue<ITask>();
 
         // ========================================================= VALIDITY
 
