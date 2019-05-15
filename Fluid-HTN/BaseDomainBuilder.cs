@@ -150,7 +150,7 @@ namespace FluidHTN
         // ========================================================= PRIMITIVE TASKS
 
         /// <summary>
-        ///     A primitive task that can contain conditions, do-operators and effects.
+        ///     A primitive task that can contain conditions, an operator and effects.
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
