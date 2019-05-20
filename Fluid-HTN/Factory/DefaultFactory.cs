@@ -37,5 +37,16 @@ namespace FluidHTN.Factory
             queue = null;
             return queue == null;
         }
+
+        public T Create<T>() where T : new()
+        {
+            return new T();
+        }
+
+        public bool Free<T>(ref T obj)
+        {
+            obj = default;
+            return obj == null;
+        }
     }
 }

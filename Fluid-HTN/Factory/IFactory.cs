@@ -13,5 +13,8 @@ namespace FluidHTN.Factory
 
         List<T> CreateList<T>();
         bool FreeList<T>(ref List<T> list);
+
+        T Create<T>() where T : new();
+        bool Free<T>(ref T obj);
     }
 }
