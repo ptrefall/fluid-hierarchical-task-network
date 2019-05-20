@@ -514,7 +514,7 @@ The [Fluid HTN Extension library](https://github.com/ptrefall/fluid-hierarchical
 ## Examples
 Example projects have been pulled into their own repositories, as not to clutter the core library. More examples are still in progress, so please check back here to see when they become available.
 * [Fluid Text Adventure](https://github.com/ptrefall/fluid-text-adventure)
-* [Fluid Troll Bridge](https://github.com/ptrefall/fluid-troll-bridge)
+* [Fluid Troll Bridge](https://github.com/ptrefall/fluid-troll-bridge) (requires Unity)
 * [Fluid Goap Coffai](https://github.com/ptrefall/fluid-goap-coffai)
 
 ## TODO
