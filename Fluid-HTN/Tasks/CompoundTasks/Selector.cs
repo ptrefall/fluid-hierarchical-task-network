@@ -51,7 +51,7 @@ namespace FluidHTN.Compounds
                         if (ctx.LastMTR[currentDecompositionIndex] < taskIndex)
                         {
                             ctx.MethodTraversalRecord.Add(-1);
-                            if(ctx.DebugMTR) ctx.MTRDebug.Add($"REPLAN FAIL {Subtasks[taskIndex].Name}");
+                            if (ctx.DebugMTR) ctx.MTRDebug.Add($"REPLAN FAIL {Subtasks[taskIndex].Name}");
                             return null;
                         }
                     }
@@ -66,7 +66,7 @@ namespace FluidHTN.Compounds
                     // We need to record the task index before we decompose the task,
                     // so that the traversal record is set up in the right order.
                     ctx.MethodTraversalRecord.Add(taskIndex);
-                    if(ctx.DebugMTR) ctx.MTRDebug.Add(task.Name);
+                    if (ctx.DebugMTR) ctx.MTRDebug.Add(task.Name);
 
                     var result = compoundTask.Decompose(ctx, 0);
 
@@ -78,7 +78,7 @@ namespace FluidHTN.Compounds
                     {
                         // Remove the taskIndex if it failed to decompose.
                         ctx.MethodTraversalRecord.RemoveAt(ctx.MethodTraversalRecord.Count - 1);
-                        if(ctx.DebugMTR) ctx.MTRDebug.RemoveAt(ctx.MTRDebug.Count - 1);
+                        if (ctx.DebugMTR) ctx.MTRDebug.RemoveAt(ctx.MTRDebug.Count - 1);
                         continue;
                     }
 

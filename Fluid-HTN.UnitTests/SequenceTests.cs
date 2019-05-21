@@ -159,9 +159,9 @@ namespace Fluid_HTN.UnitTests
 
             Assert.IsTrue(plan != null);
             Assert.IsTrue(plan.Count == 0);
-            Assert.IsTrue(ctx.WorldStateChangeStack[(int)MyWorldState.HasA].Count == 1);
-            Assert.IsTrue(ctx.WorldStateChangeStack[(int)MyWorldState.HasB].Count == 1);
-            Assert.IsTrue(ctx.WorldStateChangeStack[(int)MyWorldState.HasC].Count == 1);
+            Assert.IsTrue(ctx.WorldStateChangeStack[(int) MyWorldState.HasA].Count == 1);
+            Assert.IsTrue(ctx.WorldStateChangeStack[(int) MyWorldState.HasB].Count == 1);
+            Assert.IsTrue(ctx.WorldStateChangeStack[(int) MyWorldState.HasC].Count == 1);
             Assert.AreEqual(1, ctx.GetState(MyWorldState.HasA));
             Assert.AreEqual(1, ctx.GetState(MyWorldState.HasB));
             Assert.AreEqual(1, ctx.GetState(MyWorldState.HasC));
@@ -285,9 +285,9 @@ namespace Fluid_HTN.UnitTests
             Assert.IsTrue(ctx.MethodTraversalRecord.Count == 2);
             Assert.IsTrue(ctx.MethodTraversalRecord[0] == 0);
             Assert.IsTrue(ctx.MethodTraversalRecord[1] == -1);
-            Assert.IsTrue(ctx.WorldStateChangeStack[(int)MyWorldState.HasA].Count == 1);
-            Assert.IsTrue(ctx.WorldStateChangeStack[(int)MyWorldState.HasB].Count == 1);
-            Assert.IsTrue(ctx.WorldStateChangeStack[(int)MyWorldState.HasC].Count == 1);
+            Assert.IsTrue(ctx.WorldStateChangeStack[(int) MyWorldState.HasA].Count == 1);
+            Assert.IsTrue(ctx.WorldStateChangeStack[(int) MyWorldState.HasB].Count == 1);
+            Assert.IsTrue(ctx.WorldStateChangeStack[(int) MyWorldState.HasC].Count == 1);
             Assert.AreEqual(1, ctx.GetState(MyWorldState.HasA));
             Assert.AreEqual(1, ctx.GetState(MyWorldState.HasB));
             Assert.AreEqual(1, ctx.GetState(MyWorldState.HasC));
@@ -321,9 +321,9 @@ namespace Fluid_HTN.UnitTests
 
             Assert.IsTrue(plan != null);
             Assert.IsTrue(plan.Count == 0);
-            Assert.IsTrue(ctx.WorldStateChangeStack[(int)MyWorldState.HasA].Count == 1);
-            Assert.IsTrue(ctx.WorldStateChangeStack[(int)MyWorldState.HasB].Count == 1);
-            Assert.IsTrue(ctx.WorldStateChangeStack[(int)MyWorldState.HasC].Count == 1);
+            Assert.IsTrue(ctx.WorldStateChangeStack[(int) MyWorldState.HasA].Count == 1);
+            Assert.IsTrue(ctx.WorldStateChangeStack[(int) MyWorldState.HasB].Count == 1);
+            Assert.IsTrue(ctx.WorldStateChangeStack[(int) MyWorldState.HasC].Count == 1);
             Assert.AreEqual(1, ctx.GetState(MyWorldState.HasA));
             Assert.AreEqual(1, ctx.GetState(MyWorldState.HasB));
             Assert.AreEqual(1, ctx.GetState(MyWorldState.HasC));
@@ -397,7 +397,7 @@ namespace Fluid_HTN.UnitTests
             var task = new Sequence() { Name = "Test" };
             var task2 = new Selector() { Name = "Test2" };
             var task3 = new Sequence() { Name = "Test3" };
-            task3.AddSubtask(new PrimitiveTask() {Name = "Sub-task1"});
+            task3.AddSubtask(new PrimitiveTask() { Name = "Sub-task1" });
             task3.AddSubtask(new PausePlanTask());
             task3.AddSubtask(new PrimitiveTask() { Name = "Sub-task2" });
 

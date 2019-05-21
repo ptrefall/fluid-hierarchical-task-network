@@ -15,9 +15,9 @@ namespace FluidHTN.Contexts
         public List<int> LastMTR { get; } = new List<int>();
         public abstract List<string> MTRDebug { get; set; }
         public abstract List<string> LastMTRDebug { get; set; }
-		public abstract bool DebugMTR { get; }
+        public abstract bool DebugMTR { get; }
         public abstract Stack<string> DecompositionLog { get; set; }
-		public abstract bool LogDecomposition { get; }
+        public abstract bool LogDecomposition { get; }
         public Queue<PartialPlanEntry> PartialPlanQueue { get; set; } = new Queue<PartialPlanEntry>();
         public bool HasPausedPartialPlan { get; set; } = false;
 
@@ -29,22 +29,22 @@ namespace FluidHTN.Contexts
 
         public virtual void Init()
         {
-	        if (WorldStateChangeStack == null)
-	        {
-		        WorldStateChangeStack = new Stack<KeyValuePair<EffectType, byte>>[WorldState.Length];
-		        for (var i = 0; i < WorldState.Length; i++)
-			        WorldStateChangeStack[i] = new Stack<KeyValuePair<EffectType, byte>>();
-	        }
-
-	        if (DebugMTR)
+            if (WorldStateChangeStack == null)
             {
-				if(MTRDebug == null) MTRDebug = new List<string>();
-				if(LastMTRDebug == null) LastMTRDebug = new List<string>();
+                WorldStateChangeStack = new Stack<KeyValuePair<EffectType, byte>>[WorldState.Length];
+                for (var i = 0; i < WorldState.Length; i++)
+                    WorldStateChangeStack[i] = new Stack<KeyValuePair<EffectType, byte>>();
+            }
+
+            if (DebugMTR)
+            {
+                if (MTRDebug == null) MTRDebug = new List<string>();
+                if (LastMTRDebug == null) LastMTRDebug = new List<string>();
             }
 
             if (LogDecomposition)
             {
-				if(DecompositionLog == null) DecompositionLog = new Stack<string>();
+                if (DecompositionLog == null) DecompositionLog = new Stack<string>();
             }
         }
 
@@ -123,8 +123,8 @@ namespace FluidHTN.Contexts
 
             if (DebugMTR)
             {
-	            MTRDebug?.Clear();
-	            LastMTRDebug?.Clear();
+                MTRDebug?.Clear();
+                LastMTRDebug?.Clear();
             }
         }
     }

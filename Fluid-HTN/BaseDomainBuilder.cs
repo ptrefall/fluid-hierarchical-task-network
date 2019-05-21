@@ -59,7 +59,7 @@ namespace FluidHTN
         {
             if (Pointer is ICompoundTask compoundTask)
             {
-                var parent = new P {Name = name};
+                var parent = new P { Name = name };
                 _domain.Add(compoundTask, parent);
                 _pointers.Add(parent);
             }
@@ -85,7 +85,7 @@ namespace FluidHTN
         {
             if (Pointer is ICompoundTask compoundTask)
             {
-                var parent = new P {Name = name};
+                var parent = new P { Name = name };
                 _domain.Add(compoundTask, parent);
                 _pointers.Add(parent);
             }
@@ -111,7 +111,7 @@ namespace FluidHTN
         {
             if (Pointer is IDecomposeAll compoundTask)
             {
-                var parent = new PausePlanTask() {Name = "Pause Plan"};
+                var parent = new PausePlanTask() { Name = "Pause Plan" };
                 _domain.Add(compoundTask, parent);
             }
             else
@@ -185,17 +185,17 @@ namespace FluidHTN
         /// <returns></returns>
         public DB ExecutingCondition(string name, Func<T, bool> condition)
         {
-	        if (Pointer is IPrimitiveTask task)
-	        {
-		        var cond = new FuncCondition<T>(name, condition);
-		        task.AddExecutingCondition(cond);
-	        }
-	        else
-	        {
-		        throw new Exception("Tried to add an Executing Condition, but the Pointer is not a Primitive Task!");
-	        }
+            if (Pointer is IPrimitiveTask task)
+            {
+                var cond = new FuncCondition<T>(name, condition);
+                task.AddExecutingCondition(cond);
+            }
+            else
+            {
+                throw new Exception("Tried to add an Executing Condition, but the Pointer is not a Primitive Task!");
+            }
 
-	        return (DB) this;
+            return (DB) this;
         }
 
         // ========================================================= OPERATORS
@@ -296,7 +296,7 @@ namespace FluidHTN
         /// <returns></returns>
         public Domain<T> Build()
         {
-            if(Pointer != _domain.Root)
+            if (Pointer != _domain.Root)
                 throw new Exception($"The domain definition lacks one or more End() statements. Pointer is '{Pointer.Name}', but expected '{_domain.Root.Name}'.");
 
             _factory.FreeList(ref _pointers);

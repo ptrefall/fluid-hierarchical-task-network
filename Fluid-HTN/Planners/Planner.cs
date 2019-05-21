@@ -29,57 +29,57 @@ namespace FluidHTN
         /// </summary>
         public Action<Queue<ITask>> OnNewPlan = null;
 
-		/// <summary>
-		///		OnReplacePlan(oldPlan, currentTask, newPlan) is called when we're about to replace the
-		///		current plan with a new plan.
-		/// </summary>
+        /// <summary>
+        ///		OnReplacePlan(oldPlan, currentTask, newPlan) is called when we're about to replace the
+        ///		current plan with a new plan.
+        /// </summary>
         public Action<Queue<ITask>, ITask, Queue<ITask>> OnReplacePlan = null;
 
-		/// <summary>
-		///		OnNewTask(task) is called after we popped a new task off the current plan.
-		/// </summary>
-		public Action<ITask> OnNewTask = null;
+        /// <summary>
+        ///		OnNewTask(task) is called after we popped a new task off the current plan.
+        /// </summary>
+        public Action<ITask> OnNewTask = null;
 
-		/// <summary>
-		///		OnNewTaskConditionFailed(task, failedCondition) is called when we failed to
-		///		validate a condition on a new task.
-		/// </summary>
-		public Action<ITask, ICondition> OnNewTaskConditionFailed = null;
+        /// <summary>
+        ///		OnNewTaskConditionFailed(task, failedCondition) is called when we failed to
+        ///		validate a condition on a new task.
+        /// </summary>
+        public Action<ITask, ICondition> OnNewTaskConditionFailed = null;
 
-		/// <summary>
-		///		OnStopCurrentTask(task) is called when the currently running task was stopped
-		///		forcefully.
-		/// </summary>
-		public Action<IPrimitiveTask> OnStopCurrentTask = null;
+        /// <summary>
+        ///		OnStopCurrentTask(task) is called when the currently running task was stopped
+        ///		forcefully.
+        /// </summary>
+        public Action<IPrimitiveTask> OnStopCurrentTask = null;
 
-		/// <summary>
-		///		OnCurrentTaskCompletedSuccessfully(task) is called when the currently running task
-		///		completes successfully, and before its effects are applied.
-		/// </summary>
-		public Action<IPrimitiveTask> OnCurrentTaskCompletedSuccessfully = null;
+        /// <summary>
+        ///		OnCurrentTaskCompletedSuccessfully(task) is called when the currently running task
+        ///		completes successfully, and before its effects are applied.
+        /// </summary>
+        public Action<IPrimitiveTask> OnCurrentTaskCompletedSuccessfully = null;
 
-		/// <summary>
-		///		OnApplyEffect(effect) is called for each effect of the type PlanAndExecute on a
-		///		completed task.
-		/// </summary>
-		public Action<IEffect> OnApplyEffect = null;
+        /// <summary>
+        ///		OnApplyEffect(effect) is called for each effect of the type PlanAndExecute on a
+        ///		completed task.
+        /// </summary>
+        public Action<IEffect> OnApplyEffect = null;
 
-		/// <summary>
-		///		OnCurrentTaskFailed(task) is called when the currently running task fails to complete.
-		/// </summary>
-		public Action<IPrimitiveTask> OnCurrentTaskFailed = null;
+        /// <summary>
+        ///		OnCurrentTaskFailed(task) is called when the currently running task fails to complete.
+        /// </summary>
+        public Action<IPrimitiveTask> OnCurrentTaskFailed = null;
 
-		/// <summary>
-		///		OnCurrentTaskContinues(task) is called every tick that a currently running task
-		///		needs to continue.
-		/// </summary>
-		public Action<IPrimitiveTask> OnCurrentTaskContinues = null;
+        /// <summary>
+        ///		OnCurrentTaskContinues(task) is called every tick that a currently running task
+        ///		needs to continue.
+        /// </summary>
+        public Action<IPrimitiveTask> OnCurrentTaskContinues = null;
 
-		/// <summary>
-		///		OnCurrentTaskExecutingConditionFailed(task, condition) is called if an Executing Condition
-		///		fails. The Executing Conditions are checked before every call to task.Operator.Update(...).
-		/// </summary>
-		public Action<IPrimitiveTask, ICondition> OnCurrentTaskExecutingConditionFailed = null;
+        /// <summary>
+        ///		OnCurrentTaskExecutingConditionFailed(task, condition) is called if an Executing Condition
+        ///		fails. The Executing Conditions are checked before every call to task.Operator.Update(...).
+        /// </summary>
+        public Action<IPrimitiveTask, ICondition> OnCurrentTaskExecutingConditionFailed = null;
 
         // ========================================================= TICK PLAN
 
@@ -137,21 +137,21 @@ namespace FluidHTN
                 var newPlan = domain.FindPlan(ctx);
                 if (newPlan != null)
                 {
-	                if (OnReplacePlan != null && (_plan.Count > 0 || _currentTask != null))
-	                {
-		                OnReplacePlan.Invoke(_plan, _currentTask, newPlan);
-	                }
-					else if (OnNewPlan != null && _plan.Count == 0)
-	                {
-						OnNewPlan.Invoke(newPlan);
-	                }
+                    if (OnReplacePlan != null && (_plan.Count > 0 || _currentTask != null))
+                    {
+                        OnReplacePlan.Invoke(_plan, _currentTask, newPlan);
+                    }
+                    else if (OnNewPlan != null && _plan.Count == 0)
+                    {
+                        OnNewPlan.Invoke(newPlan);
+                    }
 
                     _plan.Clear();
                     while (newPlan.Count > 0) _plan.Enqueue(newPlan.Dequeue());
 
                     if (_currentTask != null && _currentTask is IPrimitiveTask t)
                     {
-						OnStopCurrentTask?.Invoke(t);
+                        OnStopCurrentTask?.Invoke(t);
                         t.Stop(ctx);
                         _currentTask = null;
                     }
@@ -165,8 +165,8 @@ namespace FluidHTN
 
                         if (ctx.DebugMTR)
                         {
-	                        ctx.LastMTRDebug.Clear();
-	                        foreach (var record in ctx.MTRDebug) ctx.LastMTRDebug.Add(record);
+                            ctx.LastMTRDebug.Clear();
+                            foreach (var record in ctx.MTRDebug) ctx.LastMTRDebug.Add(record);
                         }
                     }
                 }
@@ -188,9 +188,9 @@ namespace FluidHTN
 
                         if (ctx.DebugMTR)
                         {
-	                        ctx.MTRDebug.Clear();
-	                        foreach (var record in ctx.LastMTRDebug) ctx.MTRDebug.Add(record);
-	                        ctx.LastMTRDebug.Clear();
+                            ctx.MTRDebug.Clear();
+                            foreach (var record in ctx.LastMTRDebug) ctx.MTRDebug.Add(record);
+                            ctx.LastMTRDebug.Clear();
                         }
                     }
                 }
@@ -201,25 +201,25 @@ namespace FluidHTN
                 _currentTask = _plan.Dequeue();
                 if (_currentTask != null)
                 {
-	                OnNewTask?.Invoke(_currentTask);
-	                foreach (var condition in _currentTask.Conditions)
-		                // If a condition failed, then the plan failed to progress! A replan is required.
-		                if (condition.IsValid(ctx) == false)
-		                {
-			                OnNewTaskConditionFailed?.Invoke(_currentTask, condition);
+                    OnNewTask?.Invoke(_currentTask);
+                    foreach (var condition in _currentTask.Conditions)
+                        // If a condition failed, then the plan failed to progress! A replan is required.
+                        if (condition.IsValid(ctx) == false)
+                        {
+                            OnNewTaskConditionFailed?.Invoke(_currentTask, condition);
 
-			                _currentTask = null;
-			                _plan.Clear();
+                            _currentTask = null;
+                            _plan.Clear();
 
-			                ctx.LastMTR.Clear();
-			                if (ctx.DebugMTR) ctx.LastMTRDebug.Clear();
+                            ctx.LastMTR.Clear();
+                            if (ctx.DebugMTR) ctx.LastMTRDebug.Clear();
 
                             ctx.HasPausedPartialPlan = false;
                             ctx.PartialPlanQueue.Clear();
-			                ctx.IsDirty = false;
+                            ctx.IsDirty = false;
 
-			                return;
-		                }
+                            return;
+                        }
                 }
             }
 
@@ -228,24 +228,24 @@ namespace FluidHTN
                 {
                     if (task.Operator != null)
                     {
-	                    foreach (var condition in task.ExecutingConditions)
-		                    // If a condition failed, then the plan failed to progress! A replan is required.
-		                    if (condition.IsValid(ctx) == false)
-		                    {
-			                    OnCurrentTaskExecutingConditionFailed?.Invoke(task, condition);
+                        foreach (var condition in task.ExecutingConditions)
+                            // If a condition failed, then the plan failed to progress! A replan is required.
+                            if (condition.IsValid(ctx) == false)
+                            {
+                                OnCurrentTaskExecutingConditionFailed?.Invoke(task, condition);
 
-			                    _currentTask = null;
-			                    _plan.Clear();
+                                _currentTask = null;
+                                _plan.Clear();
 
-			                    ctx.LastMTR.Clear();
-			                    if (ctx.DebugMTR) ctx.LastMTRDebug.Clear();
+                                ctx.LastMTR.Clear();
+                                if (ctx.DebugMTR) ctx.LastMTRDebug.Clear();
 
                                 ctx.HasPausedPartialPlan = false;
                                 ctx.PartialPlanQueue.Clear();
                                 ctx.IsDirty = false;
 
-			                    return;
-		                    }
+                                return;
+                            }
 
                         LastStatus = task.Operator.Update(ctx);
 
@@ -272,7 +272,7 @@ namespace FluidHTN
 
                                 ctx.IsDirty = false;
 
-                                if(allowImmediateReplan) Tick(domain, ctx, allowImmediateReplan: false);
+                                if (allowImmediateReplan) Tick(domain, ctx, allowImmediateReplan: false);
                             }
                         }
 
@@ -318,10 +318,10 @@ namespace FluidHTN
             return _plan;
         }
 
-		/// <summary>
-		///		Get the current task.
-		/// </summary>
-		/// <returns></returns>
+        /// <summary>
+        ///		Get the current task.
+        /// </summary>
+        /// <returns></returns>
         public ITask GetCurrentTask()
         {
             return _currentTask;

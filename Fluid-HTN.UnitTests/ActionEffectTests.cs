@@ -46,7 +46,7 @@ namespace Fluid_HTN.UnitTests
         public void ApplyCallsInternalFunctionPtr_ExpectedBehavior()
         {
             var ctx = new MyContext();
-            var e = new ActionEffect<MyContext>("Name", EffectType.PlanOnly, (c,et) => c.Done = true );
+            var e = new ActionEffect<MyContext>("Name", EffectType.PlanOnly, (c, et) => c.Done = true);
 
             e.Apply(ctx);
 

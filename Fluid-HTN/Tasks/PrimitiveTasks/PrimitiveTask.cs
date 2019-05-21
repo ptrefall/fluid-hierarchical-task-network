@@ -28,8 +28,8 @@ namespace FluidHTN.PrimitiveTasks
 
         public ITask AddExecutingCondition(ICondition condition)
         {
-			ExecutingConditions.Add(condition);
-			return this;
+            ExecutingConditions.Add(condition);
+            return this;
         }
 
         public ITask AddEffect(IEffect effect)
