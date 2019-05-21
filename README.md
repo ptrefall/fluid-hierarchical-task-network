@@ -519,5 +519,5 @@ Example projects have been pulled into their own repositories, as not to clutter
 
 ## TODO
 * Improve documentation
-* Finish Extensions library
-* Finish Examples
+* Improve Extensions library
+* Improve Examples
