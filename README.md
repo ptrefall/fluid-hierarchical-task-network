@@ -7,7 +7,7 @@ A simple HTN planner based around the principles of the Builder pattern, inspire
 * Partial planning
 * Domain splicing
 * Easy to extend with new features, as demonstrated in the [extension library](https://github.com/ptrefall/fluid-hierarchical-task-network-ext).
-* Uses a Factory interface internally to create and free arrays/collections, allowing the user to add pooling, or other memory management schemes.
+* Uses a Factory interface internally to create and free arrays/collections/objects, allowing the user to add pooling, or other memory management schemes.
 * Comes with Unity Package Module definitions for seamless integration into Unity projects.
 * 137 unit tests
 
@@ -509,14 +509,15 @@ Your Unity project should now have integrated Fluid HTN via the Package Manager,
 If preferred, the FluidHTN folder of the planner can also be copy/pasted somewhere into your Unity project's Assets folder.
 
 ## Extensions
-The [Fluid HTN Extension library](https://github.com/ptrefall/fluid-hierarchical-task-network-ext) adds extended selector implementations, like Random Select and Utility Select. There is also a JSON serialization of HTN Domains in the works.
+The [Fluid HTN Extension library](https://github.com/ptrefall/fluid-hierarchical-task-network-ext) adds extended selector implementations, like Random Select, Utility Select and GOAP Sequence. There is also a JSON serialization of HTN Domains in the works.
 
 ## Examples
 Example projects have been pulled into their own repositories, as not to clutter the core library. More examples are still in progress, so please check back here to see when they become available.
 * [Fluid Text Adventure](https://github.com/ptrefall/fluid-text-adventure)
-* [Fluid Troll Bridge](https://github.com/ptrefall/fluid-troll-bridge)
+* [Fluid Troll Bridge](https://github.com/ptrefall/fluid-troll-bridge) (requires Unity)
+* [Fluid Goap Coffai](https://github.com/ptrefall/fluid-goap-coffai)
 
 ## TODO
 * Improve documentation
-* Finish Extensions library
-* Finish Examples
+* Improve Extensions library
+* Improve Examples
