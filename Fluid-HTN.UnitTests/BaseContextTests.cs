@@ -19,7 +19,7 @@ namespace Fluid_HTN.UnitTests
         public void InitInitializeCollections_ExpectedBehavior()
         {
             var ctx = new MyContext();
-            
+
             ctx.Init();
 
             Assert.AreEqual(true, ctx.WorldStateChangeStack != null);
@@ -52,7 +52,7 @@ namespace Fluid_HTN.UnitTests
 
             ctx.Init();
             ctx.SetState(MyWorldState.HasB, true, EffectType.Permanent);
-            
+
             Assert.AreEqual(false, ctx.HasState(MyWorldState.HasA));
             Assert.AreEqual(true, ctx.HasState(MyWorldState.HasB));
         }
@@ -67,11 +67,11 @@ namespace Fluid_HTN.UnitTests
             ctx.SetState(MyWorldState.HasB, true, EffectType.Permanent);
 
             Assert.AreEqual(true, ctx.HasState(MyWorldState.HasB));
-            Assert.IsTrue(ctx.WorldStateChangeStack[(int)MyWorldState.HasA].Count == 0);
-            Assert.IsTrue(ctx.WorldStateChangeStack[(int)MyWorldState.HasB].Count == 1);
-            Assert.IsTrue(ctx.WorldStateChangeStack[(int)MyWorldState.HasB].Peek().Key == EffectType.Permanent);
-            Assert.IsTrue(ctx.WorldStateChangeStack[(int)MyWorldState.HasB].Peek().Value == 1);
-            Assert.IsTrue(ctx.WorldState[(int)MyWorldState.HasB] == 0);
+            Assert.IsTrue(ctx.WorldStateChangeStack[(int) MyWorldState.HasA].Count == 0);
+            Assert.IsTrue(ctx.WorldStateChangeStack[(int) MyWorldState.HasB].Count == 1);
+            Assert.IsTrue(ctx.WorldStateChangeStack[(int) MyWorldState.HasB].Peek().Key == EffectType.Permanent);
+            Assert.IsTrue(ctx.WorldStateChangeStack[(int) MyWorldState.HasB].Peek().Value == 1);
+            Assert.IsTrue(ctx.WorldState[(int) MyWorldState.HasB] == 0);
         }
 
         [TestMethod]
@@ -84,8 +84,8 @@ namespace Fluid_HTN.UnitTests
             ctx.SetState(MyWorldState.HasB, true, EffectType.Permanent);
 
             Assert.AreEqual(true, ctx.HasState(MyWorldState.HasB));
-            Assert.IsTrue(ctx.WorldStateChangeStack[(int)MyWorldState.HasB].Count == 0);
-            Assert.IsTrue(ctx.WorldState[(int)MyWorldState.HasB] == 1);
+            Assert.IsTrue(ctx.WorldStateChangeStack[(int) MyWorldState.HasB].Count == 0);
+            Assert.IsTrue(ctx.WorldState[(int) MyWorldState.HasB] == 1);
         }
 
         [TestMethod]
@@ -129,12 +129,12 @@ namespace Fluid_HTN.UnitTests
             var changeDepthPlanning = ctx.GetWorldStateChangeDepth(ctx.Factory);
 
             Assert.AreEqual(ctx.WorldStateChangeStack.Length, changeDepthExecuting.Length);
-            Assert.AreEqual(0, changeDepthExecuting[(int)MyWorldState.HasA]);
-            Assert.AreEqual(0, changeDepthExecuting[(int)MyWorldState.HasB]);
+            Assert.AreEqual(0, changeDepthExecuting[(int) MyWorldState.HasA]);
+            Assert.AreEqual(0, changeDepthExecuting[(int) MyWorldState.HasB]);
 
             Assert.AreEqual(ctx.WorldStateChangeStack.Length, changeDepthPlanning.Length);
-            Assert.AreEqual(0, changeDepthPlanning[(int)MyWorldState.HasA]);
-            Assert.AreEqual(1, changeDepthPlanning[(int)MyWorldState.HasB]);
+            Assert.AreEqual(0, changeDepthPlanning[(int) MyWorldState.HasA]);
+            Assert.AreEqual(1, changeDepthPlanning[(int) MyWorldState.HasB]);
         }
 
         [TestMethod]
@@ -149,9 +149,9 @@ namespace Fluid_HTN.UnitTests
             ctx.SetState(MyWorldState.HasC, true, EffectType.PlanOnly);
             ctx.TrimForExecution();
 
-            Assert.IsTrue(ctx.WorldStateChangeStack[(int)MyWorldState.HasA].Count == 0);
-            Assert.IsTrue(ctx.WorldStateChangeStack[(int)MyWorldState.HasB].Count == 1);
-            Assert.IsTrue(ctx.WorldStateChangeStack[(int)MyWorldState.HasC].Count == 0);
+            Assert.IsTrue(ctx.WorldStateChangeStack[(int) MyWorldState.HasA].Count == 0);
+            Assert.IsTrue(ctx.WorldStateChangeStack[(int) MyWorldState.HasB].Count == 1);
+            Assert.IsTrue(ctx.WorldStateChangeStack[(int) MyWorldState.HasC].Count == 0);
         }
 
         [TestMethod]
@@ -182,9 +182,9 @@ namespace Fluid_HTN.UnitTests
             ctx.SetState(MyWorldState.HasC, false, EffectType.PlanOnly);
             ctx.TrimToStackDepth(stackDepth);
 
-            Assert.IsTrue(ctx.WorldStateChangeStack[(int)MyWorldState.HasA].Count == 1);
-            Assert.IsTrue(ctx.WorldStateChangeStack[(int)MyWorldState.HasB].Count == 1);
-            Assert.IsTrue(ctx.WorldStateChangeStack[(int)MyWorldState.HasC].Count == 1);
+            Assert.IsTrue(ctx.WorldStateChangeStack[(int) MyWorldState.HasA].Count == 1);
+            Assert.IsTrue(ctx.WorldStateChangeStack[(int) MyWorldState.HasB].Count == 1);
+            Assert.IsTrue(ctx.WorldStateChangeStack[(int) MyWorldState.HasC].Count == 1);
         }
 
         [TestMethod]

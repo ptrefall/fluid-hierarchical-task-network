@@ -24,7 +24,7 @@ namespace Fluid_HTN.UnitTests
         public void AddSubtask_ExpectedBehavior()
         {
             var task = new Selector() { Name = "Test" };
-            var t = task.AddSubtask(new PrimitiveTask() {Name = "Sub-task"});
+            var t = task.AddSubtask(new PrimitiveTask() { Name = "Sub-task" });
 
             Assert.IsTrue(t == task);
             Assert.IsTrue(task.Subtasks.Count == 1);
@@ -155,7 +155,7 @@ namespace Fluid_HTN.UnitTests
         {
             var ctx = new MyContext();
             var task = new Selector() { Name = "Test" };
-            var task2 = new Selector() { Name = "Test2"};
+            var task2 = new Selector() { Name = "Test2" };
             task2.AddSubtask(new PrimitiveTask() { Name = "Sub-task1" }.AddCondition(new FuncCondition<MyContext>("Done == true", context => context.Done == true)));
             task2.AddSubtask(new PrimitiveTask() { Name = "Sub-task2" });
 

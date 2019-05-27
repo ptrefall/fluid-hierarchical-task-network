@@ -53,19 +53,19 @@ namespace FluidHTN
 
         List<string> LastMTRDebug { get; set; }
 
-		/// <summary>
-		/// Whether the planning system should collect debug information about our Method Traversal Record.
-		/// </summary>
-		bool DebugMTR { get; }
+        /// <summary>
+        /// Whether the planning system should collect debug information about our Method Traversal Record.
+        /// </summary>
+        bool DebugMTR { get; }
 
         /// <summary>
         /// </summary>
         Stack<string> DecompositionLog { get; set; }
 
-		/// <summary>
-		/// Whether our planning system should log our decomposition. Specially condition success vs failure.
-		/// </summary>
-		bool LogDecomposition { get; }
+        /// <summary>
+        /// Whether our planning system should log our decomposition. Specially condition success vs failure.
+        /// </summary>
+        bool LogDecomposition { get; }
 
         /// <summary>
         /// 

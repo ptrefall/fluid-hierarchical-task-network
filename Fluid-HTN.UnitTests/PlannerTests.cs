@@ -228,7 +228,7 @@ namespace Fluid_HTN.UnitTests
             var domain = new Domain<MyContext>("Test");
             var task1 = new Selector() { Name = "Test1" };
             var task2 = new Selector() { Name = "Test2" };
-            var task3 = (IPrimitiveTask)new PrimitiveTask() { Name = "Sub-task1" }.AddCondition(new FuncCondition<MyContext>("TestCondition", context => context.Done == false));
+            var task3 = (IPrimitiveTask) new PrimitiveTask() { Name = "Sub-task1" }.AddCondition(new FuncCondition<MyContext>("TestCondition", context => context.Done == false));
             var task4 = new PrimitiveTask() { Name = "Sub-task2" };
             task3.SetOperator(new FuncOperator<MyContext>((context) => TaskStatus.Success));
             // Note that one should not use AddEffect on types that's not part of WorldState unless you
@@ -263,7 +263,7 @@ namespace Fluid_HTN.UnitTests
             var domain = new Domain<MyContext>("Test");
             var task1 = new Selector() { Name = "Test1" };
             var task2 = new Selector() { Name = "Test2" };
-            var task3 = (IPrimitiveTask)new PrimitiveTask() { Name = "Sub-task1" }.AddCondition(new FuncCondition<MyContext>("TestCondition", context => context.Done == false));
+            var task3 = (IPrimitiveTask) new PrimitiveTask() { Name = "Sub-task1" }.AddCondition(new FuncCondition<MyContext>("TestCondition", context => context.Done == false));
             var task4 = new PrimitiveTask() { Name = "Sub-task2" };
             task3.SetOperator(new FuncOperator<MyContext>((context) => TaskStatus.Continue));
             task4.SetOperator(new FuncOperator<MyContext>((context) => TaskStatus.Continue));
@@ -293,7 +293,7 @@ namespace Fluid_HTN.UnitTests
             var domain = new Domain<MyContext>("Test");
             var task1 = new Selector() { Name = "Test1" };
             var task2 = new Selector() { Name = "Test2" };
-            var task3 = (IPrimitiveTask)new PrimitiveTask() { Name = "Sub-task1" }.AddCondition(new FuncCondition<MyContext>("TestCondition", context => context.Done == false));
+            var task3 = (IPrimitiveTask) new PrimitiveTask() { Name = "Sub-task1" }.AddCondition(new FuncCondition<MyContext>("TestCondition", context => context.Done == false));
             var task4 = new PrimitiveTask() { Name = "Sub-task2" };
             task3.SetOperator(new FuncOperator<MyContext>((context) => TaskStatus.Success));
             task4.SetOperator(new FuncOperator<MyContext>((context) => TaskStatus.Continue));
@@ -323,7 +323,7 @@ namespace Fluid_HTN.UnitTests
             var domain = new Domain<MyContext>("Test");
             var task1 = new Selector() { Name = "Test1" };
             var task2 = new Selector() { Name = "Test2" };
-            var task3 = (IPrimitiveTask)new PrimitiveTask() { Name = "Sub-task1" }.AddCondition(new FuncCondition<MyContext>("TestCondition", context => !context.HasState(MyWorldState.HasA)));
+            var task3 = (IPrimitiveTask) new PrimitiveTask() { Name = "Sub-task1" }.AddCondition(new FuncCondition<MyContext>("TestCondition", context => !context.HasState(MyWorldState.HasA)));
             var task4 = new PrimitiveTask() { Name = "Sub-task2" };
             task3.SetOperator(new FuncOperator<MyContext>((context) => TaskStatus.Success));
             task3.AddEffect(new ActionEffect<MyContext>("TestEffect", EffectType.PlanAndExecute, (context, type) => context.SetState(MyWorldState.HasA, true, type)));

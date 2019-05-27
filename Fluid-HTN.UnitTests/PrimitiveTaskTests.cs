@@ -14,7 +14,7 @@ namespace Fluid_HTN.UnitTests
         [TestMethod]
         public void AddCondition_ExpectedBehavior()
         {
-            var task = new PrimitiveTask() {Name = "Test"};
+            var task = new PrimitiveTask() { Name = "Test" };
             var t = task.AddCondition(new FuncCondition<MyContext>("TestCondition", context => context.Done == false));
 
             Assert.IsTrue(t == task);

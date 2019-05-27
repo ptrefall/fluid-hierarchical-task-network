@@ -34,17 +34,17 @@ internal class MyContext : BaseContext
 
     public bool HasState(MyWorldState state, bool value)
     {
-        return HasState((int)state, (byte)(value ? 1 : 0));
+        return HasState((int) state, (byte) (value ? 1 : 0));
     }
 
     public bool HasState(MyWorldState state)
     {
-        return HasState((int)state, 1);
+        return HasState((int) state, 1);
     }
 
     public void SetState(MyWorldState state, bool value, EffectType type)
     {
-        SetState((int)state, (byte)(value ? 1 : 0), true, type);
+        SetState((int) state, (byte) (value ? 1 : 0), true, type);
     }
 
     public byte GetState(MyWorldState state)

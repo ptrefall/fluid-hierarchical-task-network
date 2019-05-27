@@ -10,7 +10,7 @@ namespace FluidHTN
 
         public Domain(string name)
         {
-            Root = new TaskRoot {Name = name, Parent = null};
+            Root = new TaskRoot { Name = name, Parent = null };
         }
         // ========================================================= PROPERTIES
 
@@ -105,7 +105,7 @@ namespace FluidHTN
                 // if it was a partial plan.
                 if (lastPartialPlanQueue != null)
                 {
-                    if(plan == null || plan.Count == 0)
+                    if (plan == null || plan.Count == 0)
                     {
                         ctx.HasPausedPartialPlan = true;
                         ctx.PartialPlanQueue.Clear();

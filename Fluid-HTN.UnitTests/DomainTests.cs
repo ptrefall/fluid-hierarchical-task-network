@@ -114,12 +114,12 @@ namespace Fluid_HTN.UnitTests
             domain.Add(task1, task4);
             var plan = domain.FindPlan(ctx);
 
-            Assert.IsTrue(ctx.WorldStateChangeStack[(int)MyWorldState.HasA].Count == 0);
-            Assert.IsTrue(ctx.WorldStateChangeStack[(int)MyWorldState.HasB].Count == 0);
-            Assert.IsTrue(ctx.WorldStateChangeStack[(int)MyWorldState.HasC].Count == 0);
-            Assert.IsTrue(ctx.WorldState[(int)MyWorldState.HasA] == 0);
-            Assert.IsTrue(ctx.WorldState[(int)MyWorldState.HasB] == 0);
-            Assert.IsTrue(ctx.WorldState[(int)MyWorldState.HasC] == 1);
+            Assert.IsTrue(ctx.WorldStateChangeStack[(int) MyWorldState.HasA].Count == 0);
+            Assert.IsTrue(ctx.WorldStateChangeStack[(int) MyWorldState.HasB].Count == 0);
+            Assert.IsTrue(ctx.WorldStateChangeStack[(int) MyWorldState.HasC].Count == 0);
+            Assert.IsTrue(ctx.WorldState[(int) MyWorldState.HasA] == 0);
+            Assert.IsTrue(ctx.WorldState[(int) MyWorldState.HasB] == 0);
+            Assert.IsTrue(ctx.WorldState[(int) MyWorldState.HasC] == 1);
             Assert.IsTrue(plan.Count == 3);
         }
 
@@ -141,12 +141,12 @@ namespace Fluid_HTN.UnitTests
             domain.Add(task1, task5);
             var plan = domain.FindPlan(ctx);
 
-            Assert.IsTrue(ctx.WorldStateChangeStack[(int)MyWorldState.HasA].Count == 0);
-            Assert.IsTrue(ctx.WorldStateChangeStack[(int)MyWorldState.HasB].Count == 0);
-            Assert.IsTrue(ctx.WorldStateChangeStack[(int)MyWorldState.HasC].Count == 0);
-            Assert.IsTrue(ctx.WorldState[(int)MyWorldState.HasA] == 0);
-            Assert.IsTrue(ctx.WorldState[(int)MyWorldState.HasB] == 0);
-            Assert.IsTrue(ctx.WorldState[(int)MyWorldState.HasC] == 0);
+            Assert.IsTrue(ctx.WorldStateChangeStack[(int) MyWorldState.HasA].Count == 0);
+            Assert.IsTrue(ctx.WorldStateChangeStack[(int) MyWorldState.HasB].Count == 0);
+            Assert.IsTrue(ctx.WorldStateChangeStack[(int) MyWorldState.HasC].Count == 0);
+            Assert.IsTrue(ctx.WorldState[(int) MyWorldState.HasA] == 0);
+            Assert.IsTrue(ctx.WorldState[(int) MyWorldState.HasB] == 0);
+            Assert.IsTrue(ctx.WorldState[(int) MyWorldState.HasC] == 0);
             Assert.IsTrue(plan == null);
         }
 
