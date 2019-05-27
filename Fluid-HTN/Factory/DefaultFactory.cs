@@ -45,7 +45,7 @@ namespace FluidHTN.Factory
 
         public bool Free<T>(ref T obj)
         {
-            obj = default;
+            obj = default(T);
             return obj == null;
         }
     }
