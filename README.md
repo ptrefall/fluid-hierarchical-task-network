@@ -509,7 +509,7 @@ Your Unity project should now have integrated Fluid HTN via the Package Manager,
 If preferred, the FluidHTN folder of the planner can also be copy/pasted somewhere into your Unity project's Assets folder.
 
 ## Extensions
-The [Fluid HTN Extension library](https://github.com/ptrefall/fluid-hierarchical-task-network-ext) adds extended selector implementations, like Random Select, Utility Select and GOAP Sequence. There is also a JSON serialization of HTN Domains in the works.
+The [Fluid HTN Extension library](https://github.com/ptrefall/fluid-hierarchical-task-network-ext) adds extended selector implementations, like Random Select, Utility Select, Always Succeed decorator, Invert Status decorator and GOAP Sequence. There is also a JSON serialization of HTN Domains in the works.
 
 ## Examples
 Example projects have been pulled into their own repositories, as not to clutter the core library. More examples are still in progress, so please check back here to see when they become available.
