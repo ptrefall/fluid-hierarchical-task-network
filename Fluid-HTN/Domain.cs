@@ -29,14 +29,15 @@ namespace FluidHTN
 
         // ========================================================= PLANNING
 
-        public Queue<ITask> FindPlan(T ctx)
+        public DecompositionStatus FindPlan(T ctx, out Queue<ITask> plan)
         {
             if (ctx.MethodTraversalRecord == null)
                 throw new Exception("We require the Method Traversal Record to have a valid instance.");
 
             ctx.ContextState = ContextState.Planning;
 
-            Queue<ITask> plan = null;
+            plan = null;
+            var status = DecompositionStatus.Rejected;
 
             // We first check whether we have a stored start task. This is true
             // if we had a partial plan pause somewhere in our plan, and we now
@@ -55,14 +56,17 @@ namespace FluidHTN
                     var kvp = ctx.PartialPlanQueue.Dequeue();
                     if (plan == null)
                     {
-                        plan = kvp.Task.Decompose(ctx, kvp.TaskIndex);
+                        status = kvp.Task.Decompose(ctx, kvp.TaskIndex, out plan);
                     }
                     else
                     {
-                        var p = kvp.Task.Decompose(ctx, kvp.TaskIndex);
-                        while (p.Count > 0)
+                        status = kvp.Task.Decompose(ctx, kvp.TaskIndex, out var p);
+                        if (status == DecompositionStatus.Succeeded)
                         {
-                            plan.Enqueue(p.Dequeue());
+                            while (p.Count > 0)
+                            {
+                                plan.Enqueue(p.Dequeue());
+                            }
                         }
                     }
 
@@ -74,12 +78,12 @@ namespace FluidHTN
 
                 // If we failed to continue the paused partial plan,
                 // then we have to start planning from the root.
-                if (plan == null || plan.Count == 0)
+                if (status == DecompositionStatus.Rejected || status == DecompositionStatus.Failed)
                 {
                     ctx.MethodTraversalRecord.Clear();
                     if (ctx.DebugMTR) ctx.MTRDebug.Clear();
 
-                    Root.Decompose(ctx, 0);
+                    status = Root.Decompose(ctx, 0, out plan);
                 }
             }
             else
@@ -99,13 +103,13 @@ namespace FluidHTN
                 ctx.MethodTraversalRecord.Clear();
                 if (ctx.DebugMTR) ctx.MTRDebug.Clear();
 
-                plan = Root.Decompose(ctx, 0);
+                status = Root.Decompose(ctx, 0, out plan);
 
                 // If we failed to find a new plan, we have to restore the old plan,
                 // if it was a partial plan.
                 if (lastPartialPlanQueue != null)
                 {
-                    if (plan == null || plan.Count == 0)
+                    if (status == DecompositionStatus.Rejected || status == DecompositionStatus.Failed)
                     {
                         ctx.HasPausedPartialPlan = true;
                         ctx.PartialPlanQueue.Clear();
@@ -131,10 +135,14 @@ namespace FluidHTN
                         break;
                     }
 
-                if (isMTRsEqual) plan = null;
+                if (isMTRsEqual)
+                {
+                    plan = null;
+                    status = DecompositionStatus.Rejected;
+                }
             }
 
-            if (plan != null)
+            if (status == DecompositionStatus.Succeeded)
             {
                 // Trim away any plan-only or plan&execute effects from the world state change stack, that only
                 // permanent effects on the world state remains now that the planning is done.
@@ -163,7 +171,7 @@ namespace FluidHTN
             }
 
             ctx.ContextState = ContextState.Executing;
-            return plan;
+            return status;
         }
     }
 }

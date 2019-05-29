@@ -57,7 +57,7 @@ namespace Fluid_HTN.UnitTests
         {
             var ctx = new MyContext();
             var task = new Sequence() { Name = "Test" };
-            var plan = task.Decompose(ctx, 0);
+            var status = task.Decompose(ctx, 0, out var plan);
         }
 
         [TestMethod]
@@ -66,8 +66,9 @@ namespace Fluid_HTN.UnitTests
             var ctx = new MyContext();
             ctx.Init();
             var task = new Sequence() { Name = "Test" };
-            var plan = task.Decompose(ctx, 0);
+            var status = task.Decompose(ctx, 0, out var plan);
 
+            Assert.IsTrue(status == DecompositionStatus.Failed);
             Assert.IsTrue(plan != null);
             Assert.IsTrue(plan.Count == 0);
         }
@@ -80,8 +81,9 @@ namespace Fluid_HTN.UnitTests
             var task = new Sequence() { Name = "Test" };
             task.AddSubtask(new PrimitiveTask() { Name = "Sub-task1" });
             task.AddSubtask(new PrimitiveTask() { Name = "Sub-task2" });
-            var plan = task.Decompose(ctx, 0);
+            var status = task.Decompose(ctx, 0, out var plan);
 
+            Assert.IsTrue(status == DecompositionStatus.Succeeded);
             Assert.IsTrue(plan != null);
             Assert.IsTrue(plan.Count == 2);
             Assert.AreEqual("Sub-task1", plan.Peek().Name);
@@ -105,8 +107,9 @@ namespace Fluid_HTN.UnitTests
             task.AddSubtask(task2);
             task.AddSubtask(new PrimitiveTask() { Name = "Sub-task4" });
 
-            var plan = task.Decompose(ctx, 0);
+            var status = task.Decompose(ctx, 0, out var plan);
 
+            Assert.IsTrue(status == DecompositionStatus.Succeeded);
             Assert.IsTrue(plan != null);
             Assert.IsTrue(plan.Count == 2);
             Assert.AreEqual("Sub-task2", plan.Dequeue().Name);
@@ -121,8 +124,9 @@ namespace Fluid_HTN.UnitTests
             var task = new Sequence() { Name = "Test" };
             task.AddSubtask(new PrimitiveTask() { Name = "Sub-task1" });
             task.AddSubtask(new PrimitiveTask() { Name = "Sub-task2" }.AddCondition(new FuncCondition<MyContext>("Done == true", context => context.Done == true)));
-            var plan = task.Decompose(ctx, 0);
+            var status = task.Decompose(ctx, 0, out var plan);
 
+            Assert.IsTrue(status == DecompositionStatus.Failed);
             Assert.IsTrue(plan != null);
             Assert.IsTrue(plan.Count == 0);
         }
@@ -135,8 +139,9 @@ namespace Fluid_HTN.UnitTests
             var task = new Sequence() { Name = "Test" };
             task.AddSubtask(new Selector() { Name = "Sub-task1" });
             task.AddSubtask(new PrimitiveTask() { Name = "Sub-task2" });
-            var plan = task.Decompose(ctx, 0);
+            var status = task.Decompose(ctx, 0, out var plan);
 
+            Assert.IsTrue(status == DecompositionStatus.Failed);
             Assert.IsTrue(plan != null);
             Assert.IsTrue(plan.Count == 0);
         }
@@ -155,8 +160,9 @@ namespace Fluid_HTN.UnitTests
             task.AddSubtask(new PrimitiveTask() { Name = "Sub-task1" }
                 .AddEffect(new ActionEffect<MyContext>("TestEffect", EffectType.Permanent, (context, type) => context.SetState(MyWorldState.HasA, false, EffectType.PlanOnly))));
             task.AddSubtask(new Selector() { Name = "Sub-task2" });
-            var plan = task.Decompose(ctx, 0);
+            var status = task.Decompose(ctx, 0, out var plan);
 
+            Assert.IsTrue(status == DecompositionStatus.Failed);
             Assert.IsTrue(plan != null);
             Assert.IsTrue(plan.Count == 0);
             Assert.IsTrue(ctx.WorldStateChangeStack[(int) MyWorldState.HasA].Count == 1);
@@ -187,8 +193,9 @@ namespace Fluid_HTN.UnitTests
 
             ctx.LastMTR.Add(0);
             ctx.LastMTR.Add(0);
-            var plan = task.Decompose(ctx, 0);
+            var status = task.Decompose(ctx, 0, out var plan);
 
+            Assert.IsTrue(status == DecompositionStatus.Rejected);
             Assert.IsTrue(plan == null);
             Assert.IsTrue(ctx.MethodTraversalRecord.Count == 2);
             Assert.IsTrue(ctx.MethodTraversalRecord[0] == 0);
@@ -215,8 +222,9 @@ namespace Fluid_HTN.UnitTests
 
             ctx.LastMTR.Add(1);
             ctx.LastMTR.Add(0);
-            var plan = task.Decompose(ctx, 0);
+            var status = task.Decompose(ctx, 0, out var plan);
 
+            Assert.IsTrue(status == DecompositionStatus.Rejected);
             Assert.IsTrue(plan == null);
             Assert.IsTrue(ctx.MethodTraversalRecord.Count == 2);
             Assert.IsTrue(ctx.MethodTraversalRecord[0] == 1);
@@ -243,8 +251,9 @@ namespace Fluid_HTN.UnitTests
 
             ctx.LastMTR.Add(1);
             ctx.LastMTR.Add(1);
-            var plan = task.Decompose(ctx, 0);
+            var status = task.Decompose(ctx, 0, out var plan);
 
+            Assert.IsTrue(status == DecompositionStatus.Succeeded);
             Assert.IsTrue(plan != null);
             Assert.IsTrue(plan.Count == 2);
             Assert.IsTrue(ctx.MethodTraversalRecord.Count == 1);
@@ -279,8 +288,9 @@ namespace Fluid_HTN.UnitTests
 
             ctx.LastMTR.Add(0);
             ctx.LastMTR.Add(0);
-            var plan = task.Decompose(ctx, 0);
+            var status = task.Decompose(ctx, 0, out var plan);
 
+            Assert.IsTrue(status == DecompositionStatus.Rejected);
             Assert.IsTrue(plan == null);
             Assert.IsTrue(ctx.MethodTraversalRecord.Count == 2);
             Assert.IsTrue(ctx.MethodTraversalRecord[0] == 0);
@@ -317,8 +327,9 @@ namespace Fluid_HTN.UnitTests
             task.AddSubtask(task2);
             task.AddSubtask(new PrimitiveTask() { Name = "Sub-task5" }.AddEffect(new ActionEffect<MyContext>("TestEffect", EffectType.Permanent, (context, type) => context.SetState(MyWorldState.HasC, false, EffectType.PlanOnly))));
 
-            var plan = task.Decompose(ctx, 0);
+            var status = task.Decompose(ctx, 0, out var plan);
 
+            Assert.IsTrue(status == DecompositionStatus.Failed);
             Assert.IsTrue(plan != null);
             Assert.IsTrue(plan.Count == 0);
             Assert.IsTrue(ctx.WorldStateChangeStack[(int) MyWorldState.HasA].Count == 1);
@@ -340,8 +351,9 @@ namespace Fluid_HTN.UnitTests
             task.AddSubtask(new PausePlanTask());
             task.AddSubtask(new PrimitiveTask() { Name = "Sub-task2" });
 
-            var plan = task.Decompose(ctx, 0);
+            var status = task.Decompose(ctx, 0, out var plan);
 
+            Assert.IsTrue(status == DecompositionStatus.Succeeded);
             Assert.IsTrue(plan != null);
             Assert.IsTrue(plan.Count == 1);
             Assert.AreEqual("Sub-task1", plan.Peek().Name);
@@ -362,8 +374,9 @@ namespace Fluid_HTN.UnitTests
             task.AddSubtask(new PausePlanTask());
             task.AddSubtask(new PrimitiveTask() { Name = "Sub-task2" });
 
-            var plan = task.Decompose(ctx, 0);
+            var status = task.Decompose(ctx, 0, out var plan);
 
+            Assert.IsTrue(status == DecompositionStatus.Succeeded);
             Assert.IsTrue(plan != null);
             Assert.IsTrue(plan.Count == 1);
             Assert.AreEqual("Sub-task1", plan.Dequeue().Name);
@@ -377,10 +390,13 @@ namespace Fluid_HTN.UnitTests
             while (ctx.PartialPlanQueue.Count > 0)
             {
                 var kvp = ctx.PartialPlanQueue.Dequeue();
-                var p = kvp.Task.Decompose(ctx, kvp.TaskIndex);
-                while (p.Count > 0)
+                var s = kvp.Task.Decompose(ctx, kvp.TaskIndex, out var p);
+                if (s == DecompositionStatus.Succeeded)
                 {
-                    plan.Enqueue(p.Dequeue());
+                    while (p.Count > 0)
+                    {
+                        plan.Enqueue(p.Dequeue());
+                    }
                 }
             }
             Assert.IsTrue(plan != null);
@@ -407,8 +423,9 @@ namespace Fluid_HTN.UnitTests
             task.AddSubtask(task2);
             task.AddSubtask(new PrimitiveTask() { Name = "Sub-task4" });
 
-            var plan = task.Decompose(ctx, 0);
+            var status = task.Decompose(ctx, 0, out var plan);
 
+            Assert.IsTrue(status == DecompositionStatus.Succeeded);
             Assert.IsTrue(plan != null);
             Assert.IsTrue(plan.Count == 1);
             Assert.AreEqual("Sub-task1", plan.Peek().Name);
@@ -440,8 +457,9 @@ namespace Fluid_HTN.UnitTests
             task.AddSubtask(task2);
             task.AddSubtask(new PrimitiveTask() { Name = "Sub-task4" });
 
-            var plan = task.Decompose(ctx, 0);
+            var status = task.Decompose(ctx, 0, out var plan);
 
+            Assert.IsTrue(status == DecompositionStatus.Succeeded);
             Assert.IsTrue(plan != null);
             Assert.IsTrue(plan.Count == 1);
             Assert.AreEqual("Sub-task1", plan.Dequeue().Name);
@@ -458,10 +476,14 @@ namespace Fluid_HTN.UnitTests
             while (ctx.PartialPlanQueue.Count > 0)
             {
                 var kvp = ctx.PartialPlanQueue.Dequeue();
-                var p = kvp.Task.Decompose(ctx, kvp.TaskIndex);
-                while (p.Count > 0)
+                var s = kvp.Task.Decompose(ctx, kvp.TaskIndex, out var p);
+
+                if (s == DecompositionStatus.Succeeded)
                 {
-                    plan.Enqueue(p.Dequeue());
+                    while (p.Count > 0)
+                    {
+                        plan.Enqueue(p.Dequeue());
+                    }
                 }
 
                 if (ctx.HasPausedPartialPlan)
@@ -500,8 +522,9 @@ namespace Fluid_HTN.UnitTests
             task.AddSubtask(task4);
             task.AddSubtask(new PrimitiveTask() { Name = "Sub-task7" });
 
-            var plan = task.Decompose(ctx, 0);
+            var status = task.Decompose(ctx, 0, out var plan);
 
+            Assert.IsTrue(status == DecompositionStatus.Succeeded);
             Assert.IsTrue(plan != null);
             Assert.IsTrue(plan.Count == 1);
             Assert.AreEqual("Sub-task1", plan.Dequeue().Name);
@@ -518,10 +541,14 @@ namespace Fluid_HTN.UnitTests
             while (ctx.PartialPlanQueue.Count > 0)
             {
                 var kvp = ctx.PartialPlanQueue.Dequeue();
-                var p = kvp.Task.Decompose(ctx, kvp.TaskIndex);
-                while (p.Count > 0)
+                var s = kvp.Task.Decompose(ctx, kvp.TaskIndex, out var p);
+
+                if (s == DecompositionStatus.Succeeded)
                 {
-                    plan.Enqueue(p.Dequeue());
+                    while (p.Count > 0)
+                    {
+                        plan.Enqueue(p.Dequeue());
+                    }
                 }
 
                 if (ctx.HasPausedPartialPlan)
@@ -539,10 +566,14 @@ namespace Fluid_HTN.UnitTests
             while (ctx.PartialPlanQueue.Count > 0)
             {
                 var kvp = ctx.PartialPlanQueue.Dequeue();
-                var p = kvp.Task.Decompose(ctx, kvp.TaskIndex);
-                while (p.Count > 0)
+                var s = kvp.Task.Decompose(ctx, kvp.TaskIndex, out var p);
+
+                if (s == DecompositionStatus.Succeeded)
                 {
-                    plan.Enqueue(p.Dequeue());
+                    while (p.Count > 0)
+                    {
+                        plan.Enqueue(p.Dequeue());
+                    }
                 }
 
                 if (ctx.HasPausedPartialPlan)

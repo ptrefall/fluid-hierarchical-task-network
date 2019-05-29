@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using FluidHTN.Compounds;
 using FluidHTN.Conditions;
 using FluidHTN.PrimitiveTasks;
 
@@ -134,8 +135,8 @@ namespace FluidHTN
                     }
                 }
 
-                var newPlan = domain.FindPlan(ctx);
-                if (newPlan != null)
+                var status = domain.FindPlan(ctx, out var newPlan);
+                if (status == DecompositionStatus.Succeeded)
                 {
                     if (OnReplacePlan != null && (_plan.Count > 0 || _currentTask != null))
                     {

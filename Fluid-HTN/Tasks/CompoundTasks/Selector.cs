@@ -32,7 +32,7 @@ namespace FluidHTN.Compounds
         /// </summary>
         /// <param name="ctx"></param>
         /// <returns></returns>
-        protected override Queue<ITask> OnDecompose(IContext ctx, int startIndex)
+        protected override DecompositionStatus OnDecompose(IContext ctx, int startIndex, out Queue<ITask> result)
         {
             Plan.Clear();
 
@@ -52,7 +52,9 @@ namespace FluidHTN.Compounds
                         {
                             ctx.MethodTraversalRecord.Add(-1);
                             if (ctx.DebugMTR) ctx.MTRDebug.Add($"REPLAN FAIL {Subtasks[taskIndex].Name}");
-                            return null;
+
+                            result = null;
+                            return DecompositionStatus.Rejected;
                         }
                     }
 
@@ -68,13 +70,17 @@ namespace FluidHTN.Compounds
                     ctx.MethodTraversalRecord.Add(taskIndex);
                     if (ctx.DebugMTR) ctx.MTRDebug.Add(task.Name);
 
-                    var result = compoundTask.Decompose(ctx, 0);
+                    var status = compoundTask.Decompose(ctx, 0, out var subPlan);
 
-                    // If result is null, that means the entire planning procedure should cancel.
-                    if (result == null) return null;
+                    // If status is rejected, that means the entire planning procedure should cancel.
+                    if (status == DecompositionStatus.Rejected)
+                    {
+                        result = null;
+                        return DecompositionStatus.Rejected;
+                    }
 
                     // If the decomposition failed
-                    if (result.Count == 0)
+                    if (status == DecompositionStatus.Failed)
                     {
                         // Remove the taskIndex if it failed to decompose.
                         ctx.MethodTraversalRecord.RemoveAt(ctx.MethodTraversalRecord.Count - 1);
@@ -82,15 +88,15 @@ namespace FluidHTN.Compounds
                         continue;
                     }
 
-                    while (result.Count > 0)
+                    while (subPlan.Count > 0)
                     {
-                        var res = result.Dequeue();
-                        Plan.Enqueue(res);
+                        Plan.Enqueue(subPlan.Dequeue());
                     }
 
                     if (ctx.HasPausedPartialPlan)
                     {
-                        return Plan;
+                        result = Plan;
+                        return DecompositionStatus.Succeeded;
                     }
                 }
                 else if (task is IPrimitiveTask primitiveTask)
@@ -103,7 +109,8 @@ namespace FluidHTN.Compounds
                 break;
             }
 
-            return Plan;
+            result = Plan;
+            return result.Count == 0 ? DecompositionStatus.Failed : DecompositionStatus.Succeeded;
         }
     }
 }

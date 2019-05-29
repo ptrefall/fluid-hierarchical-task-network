@@ -13,6 +13,6 @@ namespace FluidHTN.Compounds
         /// </summary>
         /// <param name="ctx"></param>
         /// <returns></returns>
-        Queue<ITask> Decompose(IContext ctx, int startIndex);
+        DecompositionStatus Decompose(IContext ctx, int startIndex, out Queue<ITask> result);
     }
 }

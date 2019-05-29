@@ -29,12 +29,12 @@ namespace FluidHTN.Compounds
 
         // ========================================================= DECOMPOSITION
 
-        public Queue<ITask> Decompose(IContext ctx, int startIndex)
+        public DecompositionStatus Decompose(IContext ctx, int startIndex, out Queue<ITask> result)
         {
-            return OnDecompose(ctx, startIndex);
+            return OnDecompose(ctx, startIndex, out result);
         }
 
-        protected abstract Queue<ITask> OnDecompose(IContext ctx, int startIndex);
+        protected abstract DecompositionStatus OnDecompose(IContext ctx, int startIndex, out Queue<ITask> result);
 
         // ========================================================= VALIDITY
 

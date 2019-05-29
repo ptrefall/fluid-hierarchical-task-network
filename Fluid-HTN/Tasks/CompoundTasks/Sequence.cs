@@ -32,7 +32,7 @@ namespace FluidHTN.Compounds
         /// </summary>
         /// <param name="ctx"></param>
         /// <returns></returns>
-        protected override Queue<ITask> OnDecompose(IContext ctx, int startIndex)
+        protected override DecompositionStatus OnDecompose(IContext ctx, int startIndex, out Queue<ITask> result)
         {
             Plan.Clear();
 
@@ -53,20 +53,22 @@ namespace FluidHTN.Compounds
 
                 if (task is ICompoundTask compoundTask)
                 {
-                    var result = compoundTask.Decompose(ctx, 0);
+                    var status = compoundTask.Decompose(ctx, 0, out var subPlan);
 
                     // If result is null, that means the entire planning procedure should cancel.
-                    if (result == null)
+                    if (status == DecompositionStatus.Rejected)
                     {
                         Plan.Clear();
                         //ctx.Copy( oldCtx );
                         ctx.TrimToStackDepth(oldStackDepth);
                         ctx.Factory.FreeArray(ref oldStackDepth);
-                        return null;
+
+                        result = null;
+                        return DecompositionStatus.Rejected;
                     }
 
                     // If the decomposition failed
-                    if (result.Count == 0)
+                    if (status == DecompositionStatus.Failed)
                     {
                         Plan.Clear();
                         //ctx.Copy( oldCtx );
@@ -74,7 +76,10 @@ namespace FluidHTN.Compounds
                         break;
                     }
 
-                    while (result.Count > 0) Plan.Enqueue(result.Dequeue());
+                    while (subPlan.Count > 0)
+                    {
+                        Plan.Enqueue(subPlan.Dequeue());
+                    }
 
                     if (ctx.HasPausedPartialPlan)
                     {
@@ -88,7 +93,9 @@ namespace FluidHTN.Compounds
                         }
 
                         ctx.Factory.FreeArray(ref oldStackDepth);
-                        return Plan;
+
+                        result = Plan;
+                        return DecompositionStatus.Succeeded;
                     }
                 }
                 else if (task is IPrimitiveTask primitiveTask)
@@ -106,12 +113,16 @@ namespace FluidHTN.Compounds
                     });
 
                     ctx.Factory.FreeArray(ref oldStackDepth);
-                    return Plan;
+
+                    result = Plan;
+                    return DecompositionStatus.Succeeded;
                 }
             }
 
             ctx.Factory.FreeArray(ref oldStackDepth);
-            return Plan;
+
+            result = Plan;
+            return result.Count == 0 ? DecompositionStatus.Failed : DecompositionStatus.Succeeded;
         }
     }
 }

@@ -35,7 +35,7 @@ namespace Fluid_HTN.UnitTests
         public void FindPlanNoCtxThrowsNRE_ExpectedBehavior()
         {
             var domain = new Domain<MyContext>("Test");
-            var plan = domain.FindPlan(null);
+            var status = domain.FindPlan(null, out var plan);
         }
 
         [TestMethod]
@@ -44,7 +44,8 @@ namespace Fluid_HTN.UnitTests
         {
             var ctx = new MyContext();
             var domain = new Domain<MyContext>("Test");
-            var plan = domain.FindPlan(ctx);
+            var status = domain.FindPlan(ctx, out var plan);
+            Assert.IsTrue(status == DecompositionStatus.Failed);
             Assert.IsTrue(plan != null);
             Assert.IsTrue(plan.Count == 0);
         }
@@ -55,7 +56,8 @@ namespace Fluid_HTN.UnitTests
             var ctx = new MyContext();
             ctx.Init();
             var domain = new Domain<MyContext>("Test");
-            var plan = domain.FindPlan(ctx);
+            var status = domain.FindPlan(ctx, out var plan);
+            Assert.IsTrue(status == DecompositionStatus.Rejected);
             Assert.IsTrue(plan == null);
         }
 
@@ -68,7 +70,7 @@ namespace Fluid_HTN.UnitTests
             ctx.MethodTraversalRecord = null;
 
             var domain = new Domain<MyContext>("Test");
-            var plan = domain.FindPlan(ctx);
+            var status = domain.FindPlan(ctx, out var plan);
         }
 
         [TestMethod]
@@ -77,7 +79,7 @@ namespace Fluid_HTN.UnitTests
             var ctx = new MyContext();
             ctx.Init();
             var domain = new Domain<MyContext>("Test");
-            var plan = domain.FindPlan(ctx);
+            var status = domain.FindPlan(ctx, out var plan);
             Assert.IsTrue(ctx.ContextState == ContextState.Executing);
         }
 
@@ -91,8 +93,9 @@ namespace Fluid_HTN.UnitTests
             var task2 = new PrimitiveTask() { Name = "Sub-task" };
             domain.Add(domain.Root, task1);
             domain.Add(task1, task2);
-            var plan = domain.FindPlan(ctx);
+            var status = domain.FindPlan(ctx, out var plan);
 
+            Assert.IsTrue(status == DecompositionStatus.Succeeded);
             Assert.IsTrue(plan != null);
             Assert.IsTrue(plan.Count == 1);
             Assert.IsTrue(plan.Peek().Name == "Sub-task");
@@ -112,8 +115,9 @@ namespace Fluid_HTN.UnitTests
             domain.Add(task1, task2);
             domain.Add(task1, task3);
             domain.Add(task1, task4);
-            var plan = domain.FindPlan(ctx);
+            var status = domain.FindPlan(ctx, out var plan);
 
+            Assert.IsTrue(status == DecompositionStatus.Succeeded);
             Assert.IsTrue(ctx.WorldStateChangeStack[(int) MyWorldState.HasA].Count == 0);
             Assert.IsTrue(ctx.WorldStateChangeStack[(int) MyWorldState.HasB].Count == 0);
             Assert.IsTrue(ctx.WorldStateChangeStack[(int) MyWorldState.HasC].Count == 0);
@@ -139,8 +143,9 @@ namespace Fluid_HTN.UnitTests
             domain.Add(task1, task3);
             domain.Add(task1, task4);
             domain.Add(task1, task5);
-            var plan = domain.FindPlan(ctx);
+            var status = domain.FindPlan(ctx, out var plan);
 
+            Assert.IsTrue(status == DecompositionStatus.Rejected);
             Assert.IsTrue(ctx.WorldStateChangeStack[(int) MyWorldState.HasA].Count == 0);
             Assert.IsTrue(ctx.WorldStateChangeStack[(int) MyWorldState.HasB].Count == 0);
             Assert.IsTrue(ctx.WorldStateChangeStack[(int) MyWorldState.HasC].Count == 0);
@@ -172,8 +177,9 @@ namespace Fluid_HTN.UnitTests
             domain.Add(task1, task3);
             domain.Add(task2, task4);
             domain.Add(task2, task5);
-            var plan = domain.FindPlan(ctx);
+            var status = domain.FindPlan(ctx, out var plan);
 
+            Assert.IsTrue(status == DecompositionStatus.Rejected);
             Assert.IsTrue(plan == null);
             Assert.IsTrue(ctx.MethodTraversalRecord.Count == 1);
             Assert.IsTrue(ctx.MethodTraversalRecord[0] == ctx.LastMTR[0]);
@@ -191,8 +197,9 @@ namespace Fluid_HTN.UnitTests
             domain.Add(task, new PausePlanTask());
             domain.Add(task, new PrimitiveTask() { Name = "Sub-task2" });
 
-            var plan = domain.FindPlan(ctx);
-
+            var status = domain.FindPlan(ctx, out var plan);
+            
+            Assert.IsTrue(status == DecompositionStatus.Succeeded);
             Assert.IsTrue(plan != null);
             Assert.IsTrue(plan.Count == 1);
             Assert.AreEqual("Sub-task1", plan.Peek().Name);
@@ -215,8 +222,9 @@ namespace Fluid_HTN.UnitTests
             domain.Add(task, new PausePlanTask());
             domain.Add(task, new PrimitiveTask() { Name = "Sub-task2" });
 
-            var plan = domain.FindPlan(ctx);
+            var status = domain.FindPlan(ctx, out var plan);
 
+            Assert.IsTrue(status == DecompositionStatus.Succeeded);
             Assert.IsTrue(plan != null);
             Assert.IsTrue(plan.Count == 1);
             Assert.AreEqual("Sub-task1", plan.Dequeue().Name);
@@ -225,8 +233,9 @@ namespace Fluid_HTN.UnitTests
             Assert.AreEqual(task, ctx.PartialPlanQueue.Peek().Task);
             Assert.AreEqual(2, ctx.PartialPlanQueue.Peek().TaskIndex);
 
-            plan = domain.FindPlan(ctx);
+            status = domain.FindPlan(ctx, out plan);
 
+            Assert.IsTrue(status == DecompositionStatus.Succeeded);
             Assert.IsTrue(plan != null);
             Assert.IsTrue(plan.Count == 1);
             Assert.AreEqual("Sub-task2", plan.Peek().Name);
@@ -254,8 +263,9 @@ namespace Fluid_HTN.UnitTests
             domain.Add(task3, new PausePlanTask());
             domain.Add(task3, new PrimitiveTask() { Name = "Sub-task2" });
 
-            var plan = domain.FindPlan(ctx);
+            var status = domain.FindPlan(ctx, out var plan);
 
+            Assert.IsTrue(status == DecompositionStatus.Succeeded);
             Assert.IsTrue(plan != null);
             Assert.IsTrue(plan.Count == 1);
             Assert.AreEqual("Sub-task1", plan.Peek().Name);
@@ -290,8 +300,9 @@ namespace Fluid_HTN.UnitTests
             domain.Add(task3, new PausePlanTask());
             domain.Add(task3, new PrimitiveTask() { Name = "Sub-task2" });
 
-            var plan = domain.FindPlan(ctx);
+            var status = domain.FindPlan(ctx, out var plan);
 
+            Assert.IsTrue(status == DecompositionStatus.Succeeded);
             Assert.IsTrue(plan != null);
             Assert.IsTrue(plan.Count == 1);
             Assert.AreEqual("Sub-task1", plan.Dequeue().Name);
@@ -303,8 +314,9 @@ namespace Fluid_HTN.UnitTests
             Assert.AreEqual(task, queueAsArray[1].Task);
             Assert.AreEqual(1, queueAsArray[1].TaskIndex);
 
-            plan = domain.FindPlan(ctx);
+            status = domain.FindPlan(ctx, out plan);
 
+            Assert.IsTrue(status == DecompositionStatus.Succeeded);
             Assert.IsTrue(plan != null);
             Assert.IsTrue(plan.Count == 2);
             Assert.AreEqual("Sub-task2", plan.Dequeue().Name);
@@ -341,8 +353,9 @@ namespace Fluid_HTN.UnitTests
             domain.Add(task, task4);
             domain.Add(task, new PrimitiveTask() { Name = "Sub-task7" });
 
-            var plan = domain.FindPlan(ctx);
+            var status = domain.FindPlan(ctx, out var plan);
 
+            Assert.IsTrue(status == DecompositionStatus.Succeeded);
             Assert.IsTrue(plan != null);
             Assert.IsTrue(plan.Count == 1);
             Assert.AreEqual("Sub-task1", plan.Dequeue().Name);
@@ -354,16 +367,18 @@ namespace Fluid_HTN.UnitTests
             Assert.AreEqual(task, queueAsArray[1].Task);
             Assert.AreEqual(1, queueAsArray[1].TaskIndex);
 
-            plan = domain.FindPlan(ctx);
+            status = domain.FindPlan(ctx, out plan);
 
+            Assert.IsTrue(status == DecompositionStatus.Succeeded);
             Assert.IsTrue(plan != null);
             Assert.IsTrue(plan.Count == 3);
             Assert.AreEqual("Sub-task2", plan.Dequeue().Name);
             Assert.AreEqual("Sub-task4", plan.Dequeue().Name);
             Assert.AreEqual("Sub-task5", plan.Dequeue().Name);
 
-            plan = domain.FindPlan(ctx);
+            status = domain.FindPlan(ctx, out plan);
 
+            Assert.IsTrue(status == DecompositionStatus.Succeeded);
             Assert.IsTrue(plan != null);
             Assert.IsTrue(plan.Count == 2);
             Assert.AreEqual("Sub-task6", plan.Dequeue().Name);
