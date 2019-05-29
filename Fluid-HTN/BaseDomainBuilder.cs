@@ -57,16 +57,44 @@ namespace FluidHTN
         /// <returns></returns>
         public DB CompoundTask<P>(string name) where P : ICompoundTask, new()
         {
-            if (Pointer is ICompoundTask compoundTask)
+            var parent = new P();
+            return CompoundTask(name, parent);
+        }
+
+        /// <summary>
+        ///     Compound tasks are where HTN get their “hierarchical” nature. You can think of a compound task as 
+        ///     a high level task that has multiple ways of being accomplished. There are primarily two types of 
+        ///     compound tasks. Selectors and Sequencers. A Selector must be able to decompose a single sub-task, 
+        ///     while a Sequence must be able to decompose all its sub-tasks successfully for itself to have decomposed 
+        ///     successfully. There is nothing stopping you from extending this toolset with RandomSelect, UtilitySelect,
+        ///     etc. These tasks are decomposed until we're left with only Primitive Tasks, which represent a final plan. 
+        ///     Compound tasks are comprised of a set of subtasks and a set of conditions.
+        ///     http://www.gameaipro.com/GameAIPro/GameAIPro_Chapter12_Exploring_HTN_Planners_through_Example.pdf
+        /// </summary>
+        /// <typeparam name="P">The type of compound task</typeparam>
+        /// <param name="name">The name given to the task, mainly for debug/display purposes</param>
+        /// <param task="task">The task instance</param>
+        /// <returns></returns>
+        public DB CompoundTask<P>(string name, P task) where P : ICompoundTask
+        {
+            if (task != null)
             {
-                var parent = new P { Name = name };
-                _domain.Add(compoundTask, parent);
-                _pointers.Add(parent);
+                if (Pointer is ICompoundTask compoundTask)
+                {
+                    task.Name = name;
+                    _domain.Add(compoundTask, task);
+                    _pointers.Add(task);
+                }
+                else
+                {
+                    throw new Exception(
+                        "Pointer is not a compound task type. Did you forget an End() after a Primitive Task Action was defined?");
+                }
             }
             else
             {
-                throw new Exception(
-                    "Pointer is not a compound task type. Did you forget an End() after a Primitive Task Action was defined?");
+                throw new ArgumentNullException(
+                    "task");
             }
 
             return (DB) this;
