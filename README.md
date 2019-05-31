@@ -389,7 +389,7 @@ namespace FluidHTN.Compounds
     {
         protected Random _random = new Random();
 
-        protected override Queue<ITask> OnDecompose(IContext ctx, int startIndex)
+        DecompositionStatus OnDecompose(IContext ctx, int startIndex, out Queue<ITask> result)
         {
             Plan.Clear();
 
@@ -397,22 +397,29 @@ namespace FluidHTN.Compounds
             var task = Subtasks[taskIndex];
 
             if (task.IsValid(ctx) == false)
-                return Plan;
+            {
+                result = Plan;
+                return DecompositionStatus.Failed;
+            }
 
             if (task is ICompoundTask compoundTask)
             {
-                var result = compoundTask.Decompose(ctx, 0);
-
-                // If result is null, that means the entire planning procedure should cancel.
-                if (result == null) return null;
-
-                // If the decomposition failed
-                if (result.Count == 0) return Plan;
-
-                while (result.Count > 0)
+                var status = compoundTask.Decompose(ctx, 0, out var subPlan);
+                if (status == DecompositionStatus.Rejected)
                 {
-                    var res = result.Dequeue();
-                    Plan.Enqueue(res);
+                    result = null;
+                    return DecompositionStatus.Rejected;
+                }
+
+                if (status == DecompositionStatus.Failed)
+                {
+                    result = Plan;
+                    return DecompositionStatus.Failed;
+                }
+
+                while (subPlan.Count > 0)
+                {
+                    Plan.Enqueue(subPlan.Dequeue());
                 }
             }
             else if (task is IPrimitiveTask primitiveTask)
@@ -421,7 +428,8 @@ namespace FluidHTN.Compounds
                 Plan.Enqueue(task);
             }
 
-            return Plan;
+            result = Plan;
+            return result.Count == 0 ? DecompositionStatus.Failed : DecompositionStatus.Succeeded;
         }
     }
 }
@@ -520,6 +528,7 @@ Example projects have been pulled into their own repositories, as not to clutter
 * [Fluid Goap Coffai](https://github.com/ptrefall/fluid-goap-coffai)
 
 ## TODO
+* Improve debugging capabilities
 * Improve documentation
 * Improve Extensions library
 * Improve Examples
