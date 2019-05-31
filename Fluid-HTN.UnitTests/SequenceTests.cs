@@ -353,7 +353,7 @@ namespace Fluid_HTN.UnitTests
 
             var status = task.Decompose(ctx, 0, out var plan);
 
-            Assert.IsTrue(status == DecompositionStatus.Succeeded);
+            Assert.IsTrue(status == DecompositionStatus.Partial);
             Assert.IsTrue(plan != null);
             Assert.IsTrue(plan.Count == 1);
             Assert.AreEqual("Sub-task1", plan.Peek().Name);
@@ -376,7 +376,7 @@ namespace Fluid_HTN.UnitTests
 
             var status = task.Decompose(ctx, 0, out var plan);
 
-            Assert.IsTrue(status == DecompositionStatus.Succeeded);
+            Assert.IsTrue(status == DecompositionStatus.Partial);
             Assert.IsTrue(plan != null);
             Assert.IsTrue(plan.Count == 1);
             Assert.AreEqual("Sub-task1", plan.Dequeue().Name);
@@ -391,7 +391,7 @@ namespace Fluid_HTN.UnitTests
             {
                 var kvp = ctx.PartialPlanQueue.Dequeue();
                 var s = kvp.Task.Decompose(ctx, kvp.TaskIndex, out var p);
-                if (s == DecompositionStatus.Succeeded)
+                if (s == DecompositionStatus.Succeeded || s == DecompositionStatus.Partial)
                 {
                     while (p.Count > 0)
                     {
@@ -425,7 +425,7 @@ namespace Fluid_HTN.UnitTests
 
             var status = task.Decompose(ctx, 0, out var plan);
 
-            Assert.IsTrue(status == DecompositionStatus.Succeeded);
+            Assert.IsTrue(status == DecompositionStatus.Partial);
             Assert.IsTrue(plan != null);
             Assert.IsTrue(plan.Count == 1);
             Assert.AreEqual("Sub-task1", plan.Peek().Name);
@@ -459,7 +459,7 @@ namespace Fluid_HTN.UnitTests
 
             var status = task.Decompose(ctx, 0, out var plan);
 
-            Assert.IsTrue(status == DecompositionStatus.Succeeded);
+            Assert.IsTrue(status == DecompositionStatus.Partial);
             Assert.IsTrue(plan != null);
             Assert.IsTrue(plan.Count == 1);
             Assert.AreEqual("Sub-task1", plan.Dequeue().Name);
@@ -478,7 +478,7 @@ namespace Fluid_HTN.UnitTests
                 var kvp = ctx.PartialPlanQueue.Dequeue();
                 var s = kvp.Task.Decompose(ctx, kvp.TaskIndex, out var p);
 
-                if (s == DecompositionStatus.Succeeded)
+                if (s == DecompositionStatus.Succeeded || s == DecompositionStatus.Partial)
                 {
                     while (p.Count > 0)
                     {
@@ -524,7 +524,7 @@ namespace Fluid_HTN.UnitTests
 
             var status = task.Decompose(ctx, 0, out var plan);
 
-            Assert.IsTrue(status == DecompositionStatus.Succeeded);
+            Assert.IsTrue(status == DecompositionStatus.Partial);
             Assert.IsTrue(plan != null);
             Assert.IsTrue(plan.Count == 1);
             Assert.AreEqual("Sub-task1", plan.Dequeue().Name);
@@ -543,7 +543,7 @@ namespace Fluid_HTN.UnitTests
                 var kvp = ctx.PartialPlanQueue.Dequeue();
                 var s = kvp.Task.Decompose(ctx, kvp.TaskIndex, out var p);
 
-                if (s == DecompositionStatus.Succeeded)
+                if (s == DecompositionStatus.Succeeded || s == DecompositionStatus.Partial)
                 {
                     while (p.Count > 0)
                     {
@@ -568,7 +568,7 @@ namespace Fluid_HTN.UnitTests
                 var kvp = ctx.PartialPlanQueue.Dequeue();
                 var s = kvp.Task.Decompose(ctx, kvp.TaskIndex, out var p);
 
-                if (s == DecompositionStatus.Succeeded)
+                if (s == DecompositionStatus.Succeeded || s == DecompositionStatus.Partial)
                 {
                     while (p.Count > 0)
                     {

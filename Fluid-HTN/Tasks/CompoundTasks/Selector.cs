@@ -60,57 +60,87 @@ namespace FluidHTN.Compounds
 
                 var task = Subtasks[taskIndex];
 
-                if (task.IsValid(ctx) == false)
-                    continue;
-
-                if (task is ICompoundTask compoundTask)
+                var status = OnDecomposeTask(ctx, task, taskIndex, null, out result);
+                switch (status)
                 {
-                    // We need to record the task index before we decompose the task,
-                    // so that the traversal record is set up in the right order.
-                    ctx.MethodTraversalRecord.Add(taskIndex);
-                    if (ctx.DebugMTR) ctx.MTRDebug.Add(task.Name);
-
-                    var status = compoundTask.Decompose(ctx, 0, out var subPlan);
-
-                    // If status is rejected, that means the entire planning procedure should cancel.
-                    if (status == DecompositionStatus.Rejected)
-                    {
-                        result = null;
-                        return DecompositionStatus.Rejected;
-                    }
-
-                    // If the decomposition failed
-                    if (status == DecompositionStatus.Failed)
-                    {
-                        // Remove the taskIndex if it failed to decompose.
-                        ctx.MethodTraversalRecord.RemoveAt(ctx.MethodTraversalRecord.Count - 1);
-                        if (ctx.DebugMTR) ctx.MTRDebug.RemoveAt(ctx.MTRDebug.Count - 1);
+                    case DecompositionStatus.Rejected:
+                    case DecompositionStatus.Succeeded:
+                    case DecompositionStatus.Partial:
+                        return status;
+                    case DecompositionStatus.Failed:
+                    default:
                         continue;
-                    }
-
-                    while (subPlan.Count > 0)
-                    {
-                        Plan.Enqueue(subPlan.Dequeue());
-                    }
-
-                    if (ctx.HasPausedPartialPlan)
-                    {
-                        result = Plan;
-                        return DecompositionStatus.Succeeded;
-                    }
                 }
-                else if (task is IPrimitiveTask primitiveTask)
-                {
-                    primitiveTask.ApplyEffects(ctx);
-                    Plan.Enqueue(task);
-                }
-
-                // Break the moment we've selected a single sub-task that was successfully decomposed / validated.
-                break;
             }
 
             result = Plan;
             return result.Count == 0 ? DecompositionStatus.Failed : DecompositionStatus.Succeeded;
+        }
+
+        protected override DecompositionStatus OnDecomposeTask(IContext ctx, ITask task, int taskIndex,
+            int[] oldStackDepth, out Queue<ITask> result)
+        {
+            if (task.IsValid(ctx) == false)
+            {
+                result = Plan;
+                return DecompositionStatus.Failed;
+            }
+
+            if (task is ICompoundTask compoundTask)
+            {
+                return OnDecomposeCompoundTask(ctx, compoundTask, taskIndex, null, out result);
+            }
+
+            if (task is IPrimitiveTask primitiveTask)
+            {
+                primitiveTask.ApplyEffects(ctx);
+                Plan.Enqueue(task);
+            }
+
+            result = Plan;
+            return DecompositionStatus.Succeeded;
+        }
+
+        protected override DecompositionStatus OnDecomposeCompoundTask(IContext ctx, ICompoundTask task, int taskIndex,
+            int[] oldStackDepth, out Queue<ITask> result)
+        {
+            // We need to record the task index before we decompose the task,
+            // so that the traversal record is set up in the right order.
+            ctx.MethodTraversalRecord.Add(taskIndex);
+            if (ctx.DebugMTR) ctx.MTRDebug.Add(task.Name);
+
+            var status = task.Decompose(ctx, 0, out var subPlan);
+
+            // If status is rejected, that means the entire planning procedure should cancel.
+            if (status == DecompositionStatus.Rejected)
+            {
+                result = null;
+                return DecompositionStatus.Rejected;
+            }
+
+            // If the decomposition failed
+            if (status == DecompositionStatus.Failed)
+            {
+                // Remove the taskIndex if it failed to decompose.
+                ctx.MethodTraversalRecord.RemoveAt(ctx.MethodTraversalRecord.Count - 1);
+                if (ctx.DebugMTR) ctx.MTRDebug.RemoveAt(ctx.MTRDebug.Count - 1);
+                result = Plan;
+                return DecompositionStatus.Failed;
+            }
+
+            while (subPlan.Count > 0)
+            {
+                Plan.Enqueue(subPlan.Dequeue());
+            }
+
+            if (ctx.HasPausedPartialPlan)
+            {
+                result = Plan;
+                return DecompositionStatus.Partial;
+            }
+
+            result = Plan;
+            return DecompositionStatus.Succeeded;
         }
     }
 }

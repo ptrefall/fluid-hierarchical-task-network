@@ -61,7 +61,7 @@ namespace FluidHTN
                     else
                     {
                         status = kvp.Task.Decompose(ctx, kvp.TaskIndex, out var p);
-                        if (status == DecompositionStatus.Succeeded)
+                        if (status == DecompositionStatus.Succeeded || status == DecompositionStatus.Partial)
                         {
                             while (p.Count > 0)
                             {
@@ -142,7 +142,7 @@ namespace FluidHTN
                 }
             }
 
-            if (status == DecompositionStatus.Succeeded)
+            if (status == DecompositionStatus.Succeeded || status == DecompositionStatus.Partial)
             {
                 // Trim away any plan-only or plan&execute effects from the world state change stack, that only
                 // permanent effects on the world state remains now that the planning is done.

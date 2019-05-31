@@ -136,7 +136,7 @@ namespace FluidHTN
                 }
 
                 var status = domain.FindPlan(ctx, out var newPlan);
-                if (status == DecompositionStatus.Succeeded)
+                if (status == DecompositionStatus.Succeeded || status == DecompositionStatus.Partial)
                 {
                     if (OnReplacePlan != null && (_plan.Count > 0 || _currentTask != null))
                     {

@@ -3,6 +3,7 @@
     public enum DecompositionStatus
     {
         Succeeded,
+        Partial,
         Failed,
         Rejected
     }
