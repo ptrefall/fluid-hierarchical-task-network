@@ -308,6 +308,19 @@ namespace FluidHTN
                 }
         }
 
+        // ========================================================= RESET
+
+        public void Reset(IContext ctx)
+        {
+            _plan.Clear();
+            
+            if(_currentTask != null && _currentTask is IPrimitiveTask task)
+            {
+                task.Stop(ctx);
+            }
+            _currentTask = null;
+        }
+
         // ========================================================= GETTERS
 
         /// <summary>
