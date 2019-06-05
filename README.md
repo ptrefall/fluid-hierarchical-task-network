@@ -528,7 +528,4 @@ Example projects have been pulled into their own repositories, as not to clutter
 * [Fluid Goap Coffai](https://github.com/ptrefall/fluid-goap-coffai)
 
 ## TODO
-* Improve debugging capabilities
-* Improve documentation
-* Improve Extensions library
-* Improve Examples
+Review the [Projects area](https://github.com/ptrefall/fluid-hierarchical-task-network/projects) of this project to get an overview of what's on the todo-list of this project, and which new features are in progress.
