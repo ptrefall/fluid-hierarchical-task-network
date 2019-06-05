@@ -6,6 +6,10 @@ namespace FluidHTN
 {
     public class Domain<T> where T : IContext
     {
+        // ========================================================= FIELDS
+
+        private Dictionary<int, Slot> _slots = null;
+
         // ========================================================= CONSTRUCTION
 
         public Domain(string name)
@@ -25,6 +29,22 @@ namespace FluidHTN
 
             parent.AddSubtask(subtask);
             subtask.Parent = parent;
+        }
+
+        public void Add(ICompoundTask parent, Slot slot)
+        {
+            if (parent == slot)
+                throw new Exception("Parent-task and Sub-task can't be the same instance!");
+
+            parent.AddSubtask(slot);
+            slot.Parent = parent;
+
+            if(_slots == null)
+            {
+                _slots = new Dictionary<int, Slot>();
+            }
+
+            _slots.Add(slot.SlotId, slot);
         }
 
         // ========================================================= PLANNING
@@ -172,6 +192,36 @@ namespace FluidHTN
 
             ctx.ContextState = ContextState.Executing;
             return status;
+        }
+
+        // ========================================================= SLOTS
+
+        /// <summary>
+        ///     At runtime, set a sub-domain to the slot with the given id.
+        ///     This can be used with Smart Objects, to extend the behavior
+        ///     of an agent at runtime.
+        /// </summary>
+        public bool TrySetSlotDomain(int slotId, Domain<T> subDomain)
+        {
+            if(_slots != null && _slots.TryGetValue(slotId, out var slot))
+            {
+                return slot.Set(subDomain.Root);
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        ///     At runtime, clear the sub-domain from the slot with the given id.
+        ///     This can be used with Smart Objects, to extend the behavior
+        ///     of an agent at runtime.
+        /// </summary>
+        public void ClearSlot(int slotId)
+        {
+            if (_slots != null && _slots.TryGetValue(slotId, out var slot))
+            {
+                slot.Clear();
+            }
         }
     }
 }

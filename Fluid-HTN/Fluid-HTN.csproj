@@ -58,6 +58,7 @@
     <Compile Include="Conditions\ICondition.cs" />
     <Compile Include="Effects\ActionEffect.cs" />
     <Compile Include="Effects\IEffect.cs" />
+    <Compile Include="Tasks\OtherTasks\Slot.cs" />
     <Compile Include="Tasks\ITask.cs" />
     <Compile Include="Tasks\CompoundTasks\ICompoundTask.cs" />
     <Compile Include="Effects\EffectType.cs" />

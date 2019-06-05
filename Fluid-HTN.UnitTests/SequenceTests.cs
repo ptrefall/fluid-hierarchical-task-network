@@ -121,6 +121,8 @@ namespace Fluid_HTN.UnitTests
         {
             var ctx = new MyContext();
             ctx.Init();
+            ctx.ContextState = ContextState.Planning;
+
             var task = new Sequence() { Name = "Test" };
             task.AddSubtask(new PrimitiveTask() { Name = "Sub-task1" });
             task.AddSubtask(new PrimitiveTask() { Name = "Sub-task2" }.AddCondition(new FuncCondition<MyContext>("Done == true", context => context.Done == true)));
@@ -136,6 +138,8 @@ namespace Fluid_HTN.UnitTests
         {
             var ctx = new MyContext();
             ctx.Init();
+            ctx.ContextState = ContextState.Planning;
+
             var task = new Sequence() { Name = "Test" };
             task.AddSubtask(new Selector() { Name = "Sub-task1" });
             task.AddSubtask(new PrimitiveTask() { Name = "Sub-task2" });
@@ -178,6 +182,7 @@ namespace Fluid_HTN.UnitTests
         {
             var ctx = new MyContext();
             ctx.Init();
+            ctx.ContextState = ContextState.Planning;
 
             var task = new Sequence() { Name = "Test" };
             var task2 = new Selector() { Name = "Test2" };
@@ -207,6 +212,7 @@ namespace Fluid_HTN.UnitTests
         {
             var ctx = new MyContext();
             ctx.Init();
+            ctx.ContextState = ContextState.Planning;
 
             var task = new Sequence() { Name = "Test" };
             var task2 = new Selector() { Name = "Test2" };

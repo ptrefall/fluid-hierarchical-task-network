@@ -295,7 +295,28 @@ namespace FluidHTN
                 _domain.Add(compoundTask, domain.Root);
             else
                 throw new Exception(
-                    "Pointer is not a compound task type. Did you forget an End() after a Primitive Task Action was defined?");
+                    "Pointer is not a compound task type. Did you forget an End()?");
+
+            return (DB) this;
+        }
+
+        /// <summary>
+        ///     The identifier associated with a slot can be used to splice 
+        ///     sub-domains onto the domain, and remove them, at runtime.
+        ///     Use TrySetSlotDomain and ClearSlot on the domain instance at
+        ///     runtime to manage this feature. SlotId can typically be implemented
+        ///     as an enum.
+        /// </summary>
+        public DB Slot(int slotId)
+        {
+            if (Pointer is ICompoundTask compoundTask)
+            {
+                var slot = new Slot() { SlotId = slotId };
+                _domain.Add(compoundTask, slot);
+            }
+            else
+                throw new Exception(
+                    "Pointer is not a compound task type. Did you forget an End()?");
 
             return (DB) this;
         }

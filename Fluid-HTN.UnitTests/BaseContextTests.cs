@@ -8,11 +8,11 @@ namespace Fluid_HTN.UnitTests
     public class BaseContextTests
     {
         [TestMethod]
-        public void DefaultContextStateIsPlanning_ExpectedBehavior()
+        public void DefaultContextStateIsExecuting_ExpectedBehavior()
         {
             var ctx = new MyContext();
 
-            Assert.IsTrue(ctx.ContextState == ContextState.Planning);
+            Assert.IsTrue(ctx.ContextState == ContextState.Executing);
         }
 
         [TestMethod]
