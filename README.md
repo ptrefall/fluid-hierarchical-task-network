@@ -11,7 +11,7 @@ A simple HTN planner based around the principles of the Builder pattern, inspire
 * Easy to extend with new features, as demonstrated in the [extension library](https://github.com/ptrefall/fluid-hierarchical-task-network-ext).
 * Uses a Factory interface internally to create and free arrays/collections/objects, allowing the user to add pooling, or other memory management schemes.
 * Comes with Unity Package Module definitions for seamless integration into Unity projects.
-* 139 unit tests.
+* 142 unit tests.
 
 ## Support
 Join the [discord channel](https://discord.gg/MuccnAz) to share your experience and get support on the usage of Fluid HTN.
@@ -190,6 +190,23 @@ var myDomain = new DomainBuilder<MyContext>("MyDomain")
         //...
     .End()
     .Build();
+```
+### Sub-domains and slots
+We can define slots in our domain definitions, and mark them with slot ids. This allow us to hook up sub-domains to these slots at run-time. This can be useful together with Smart Objects that extend the behavior of an agent when interacted with, for example.
+```C#
+var subDomain = new DomainBuilder<MyContext>("SubDomain")
+    .Select("B")
+        //...
+    .End()
+    .Build();
+
+var myDomain = new DomainBuilder<MyContext>("MyDomain")
+    .Slot(1)
+    .Build();
+    
+myDomain.TrySetSlotDomain(1, subDomain);
+//...
+myDomain.ClearSlot(1);
 ```
 ### Extending the Domain Builder
 A powerful feature of Fluid HTN, is how easy it is to extend the domain builder with specialized task types for a project's problem domain.
