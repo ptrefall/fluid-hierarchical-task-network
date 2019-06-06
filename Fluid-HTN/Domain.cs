@@ -36,6 +36,14 @@ namespace FluidHTN
             if (parent == slot)
                 throw new Exception("Parent-task and Sub-task can't be the same instance!");
 
+            if (_slots != null)
+            {
+                if (_slots.ContainsKey(slot.SlotId))
+                {
+                    throw new Exception("This slot id already exist in the domain definition!");
+                }
+            }
+
             parent.AddSubtask(slot);
             slot.Parent = parent;
 

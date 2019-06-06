@@ -389,6 +389,18 @@ namespace Fluid_HTN.UnitTests
         }
 
         [TestMethod]
+        [ExpectedException(typeof(Exception), AllowDerivedTypes = false)]
+        public void Slot_ThrowsIfSlotIdAlreadyDefined()
+        {
+            // Arrange
+            var builder = new DomainBuilder<MyContext>("Test");
+
+            // Act
+            builder.Slot(1);
+            builder.Slot(1);
+        }
+
+        [TestMethod]
         public void Slot_ExpectedBehavior()
         {
             // Arrange
