@@ -6,6 +6,7 @@ A simple HTN planner based around the principles of the Builder pattern, inspire
 * Fluid HTN is a total-order forward decomposition planner, as described by Troy Humphreys in his [GameAIPro article](http://www.gameaipro.com/GameAIPro/GameAIPro_Chapter12_Exploring_HTN_Planners_through_Example.pdf).
 * Partial planning.
 * Domain splicing.
+* Domain slots for run-time splicing.
 * Replan only when plans complete/fail or when world state change.
 * Early rejection of replanning that can't win.
 * Easy to extend with new features, as demonstrated in the [extension library](https://github.com/ptrefall/fluid-hierarchical-task-network-ext).
