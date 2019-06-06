@@ -375,5 +375,59 @@ namespace Fluid_HTN.UnitTests
 
             Assert.AreEqual(true, builder.Pointer is Selector);
         }
+
+        [TestMethod]
+        [ExpectedException(typeof(Exception), AllowDerivedTypes = false)]
+        public void Slot_ThrowsIfNotCompoundPointer()
+        {
+            // Arrange
+            var builder = new DomainBuilder<MyContext>("Test");
+
+            // Act
+            builder.Action("test");
+            builder.Slot(1);
+        }
+
+        [TestMethod]
+        public void Slot_ExpectedBehavior()
+        {
+            // Arrange
+            var builder = new DomainBuilder<MyContext>("Test");
+
+            // Act
+            builder.Slot(1);
+            Assert.AreEqual(true, builder.Pointer is TaskRoot);
+
+            var domain = builder.Build();
+
+            var subDomain = new DomainBuilder<MyContext>("sub-domain").Build();
+            Assert.IsTrue(domain.TrySetSlotDomain(1, subDomain)); // Its valid to add a sub-domain to a slot we have defined in our domain definition, and that is not currently occupied.
+            Assert.IsTrue(domain.TrySetSlotDomain(1, subDomain) == false); // Need to clear slot before we can attach sub-domain to a currently occupied slot.
+            Assert.IsTrue(domain.TrySetSlotDomain(99, subDomain) == false); // Need to define slotId in domain definition before we can attach sub-domain to that slot.
+
+            Assert.IsTrue(domain.Root.Subtasks.Count == 1);
+            Assert.IsTrue(domain.Root.Subtasks[0] is Slot);
+
+            var slot = (Slot) domain.Root.Subtasks[0];
+            Assert.IsTrue(slot.Subtask != null);
+            Assert.IsTrue(slot.Subtask is TaskRoot);
+            Assert.IsTrue(slot.Subtask.Name == "sub-domain");
+
+            domain.ClearSlot(1);
+            Assert.IsTrue(slot.Subtask == null);
+        }
+
+        [TestMethod]
+        public void Slot_ForgotEnd()
+        {
+            // Arrange
+            var builder = new DomainBuilder<MyContext>("Test");
+
+            // Act
+            builder.Select("test");
+            builder.Slot(1);
+
+            Assert.AreEqual(true, builder.Pointer is Selector);
+        }
     }
 }
