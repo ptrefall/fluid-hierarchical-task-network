@@ -97,8 +97,13 @@ namespace FluidHTN.Compounds
                 Plan.Enqueue(task);
             }
 
+            if (task is Slot slot)
+            {
+                return OnDecomposeSlot(ctx, slot, taskIndex, null, out result);
+            }
+
             result = Plan;
-            return DecompositionStatus.Succeeded;
+            return result.Count == 0 ? DecompositionStatus.Failed : DecompositionStatus.Succeeded;
         }
 
         protected override DecompositionStatus OnDecomposeCompoundTask(IContext ctx, ICompoundTask task, int taskIndex,
@@ -140,7 +145,48 @@ namespace FluidHTN.Compounds
             }
 
             result = Plan;
-            return DecompositionStatus.Succeeded;
+            return result.Count == 0 ? DecompositionStatus.Failed : DecompositionStatus.Succeeded;
+        }
+
+        protected override DecompositionStatus OnDecomposeSlot(IContext ctx, Slot task, int taskIndex, int[] oldStackDepth, out Queue<ITask> result)
+        {
+            // We need to record the task index before we decompose the task,
+            // so that the traversal record is set up in the right order.
+            ctx.MethodTraversalRecord.Add(taskIndex);
+            if (ctx.DebugMTR) ctx.MTRDebug.Add(task.Name);
+
+            var status = task.Decompose(ctx, 0, out var subPlan);
+
+            // If status is rejected, that means the entire planning procedure should cancel.
+            if (status == DecompositionStatus.Rejected)
+            {
+                result = null;
+                return DecompositionStatus.Rejected;
+            }
+
+            // If the decomposition failed
+            if (status == DecompositionStatus.Failed)
+            {
+                // Remove the taskIndex if it failed to decompose.
+                ctx.MethodTraversalRecord.RemoveAt(ctx.MethodTraversalRecord.Count - 1);
+                if (ctx.DebugMTR) ctx.MTRDebug.RemoveAt(ctx.MTRDebug.Count - 1);
+                result = Plan;
+                return DecompositionStatus.Failed;
+            }
+
+            while (subPlan.Count > 0)
+            {
+                Plan.Enqueue(subPlan.Dequeue());
+            }
+
+            if (ctx.HasPausedPartialPlan)
+            {
+                result = Plan;
+                return DecompositionStatus.Partial;
+            }
+
+            result = Plan;
+            return result.Count == 0 ? DecompositionStatus.Failed : DecompositionStatus.Succeeded;
         }
     }
 }

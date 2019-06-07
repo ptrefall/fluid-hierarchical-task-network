@@ -40,6 +40,8 @@ namespace FluidHTN.Compounds
 
         protected abstract DecompositionStatus OnDecomposeCompoundTask(IContext ctx, ICompoundTask task, int taskIndex, int[] oldStackDepth, out Queue<ITask> result);
 
+        protected abstract DecompositionStatus OnDecomposeSlot(IContext ctx, Slot task, int taskIndex, int[] oldStackDepth, out Queue<ITask> result);
+
         // ========================================================= VALIDITY
 
         public virtual bool IsValid(IContext ctx)

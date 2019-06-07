@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics.Eventing.Reader;
 using FluidHTN.PrimitiveTasks;
 
 namespace FluidHTN.Compounds
@@ -93,12 +94,64 @@ namespace FluidHTN.Compounds
                 result = Plan;
                 return DecompositionStatus.Partial;
             }
+            else if (task is Slot slot)
+            {
+                return OnDecomposeSlot(ctx, slot, taskIndex, oldStackDepth, out result);
+            }
 
             result = Plan;
             return result.Count == 0 ? DecompositionStatus.Failed : DecompositionStatus.Succeeded;
         }
 
         protected override DecompositionStatus OnDecomposeCompoundTask(IContext ctx, ICompoundTask task,
+            int taskIndex, int[] oldStackDepth, out Queue<ITask> result)
+        {
+            var status = task.Decompose(ctx, 0, out var subPlan);
+
+            // If result is null, that means the entire planning procedure should cancel.
+            if (status == DecompositionStatus.Rejected)
+            {
+                Plan.Clear();
+                ctx.TrimToStackDepth(oldStackDepth);
+
+                result = null;
+                return DecompositionStatus.Rejected;
+            }
+
+            // If the decomposition failed
+            if (status == DecompositionStatus.Failed)
+            {
+                Plan.Clear();
+                ctx.TrimToStackDepth(oldStackDepth);
+                result = Plan;
+                return DecompositionStatus.Failed;
+            }
+
+            while (subPlan.Count > 0)
+            {
+                Plan.Enqueue(subPlan.Dequeue());
+            }
+
+            if (ctx.HasPausedPartialPlan)
+            {
+                if (taskIndex < Subtasks.Count - 1)
+                {
+                    ctx.PartialPlanQueue.Enqueue(new PartialPlanEntry()
+                    {
+                        Task = this,
+                        TaskIndex = taskIndex + 1,
+                    });
+                }
+
+                result = Plan;
+                return DecompositionStatus.Partial;
+            }
+
+            result = Plan;
+            return DecompositionStatus.Succeeded;
+        }
+
+        protected override DecompositionStatus OnDecomposeSlot(IContext ctx, Slot task,
             int taskIndex, int[] oldStackDepth, out Queue<ITask> result)
         {
             var status = task.Decompose(ctx, 0, out var subPlan);
