@@ -44,6 +44,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Contexts\BaseContext.cs" />
+    <Compile Include="Debug\DecompositionLogEntry.cs" />
     <Compile Include="DomainBuilder.cs" />
     <Compile Include="Factory\DefaultFactory.cs" />
     <Compile Include="Factory\IFactory.cs" />

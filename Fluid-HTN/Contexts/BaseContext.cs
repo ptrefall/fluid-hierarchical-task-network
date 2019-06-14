@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using FluidHTN.Compounds;
+using FluidHTN.Conditions;
+using FluidHTN.Debug;
 using FluidHTN.Factory;
 
 namespace FluidHTN.Contexts
@@ -16,7 +19,7 @@ namespace FluidHTN.Contexts
         public abstract List<string> MTRDebug { get; set; }
         public abstract List<string> LastMTRDebug { get; set; }
         public abstract bool DebugMTR { get; }
-        public abstract Stack<string> DecompositionLog { get; set; }
+        public abstract Stack<IBaseDecompositionLogEntry> DecompositionLog { get; set; }
         public abstract bool LogDecomposition { get; }
         public Queue<PartialPlanEntry> PartialPlanQueue { get; set; } = new Queue<PartialPlanEntry>();
         public bool HasPausedPartialPlan { get; set; } = false;
@@ -44,7 +47,7 @@ namespace FluidHTN.Contexts
 
             if (LogDecomposition)
             {
-                if (DecompositionLog == null) DecompositionLog = new Stack<string>();
+                if (DecompositionLog == null) DecompositionLog = new Stack<IBaseDecompositionLogEntry>();
             }
         }
 
@@ -126,6 +129,78 @@ namespace FluidHTN.Contexts
                 MTRDebug?.Clear();
                 LastMTRDebug?.Clear();
             }
+        }
+
+        // ========================================================= DECOMPOSITION LOGGING
+
+        public void TryLogDecomposition(string name, string description, ICompoundTask task, DecompositionStatus status, Queue<ITask> plan)
+        {
+            if (LogDecomposition == false)
+                return;
+
+            DecompositionLog.Push(new DecomposedCompoundTaskEntry
+            {
+                Name = name,
+                Description = description,
+                Entry = new DecomposedCompoundTask
+                {
+                    Status = status,
+                    TaskType = this.GetType().ToString(),
+                    Plan = ToDecomposedPrimitiveTasks(plan),
+                }
+            });
+        }
+
+        private DecomposedPrimitiveTask[] ToDecomposedPrimitiveTasks(Queue<ITask> plan)
+        {
+            if (plan == null || plan.Count == null)
+                return null;
+
+            var result = Factory.CreateArray<DecomposedPrimitiveTask>(plan.Count);
+            var array = plan.ToArray();
+            for (var i = 0; i < array.Length; i++)
+            {
+                result[i] = new DecomposedPrimitiveTask
+                {
+                    Name = array[i].Name,
+                    TaskType = array[i].GetType().ToString(),
+                };
+            }
+            return result;
+        }
+
+        public void TryLogDecomposition(string name, string description, ICondition condition, bool result)
+        {
+            if (LogDecomposition == false)
+                return;
+
+            DecompositionLog.Push(new DecomposedConditionEntry
+            {
+                Name = name,
+                Description = description,
+                Entry = new DecomposedCondition
+                {
+                    Result = result,
+                    ConditionType = condition.GetType().ToString(),
+                }
+            });
+        }
+
+        public void TryLogDecomposition(string name, string description, IEffect effect)
+        {
+            if (LogDecomposition == false)
+                return;
+
+            DecompositionLog.Push(new DecomposedEffectEntry
+            {
+                Name = name,
+                Description = description,
+                Entry = new DecomposedEffect
+                {
+                    Name = effect.Name,
+                    EffectType = effect.GetType().ToString(),
+                }
+            });
         }
     }
 }

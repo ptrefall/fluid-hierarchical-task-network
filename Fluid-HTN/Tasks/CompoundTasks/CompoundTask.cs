@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using FluidHTN.Conditions;
+using FluidHTN.Debug;
 
 namespace FluidHTN.Compounds
 {
@@ -31,7 +32,9 @@ namespace FluidHTN.Compounds
 
         public DecompositionStatus Decompose(IContext ctx, int startIndex, out Queue<ITask> result)
         {
-            return OnDecompose(ctx, startIndex, out result);
+            var status = OnDecompose(ctx, startIndex, out result);
+            ctx.TryLogDecomposition(Name, "OnDecompose", this, status, result);
+            return status;
         }
 
         protected abstract DecompositionStatus OnDecompose(IContext ctx, int startIndex, out Queue<ITask> result);
@@ -47,8 +50,19 @@ namespace FluidHTN.Compounds
         public virtual bool IsValid(IContext ctx)
         {
             foreach (var condition in Conditions)
-                if (condition.IsValid(ctx) == false)
+            {
+                var result = condition.IsValid(ctx);
+
+                if (ctx.ContextState == ContextState.Planning)
+                {
+                    ctx.TryLogDecomposition(Name, "IsValid", condition, result);
+                }
+
+                if (result == false)
+                {
                     return false;
+                }
+            }
 
             return true;
         }

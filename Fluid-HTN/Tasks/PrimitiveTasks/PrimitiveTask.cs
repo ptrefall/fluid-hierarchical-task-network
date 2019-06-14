@@ -51,7 +51,15 @@ namespace FluidHTN.PrimitiveTasks
 
         public void ApplyEffects(IContext ctx)
         {
-            foreach (var effect in Effects) effect.Apply(ctx);
+            foreach (var effect in Effects)
+            {
+                if (ctx.ContextState == ContextState.Planning)
+                {
+                    ctx.TryLogDecomposition(Name, "ApplyEffects", effect);
+                }
+
+                effect.Apply(ctx);
+            }
         }
 
         public void Stop(IContext ctx)
@@ -64,8 +72,17 @@ namespace FluidHTN.PrimitiveTasks
         public bool IsValid(IContext ctx)
         {
             foreach (var condition in Conditions)
-                if (condition.IsValid(ctx) == false)
+            {
+                var result = condition.IsValid(ctx);
+
+                if (ctx.ContextState == ContextState.Planning)
+                {
+                    ctx.TryLogDecomposition(Name, "IsValid", condition, result);
+                }
+
+                if (result == false)
                     return false;
+            }
 
             return true;
         }

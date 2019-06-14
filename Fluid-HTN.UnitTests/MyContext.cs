@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using FluidHTN;
 using FluidHTN.Contexts;
+using FluidHTN.Debug;
 using FluidHTN.Factory;
 
 public enum MyWorldState : byte
@@ -18,7 +19,7 @@ internal class MyContext : BaseContext
     public override List<string> MTRDebug { get; set; } = null;
     public override List<string> LastMTRDebug { get; set; } = null;
     public override bool DebugMTR { get; } = false;
-    public override Stack<string> DecompositionLog { get; set; } = null;
+    public override Stack<IBaseDecompositionLogEntry> DecompositionLog { get; set; } = null;
     public override bool LogDecomposition { get; } = false;
     public override byte[] WorldState => _worldState;
 
