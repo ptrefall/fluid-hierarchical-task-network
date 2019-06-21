@@ -411,43 +411,10 @@ namespace FluidHTN.Compounds
         {
             Plan.Clear();
 
-            var taskIndex = _random.Next(startIndex, Subtasks.Count - 1);
+            var taskIndex = _random.Next(startIndex, Subtasks.Count);
             var task = Subtasks[taskIndex];
 
-            if (task.IsValid(ctx) == false)
-            {
-                result = Plan;
-                return DecompositionStatus.Failed;
-            }
-
-            if (task is ICompoundTask compoundTask)
-            {
-                var status = compoundTask.Decompose(ctx, 0, out var subPlan);
-                if (status == DecompositionStatus.Rejected)
-                {
-                    result = null;
-                    return DecompositionStatus.Rejected;
-                }
-
-                if (status == DecompositionStatus.Failed)
-                {
-                    result = Plan;
-                    return DecompositionStatus.Failed;
-                }
-
-                while (subPlan.Count > 0)
-                {
-                    Plan.Enqueue(subPlan.Dequeue());
-                }
-            }
-            else if (task is IPrimitiveTask primitiveTask)
-            {
-                primitiveTask.ApplyEffects(ctx);
-                Plan.Enqueue(task);
-            }
-
-            result = Plan;
-            return result.Count == 0 ? DecompositionStatus.Failed : DecompositionStatus.Succeeded;
+            return OnDecomposeTask(ctx, task, taskIndex, null, out result);
         }
     }
 }
