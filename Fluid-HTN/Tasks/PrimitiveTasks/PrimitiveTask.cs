@@ -11,6 +11,7 @@ namespace FluidHTN.PrimitiveTasks
         // ========================================================= PROPERTIES
 
         public string Name { get; set; }
+        public int Depth { get; set; }
         public ICompoundTask Parent { get; set; }
         public List<ICondition> Conditions { get; } = new List<ICondition>();
         public List<ICondition> ExecutingConditions { get; } = new List<ICondition>();
@@ -51,13 +52,13 @@ namespace FluidHTN.PrimitiveTasks
 
         public void ApplyEffects(IContext ctx)
         {
+            if (ctx.ContextState == ContextState.Planning)
+            {
+                if (ctx.LogDecomposition) Log(ctx, $"PrimitiveTask.ApplyEffects");
+            }
+
             foreach (var effect in Effects)
             {
-                if (ctx.ContextState == ContextState.Planning)
-                {
-                    ctx.TryLogDecomposition(Name, "ApplyEffects", effect);
-                }
-
                 effect.Apply(ctx);
             }
         }
@@ -71,20 +72,23 @@ namespace FluidHTN.PrimitiveTasks
 
         public bool IsValid(IContext ctx)
         {
+            if (ctx.LogDecomposition) Log(ctx, $"PrimitiveTask.IsValid check");
             foreach (var condition in Conditions)
             {
                 var result = condition.IsValid(ctx);
-
-                if (ctx.ContextState == ContextState.Planning)
-                {
-                    ctx.TryLogDecomposition(Name, "IsValid", condition, result);
-                }
-
+                if (ctx.LogDecomposition) Log(ctx, $"PrimitiveTask.IsValid:Failed:{condition.Name} is not valid!");
                 if (result == false)
                     return false;
             }
 
             return true;
+        }
+
+        // ========================================================= LOGGING
+
+        protected virtual void Log(IContext ctx, string description)
+        {
+            ctx.Log(Name, description, Depth, this);
         }
     }
 }

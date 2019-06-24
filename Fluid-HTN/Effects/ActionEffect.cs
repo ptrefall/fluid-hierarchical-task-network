@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq.Expressions;
 
 namespace FluidHTN.Effects
 {
@@ -20,6 +21,7 @@ namespace FluidHTN.Effects
         // ========================================================= PROPERTIES
 
         public string Name { get; }
+        public int Depth { get; set; }
         public EffectType Type { get; }
 
         // ========================================================= FUNCTIONALITY
@@ -27,7 +29,10 @@ namespace FluidHTN.Effects
         public void Apply(IContext ctx)
         {
             if (ctx is T c)
+            {
+                if (ctx.LogDecomposition) ctx.Log(Name, $"ActionEffect.Apply:{Type}", Depth, this);
                 _action?.Invoke(c, Type);
+            }
             else
                 throw new Exception("Unexpected context type!");
         }

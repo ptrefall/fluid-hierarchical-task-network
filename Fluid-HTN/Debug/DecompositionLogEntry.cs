@@ -1,12 +1,28 @@
 ﻿using System.Collections.Generic;
 using FluidHTN.Compounds;
+using FluidHTN.Conditions;
 
 namespace FluidHTN.Debug
 {
+    public static class Debug
+    {
+        public static string DepthToString(int depth)
+        {
+            string s = "";
+            for (var i = 0; i < depth; i++)
+            {
+                s += "\t";
+            }
+
+            s += "- ";
+            return s;
+        }
+    }
     public interface IBaseDecompositionLogEntry
     {
         string Name { get; set; }
         string Description { get; set; }
+        int Depth { get; set; }
         string ToString();
     }
 
@@ -15,48 +31,25 @@ namespace FluidHTN.Debug
         T Entry { get; set; }
     }
 
-    public struct DecomposedCompoundTaskEntry : IDecompositionLogEntry<DecomposedCompoundTask>
+    public struct DecomposedCompoundTaskEntry : IDecompositionLogEntry<ITask>
     {
         public string Name { get; set; }
         public string Description { get; set; }
-        public DecomposedCompoundTask Entry { get; set; }
+        public int Depth { get; set; }
+        public ITask Entry { get; set; }
     }
 
-    public struct DecomposedConditionEntry : IDecompositionLogEntry<DecomposedCondition> {
+    public struct DecomposedConditionEntry : IDecompositionLogEntry<ICondition> {
         public string Name { get; set; }
         public string Description { get; set; }
-        public DecomposedCondition Entry { get; set; }
+        public int Depth { get; set; }
+        public ICondition Entry { get; set; }
     }
 
-    public struct DecomposedEffectEntry : IDecompositionLogEntry<DecomposedEffect> {
+    public struct DecomposedEffectEntry : IDecompositionLogEntry<IEffect> {
         public string Name { get; set; }
         public string Description { get; set; }
-        public DecomposedEffect Entry { get; set; }
-    }
-
-    public struct DecomposedCompoundTask
-    {
-        public string TaskType { get; set; }
-        public DecompositionStatus Status { get; set; }
-        public DecomposedPrimitiveTask[] Plan { get; set; }
-    }
-
-    public struct DecomposedPrimitiveTask
-    {
-        public string Name { get; set; }
-        public string TaskType { get; set; }
-    }
-
-    public struct DecomposedCondition
-    {
-        public string ConditionType { get; set; }
-        public bool Result { get; set; }
-    }
-
-    public struct DecomposedEffect
-    {
-        public string Name { get; set; }
-        public string EffectType { get; set; }
-        public byte Result { get; set; }
+        public int Depth { get; set; }
+        public IEffect Entry { get; set; }
     }
 }

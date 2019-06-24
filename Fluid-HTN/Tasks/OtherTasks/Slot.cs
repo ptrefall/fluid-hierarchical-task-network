@@ -10,6 +10,7 @@ namespace FluidHTN.Compounds
 
         public int SlotId { get; set; }
         public string Name { get; set; }
+        public int Depth { get; set; }
         public ICompoundTask Parent { get; set; }
         public List<ICondition> Conditions { get; } = null;
         public TaskStatus LastStatus { get; private set; }

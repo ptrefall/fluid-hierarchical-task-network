@@ -20,7 +20,10 @@ namespace FluidHTN.Compounds
 
             // Selector requires there to be subtasks to successfully select from.
             if (Subtasks.Count == 0)
+            {
+                if (ctx.LogDecomposition) Log(ctx, $"Sequence.IsValid:Failed:No sub-tasks!");
                 return false;
+            }
 
             return true;
         }
@@ -42,6 +45,7 @@ namespace FluidHTN.Compounds
             for (var taskIndex = startIndex; taskIndex < Subtasks.Count; taskIndex++)
             {
                 var task = Subtasks[taskIndex];
+                if (ctx.LogDecomposition) Log(ctx, $"Selector.OnDecompose:Task index: {taskIndex}: {task?.Name}");
 
                 var status = OnDecomposeTask(ctx, task, taskIndex, oldStackDepth, out result);
                 switch (status)
@@ -67,6 +71,7 @@ namespace FluidHTN.Compounds
         {
             if (task.IsValid(ctx) == false)
             {
+                if (ctx.LogDecomposition) Log(ctx, $"Sequence.OnDecomposeTask:Failed:Task {task.Name}.IsValid returned false!");
                 Plan.Clear();
                 ctx.TrimToStackDepth(oldStackDepth);
                 result = Plan;
@@ -79,11 +84,13 @@ namespace FluidHTN.Compounds
             }
             else if (task is IPrimitiveTask primitiveTask)
             {
+                if (ctx.LogDecomposition) Log(ctx, $"Sequence.OnDecomposeTask:Pushed {primitiveTask.Name} to plan!");
                 primitiveTask.ApplyEffects(ctx);
                 Plan.Enqueue(task);
             }
             else if (task is PausePlanTask)
             {
+                if (ctx.LogDecomposition) Log(ctx, $"Sequence.OnDecomposeTask:Return partial plan at index {taskIndex}!");
                 ctx.HasPausedPartialPlan = true;
                 ctx.PartialPlanQueue.Enqueue(new PartialPlanEntry()
                 {
@@ -100,7 +107,9 @@ namespace FluidHTN.Compounds
             }
 
             result = Plan;
-            return result.Count == 0 ? DecompositionStatus.Failed : DecompositionStatus.Succeeded;
+            var s = result.Count == 0 ? DecompositionStatus.Failed : DecompositionStatus.Succeeded;
+            if (ctx.LogDecomposition) Log(ctx, $"Sequence.OnDecomposeTask:{s}!");
+            return s;
         }
 
         protected override DecompositionStatus OnDecomposeCompoundTask(IContext ctx, ICompoundTask task,
@@ -111,6 +120,8 @@ namespace FluidHTN.Compounds
             // If result is null, that means the entire planning procedure should cancel.
             if (status == DecompositionStatus.Rejected)
             {
+                if (ctx.LogDecomposition) Log(ctx, $"Sequence.OnDecomposeCompoundTask:{status}: Decomposing {task.Name} was rejected.");
+
                 Plan.Clear();
                 ctx.TrimToStackDepth(oldStackDepth);
 
@@ -121,6 +132,8 @@ namespace FluidHTN.Compounds
             // If the decomposition failed
             if (status == DecompositionStatus.Failed)
             {
+                if (ctx.LogDecomposition) Log(ctx, $"Sequence.OnDecomposeCompoundTask:{status}: Decomposing {task.Name} failed.");
+
                 Plan.Clear();
                 ctx.TrimToStackDepth(oldStackDepth);
                 result = Plan;
@@ -129,11 +142,14 @@ namespace FluidHTN.Compounds
 
             while (subPlan.Count > 0)
             {
-                Plan.Enqueue(subPlan.Dequeue());
+                var p = subPlan.Dequeue();
+                if (ctx.LogDecomposition) Log(ctx, $"Sequence.OnDecomposeCompoundTask:Decomposing {task.Name}:Pushed {p.Name} to plan!");
+                Plan.Enqueue(p);
             }
 
             if (ctx.HasPausedPartialPlan)
             {
+                if (ctx.LogDecomposition) Log(ctx, $"Sequence.OnDecomposeCompoundTask:Return partial plan at index {taskIndex}!");
                 if (taskIndex < Subtasks.Count - 1)
                 {
                     ctx.PartialPlanQueue.Enqueue(new PartialPlanEntry()
@@ -148,6 +164,7 @@ namespace FluidHTN.Compounds
             }
 
             result = Plan;
+            if (ctx.LogDecomposition) Log(ctx, $"Sequence.OnDecomposeCompoundTask:Succeeded!");
             return DecompositionStatus.Succeeded;
         }
 
@@ -159,6 +176,8 @@ namespace FluidHTN.Compounds
             // If result is null, that means the entire planning procedure should cancel.
             if (status == DecompositionStatus.Rejected)
             {
+                if (ctx.LogDecomposition) Log(ctx, $"Sequence.OnDecomposeSlot:{status}: Decomposing {task.Name} was rejected.");
+
                 Plan.Clear();
                 ctx.TrimToStackDepth(oldStackDepth);
 
@@ -169,6 +188,8 @@ namespace FluidHTN.Compounds
             // If the decomposition failed
             if (status == DecompositionStatus.Failed)
             {
+                if (ctx.LogDecomposition) Log(ctx, $"Sequence.OnDecomposeSlot:{status}: Decomposing {task.Name} failed.");
+
                 Plan.Clear();
                 ctx.TrimToStackDepth(oldStackDepth);
                 result = Plan;
@@ -177,11 +198,14 @@ namespace FluidHTN.Compounds
 
             while (subPlan.Count > 0)
             {
-                Plan.Enqueue(subPlan.Dequeue());
+                var p = subPlan.Dequeue();
+                if (ctx.LogDecomposition) Log(ctx, $"Sequence.OnDecomposeSlot:Decomposing {task.Name}:Pushed {p.Name} to plan!");
+                Plan.Enqueue(p);
             }
 
             if (ctx.HasPausedPartialPlan)
             {
+                if (ctx.LogDecomposition) Log(ctx, $"Sequence.OnDecomposeSlot:Return partial plan at index {taskIndex}!");
                 if (taskIndex < Subtasks.Count - 1)
                 {
                     ctx.PartialPlanQueue.Enqueue(new PartialPlanEntry()
@@ -196,6 +220,7 @@ namespace FluidHTN.Compounds
             }
 
             result = Plan;
+            if (ctx.LogDecomposition) Log(ctx, $"Sequence.OnDecomposeSlot:Succeeded!");
             return DecompositionStatus.Succeeded;
         }
     }

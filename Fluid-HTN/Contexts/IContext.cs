@@ -3,6 +3,7 @@ using FluidHTN.Compounds;
 using FluidHTN.Conditions;
 using FluidHTN.Debug;
 using FluidHTN.Factory;
+using FluidHTN.PrimitiveTasks;
 
 namespace FluidHTN
 {
@@ -62,7 +63,7 @@ namespace FluidHTN
 
         /// <summary>
         /// </summary>
-        Stack<IBaseDecompositionLogEntry> DecompositionLog { get; set; }
+        Queue<IBaseDecompositionLogEntry> DecompositionLog { get; set; }
 
         /// <summary>
         /// Whether our planning system should log our decomposition. Specially condition success vs failure.
@@ -98,8 +99,8 @@ namespace FluidHTN
 
         int[] GetWorldStateChangeDepth(IFactory factory);
 
-        void TryLogDecomposition(string name, string description, ICompoundTask task, DecompositionStatus status, Queue<ITask> plan);
-        void TryLogDecomposition(string name, string description, ICondition condition, bool result);
-        void TryLogDecomposition(string name, string description, IEffect effect);
+        void Log(string name, string description, int depth, ITask task);
+        void Log(string name, string description, int depth, ICondition condition);
+        void Log(string name, string description, int depth, IEffect effect);
     }
 }

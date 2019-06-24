@@ -19,7 +19,7 @@ internal class MyContext : BaseContext
     public override List<string> MTRDebug { get; set; } = null;
     public override List<string> LastMTRDebug { get; set; } = null;
     public override bool DebugMTR { get; } = false;
-    public override Stack<IBaseDecompositionLogEntry> DecompositionLog { get; set; } = null;
+    public override Queue<IBaseDecompositionLogEntry> DecompositionLog { get; set; } = null;
     public override bool LogDecomposition { get; } = false;
     public override byte[] WorldState => _worldState;
 

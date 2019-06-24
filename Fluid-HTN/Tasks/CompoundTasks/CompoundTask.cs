@@ -9,6 +9,7 @@ namespace FluidHTN.Compounds
         // ========================================================= PROPERTIES
 
         public string Name { get; set; }
+        public int Depth { get; set; }
         public ICompoundTask Parent { get; set; }
         public List<ICondition> Conditions { get; } = new List<ICondition>();
         public TaskStatus LastStatus { get; private set; }
@@ -33,7 +34,6 @@ namespace FluidHTN.Compounds
         public DecompositionStatus Decompose(IContext ctx, int startIndex, out Queue<ITask> result)
         {
             var status = OnDecompose(ctx, startIndex, out result);
-            ctx.TryLogDecomposition(Name, "OnDecompose", this, status, result);
             return status;
         }
 
@@ -52,19 +52,21 @@ namespace FluidHTN.Compounds
             foreach (var condition in Conditions)
             {
                 var result = condition.IsValid(ctx);
-
-                if (ctx.ContextState == ContextState.Planning)
-                {
-                    ctx.TryLogDecomposition(Name, "IsValid", condition, result);
-                }
-
                 if (result == false)
                 {
+                    if (ctx.LogDecomposition) Log(ctx, $"CompoundTask.IsValid:Failed:{condition.Name} is not valid!");
                     return false;
                 }
             }
 
             return true;
+        }
+
+        // ========================================================= LOGGING
+
+        protected virtual void Log(IContext ctx, string description)
+        {
+            ctx.Log(Name, description, Depth, this);
         }
     }
 }

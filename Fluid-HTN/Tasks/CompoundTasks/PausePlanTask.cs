@@ -10,6 +10,7 @@ namespace FluidHTN
         // ========================================================= PROPERTIES
 
         public string Name { get; set; }
+        public int Depth { get; set; }
         public ICompoundTask Parent { get; set; }
         public List<ICondition> Conditions { get; } = null;
         public List<IEffect> Effects { get; } = null;
