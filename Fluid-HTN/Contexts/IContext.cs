@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using FluidHTN.Compounds;
 using FluidHTN.Conditions;
 using FluidHTN.Debug;
@@ -99,8 +100,8 @@ namespace FluidHTN
 
         int[] GetWorldStateChangeDepth(IFactory factory);
 
-        void Log(string name, string description, int depth, ITask task);
-        void Log(string name, string description, int depth, ICondition condition);
-        void Log(string name, string description, int depth, IEffect effect);
+        void Log(string name, string description, int depth, ITask task, ConsoleColor color = ConsoleColor.White);
+        void Log(string name, string description, int depth, ICondition condition, ConsoleColor color = ConsoleColor.DarkGreen);
+        void Log(string name, string description, int depth, IEffect effect, ConsoleColor color = ConsoleColor.DarkYellow);
     }
 }

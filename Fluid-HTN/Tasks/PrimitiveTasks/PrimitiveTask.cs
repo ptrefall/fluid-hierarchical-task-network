@@ -54,7 +54,7 @@ namespace FluidHTN.PrimitiveTasks
         {
             if (ctx.ContextState == ContextState.Planning)
             {
-                if (ctx.LogDecomposition) Log(ctx, $"PrimitiveTask.ApplyEffects");
+                if (ctx.LogDecomposition) Log(ctx, $"PrimitiveTask.ApplyEffects", ConsoleColor.Yellow);
             }
 
             foreach (var effect in Effects)
@@ -76,19 +76,23 @@ namespace FluidHTN.PrimitiveTasks
             foreach (var condition in Conditions)
             {
                 var result = condition.IsValid(ctx);
-                if (ctx.LogDecomposition) Log(ctx, $"PrimitiveTask.IsValid:Failed:{condition.Name} is not valid!");
+                if (ctx.LogDecomposition) Log(ctx, $"PrimitiveTask.IsValid:{(result ? "Success" : "Failed")}:{condition.Name} is{(result ? "" : " not")} valid!", result ? ConsoleColor.DarkGreen : ConsoleColor.DarkRed);
                 if (result == false)
+                {
+                    if (ctx.LogDecomposition) Log(ctx, $"PrimitiveTask.IsValid:Failed:Preconditions not met!", ConsoleColor.Red);
                     return false;
+                }
             }
 
+            if (ctx.LogDecomposition) Log(ctx, $"PrimitiveTask.IsValid:Success!", ConsoleColor.Green);
             return true;
         }
 
         // ========================================================= LOGGING
 
-        protected virtual void Log(IContext ctx, string description)
+        protected virtual void Log(IContext ctx, string description, ConsoleColor color = ConsoleColor.White)
         {
-            ctx.Log(Name, description, Depth, this);
+            ctx.Log(Name, description, Depth, this, color);
         }
     }
 }

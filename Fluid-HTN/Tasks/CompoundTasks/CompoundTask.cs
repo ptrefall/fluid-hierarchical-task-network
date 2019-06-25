@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using FluidHTN.Conditions;
 using FluidHTN.Debug;
 
@@ -52,9 +53,9 @@ namespace FluidHTN.Compounds
             foreach (var condition in Conditions)
             {
                 var result = condition.IsValid(ctx);
+                if (ctx.LogDecomposition) Log(ctx, $"PrimitiveTask.IsValid:{(result ? "Success" : "Failed")}:{condition.Name} is{(result ? "" : " not")} valid!", result ? ConsoleColor.DarkGreen : ConsoleColor.DarkRed);
                 if (result == false)
                 {
-                    if (ctx.LogDecomposition) Log(ctx, $"CompoundTask.IsValid:Failed:{condition.Name} is not valid!");
                     return false;
                 }
             }
@@ -64,9 +65,9 @@ namespace FluidHTN.Compounds
 
         // ========================================================= LOGGING
 
-        protected virtual void Log(IContext ctx, string description)
+        protected virtual void Log(IContext ctx, string description, ConsoleColor color = ConsoleColor.White)
         {
-            ctx.Log(Name, description, Depth, this);
+            ctx.Log(Name, description, Depth, this, color);
         }
     }
 }

@@ -133,7 +133,7 @@ namespace FluidHTN.Contexts
 
         // ========================================================= DECOMPOSITION LOGGING
 
-        public void Log(string name, string description, int depth, ITask task)
+        public void Log(string name, string description, int depth, ITask task, ConsoleColor color = ConsoleColor.White)
         {
             if (LogDecomposition == false)
                 return;
@@ -144,10 +144,11 @@ namespace FluidHTN.Contexts
                 Description = description,
                 Entry = task,
                 Depth = depth,
+                Color = color,
             });
         }
 
-        public void Log(string name, string description, int depth, ICondition condition)
+        public void Log(string name, string description, int depth, ICondition condition, ConsoleColor color = ConsoleColor.DarkGreen)
         {
             if (LogDecomposition == false)
                 return;
@@ -158,10 +159,11 @@ namespace FluidHTN.Contexts
                 Description = description,
                 Entry = condition,
                 Depth = depth,
+                Color = color
             });
         }
 
-        public void Log(string name, string description, int depth, IEffect effect)
+        public void Log(string name, string description, int depth, IEffect effect, ConsoleColor color = ConsoleColor.DarkYellow)
         {
             if (LogDecomposition == false)
                 return;
@@ -172,6 +174,7 @@ namespace FluidHTN.Contexts
                 Description = description,
                 Entry = effect,
                 Depth = depth,
+                Color = color,
             });
         }
     }

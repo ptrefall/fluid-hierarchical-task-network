@@ -38,7 +38,15 @@ namespace FluidHTN
 
         public bool IsValid(IContext ctx)
         {
+            if (ctx.LogDecomposition) Log(ctx, $"PausePlanTask.IsValid:Success!");
             return true;
+        }
+
+        // ========================================================= LOGGING
+
+        protected virtual void Log(IContext ctx, string description)
+        {
+            ctx.Log(Name, description, Depth, this, ConsoleColor.Green);
         }
     }
 }

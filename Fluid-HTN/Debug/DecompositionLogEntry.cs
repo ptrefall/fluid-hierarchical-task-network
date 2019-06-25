@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using FluidHTN.Compounds;
 using FluidHTN.Conditions;
 
@@ -23,6 +24,7 @@ namespace FluidHTN.Debug
         string Name { get; set; }
         string Description { get; set; }
         int Depth { get; set; }
+        ConsoleColor Color { get; set; }
         string ToString();
     }
 
@@ -36,6 +38,7 @@ namespace FluidHTN.Debug
         public string Name { get; set; }
         public string Description { get; set; }
         public int Depth { get; set; }
+        public ConsoleColor Color { get; set; }
         public ITask Entry { get; set; }
     }
 
@@ -43,6 +46,7 @@ namespace FluidHTN.Debug
         public string Name { get; set; }
         public string Description { get; set; }
         public int Depth { get; set; }
+        public ConsoleColor Color { get; set; }
         public ICondition Entry { get; set; }
     }
 
@@ -50,6 +54,7 @@ namespace FluidHTN.Debug
         public string Name { get; set; }
         public string Description { get; set; }
         public int Depth { get; set; }
+        public ConsoleColor Color { get; set; }
         public IEffect Entry { get; set; }
     }
 }
