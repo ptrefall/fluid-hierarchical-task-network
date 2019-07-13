@@ -1,4 +1,7 @@
 ![Fluid Hierarchical Task Network](https://i.imgur.com/xKfIV0f.png)
+
+![MIT License](https://camo.githubusercontent.com/e7302c620b3589a361fc5503732f3505347205d4/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f6c6963656e73652d4d49542d627269676874677265656e2e737667)
+
 A simple HTN planner based around the principles of the Builder pattern, inspired by [Fluid Behaviour Tree](https://github.com/ashblue/fluid-behavior-tree). Please expand this readme if you're on mobile for more information.
 
 ## Features
