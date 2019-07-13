@@ -9,8 +9,8 @@ A simple HTN planner based around the principles of the Builder pattern, inspire
 ![Issues](https://img.shields.io/github/issues/ptrefall/fluid-hierarchical-task-network.svg)
 
 ## Features
-* Comes with a Domain Builder to simplify the design of code-oriented HTN domains.
 * Fluid HTN is a total-order forward decomposition planner, as described by Troy Humphreys in his [GameAIPro article](http://www.gameaipro.com/GameAIPro/GameAIPro_Chapter12_Exploring_HTN_Planners_through_Example.pdf).
+* Comes with a Domain Builder to simplify the design of code-oriented HTN domains.
 * Partial planning.
 * Domain splicing.
 * Domain slots for run-time splicing.
