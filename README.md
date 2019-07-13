@@ -4,7 +4,6 @@
 ![Stars](https://img.shields.io/github/stars/ptrefall/fluid-hierarchical-task-network.svg)
 ![Forks](https://img.shields.io/github/forks/ptrefall/fluid-hierarchical-task-network.svg)
 ![Issues](https://img.shields.io/github/issues/ptrefall/fluid-hierarchical-task-network.svg)
-![Tweet](https://img.shields.io/twitter/url/https/github.com%2Fptrefall%2Ffluid-hierarchical-task-network.svg)
 
 A simple HTN planner based around the principles of the Builder pattern, inspired by [Fluid Behaviour Tree](https://github.com/ashblue/fluid-behavior-tree). Please expand this readme if you're on mobile for more information.
 
