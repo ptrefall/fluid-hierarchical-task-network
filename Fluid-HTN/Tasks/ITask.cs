@@ -12,11 +12,6 @@ namespace FluidHTN
         string Name { get; set; }
 
         /// <summary>
-        ///     Depth of the task in the hierarchy
-        /// </summary>
-        int Depth { get; set; }
-
-        /// <summary>
         ///     The parent of this task in the hierarchy
         /// </summary>
         ICompoundTask Parent { get; set; }

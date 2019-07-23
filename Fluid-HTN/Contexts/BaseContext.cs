@@ -13,6 +13,7 @@ namespace FluidHTN.Contexts
 
         public bool IsDirty { get; set; }
         public ContextState ContextState { get; set; } = ContextState.Executing;
+        public int CurrentDecompositionDepth { get; set; } = 0;
         public abstract IFactory Factory { get; set; }
         public List<int> MethodTraversalRecord { get; set; } = new List<int>();
         public List<int> LastMTR { get; } = new List<int>();

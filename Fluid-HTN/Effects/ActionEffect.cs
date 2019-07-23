@@ -21,7 +21,6 @@ namespace FluidHTN.Effects
         // ========================================================= PROPERTIES
 
         public string Name { get; }
-        public int Depth { get; set; }
         public EffectType Type { get; }
 
         // ========================================================= FUNCTIONALITY
@@ -30,7 +29,7 @@ namespace FluidHTN.Effects
         {
             if (ctx is T c)
             {
-                if (ctx.LogDecomposition) ctx.Log(Name, $"ActionEffect.Apply:{Type}", Depth, this);
+                if (ctx.LogDecomposition) ctx.Log(Name, $"ActionEffect.Apply:{Type}", ctx.CurrentDecompositionDepth+1, this);
                 _action?.Invoke(c, Type);
             }
             else

@@ -10,7 +10,6 @@ namespace FluidHTN
         // ========================================================= PROPERTIES
 
         public string Name { get; set; }
-        public int Depth { get; set; }
         public ICompoundTask Parent { get; set; }
         public List<ICondition> Conditions { get; } = null;
         public List<IEffect> Effects { get; } = null;
@@ -46,7 +45,7 @@ namespace FluidHTN
 
         protected virtual void Log(IContext ctx, string description)
         {
-            ctx.Log(Name, description, Depth, this, ConsoleColor.Green);
+            ctx.Log(Name, description, ctx.CurrentDecompositionDepth, this, ConsoleColor.Green);
         }
     }
 }

@@ -10,7 +10,6 @@ namespace FluidHTN.Compounds
         // ========================================================= PROPERTIES
 
         public string Name { get; set; }
-        public int Depth { get; set; }
         public ICompoundTask Parent { get; set; }
         public List<ICondition> Conditions { get; } = new List<ICondition>();
         public TaskStatus LastStatus { get; private set; }
@@ -34,7 +33,9 @@ namespace FluidHTN.Compounds
 
         public DecompositionStatus Decompose(IContext ctx, int startIndex, out Queue<ITask> result)
         {
+            if (ctx.LogDecomposition) ctx.CurrentDecompositionDepth++;
             var status = OnDecompose(ctx, startIndex, out result);
+            if (ctx.LogDecomposition) ctx.CurrentDecompositionDepth--;
             return status;
         }
 
@@ -67,7 +68,7 @@ namespace FluidHTN.Compounds
 
         protected virtual void Log(IContext ctx, string description, ConsoleColor color = ConsoleColor.White)
         {
-            ctx.Log(Name, description, Depth, this, color);
+            ctx.Log(Name, description, ctx.CurrentDecompositionDepth, this, color);
         }
     }
 }

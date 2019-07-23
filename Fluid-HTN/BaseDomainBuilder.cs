@@ -82,7 +82,6 @@ namespace FluidHTN
                 if (Pointer is ICompoundTask compoundTask)
                 {
                     task.Name = name;
-                    task.Depth = compoundTask.Depth + 1;
                     _domain.Add(compoundTask, task);
                     _pointers.Add(task);
                 }
@@ -115,7 +114,6 @@ namespace FluidHTN
             if (Pointer is ICompoundTask compoundTask)
             {
                 var parent = new P { Name = name };
-                parent.Depth = compoundTask.Depth + 1;
                 _domain.Add(compoundTask, parent);
                 _pointers.Add(parent);
             }
@@ -142,7 +140,6 @@ namespace FluidHTN
             if (Pointer is IDecomposeAll compoundTask)
             {
                 var parent = new PausePlanTask() { Name = "Pause Plan" };
-                parent.Depth = compoundTask.Depth + 1;
                 _domain.Add(compoundTask, parent);
             }
             else
@@ -201,7 +198,6 @@ namespace FluidHTN
         public DB Condition(string name, Func<T, bool> condition)
         {
             var cond = new FuncCondition<T>(name, condition);
-            cond.Depth = Pointer.Depth + 1;
             Pointer.AddCondition(cond);
 
             return (DB) this;
@@ -220,7 +216,6 @@ namespace FluidHTN
             if (Pointer is IPrimitiveTask task)
             {
                 var cond = new FuncCondition<T>(name, condition);
-                cond.Depth = task.Depth + 1;
                 task.AddExecutingCondition(cond);
             }
             else
@@ -267,7 +262,6 @@ namespace FluidHTN
             if (Pointer is IPrimitiveTask task)
             {
                 var effect = new ActionEffect<T>(name, effectType, action);
-                effect.Depth = task.Depth + 1;
                 task.AddEffect(effect);
             }
             else
@@ -318,7 +312,6 @@ namespace FluidHTN
             if (Pointer is ICompoundTask compoundTask)
             {
                 var slot = new Slot() { SlotId = slotId, Name = $"Slot {slotId}" };
-                slot.Depth = compoundTask.Depth + 1;
                 _domain.Add(compoundTask, slot);
             }
             else

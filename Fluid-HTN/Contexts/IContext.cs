@@ -27,6 +27,7 @@ namespace FluidHTN
     {
         bool IsDirty { get; set; }
         ContextState ContextState { get; set; }
+        int CurrentDecompositionDepth { get; set; }
 
         IFactory Factory { get; set; }
 

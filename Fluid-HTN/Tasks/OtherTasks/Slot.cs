@@ -10,7 +10,6 @@ namespace FluidHTN.Compounds
 
         public int SlotId { get; set; }
         public string Name { get; set; }
-        public int Depth { get; set; }
         public ICompoundTask Parent { get; set; }
         public List<ICondition> Conditions { get; } = null;
         public TaskStatus LastStatus { get; private set; }
@@ -59,7 +58,7 @@ namespace FluidHTN.Compounds
         public virtual bool IsValid(IContext ctx)
         {
             var result = Subtask != null;
-            if (ctx.LogDecomposition) Log(ctx, $"PausePlanTask.IsValid:{(result ? "Success" : "Failed")}!", result ? ConsoleColor.Green : ConsoleColor.Red);
+            if (ctx.LogDecomposition) Log(ctx, $"Slot.IsValid:{(result ? "Success" : "Failed")}!", result ? ConsoleColor.Green : ConsoleColor.Red);
             return result;
         }
 
@@ -67,7 +66,7 @@ namespace FluidHTN.Compounds
 
         protected virtual void Log(IContext ctx, string description, ConsoleColor color = ConsoleColor.White)
         {
-            ctx.Log(Name, description, Depth, this, color);
+            ctx.Log(Name, description, ctx.CurrentDecompositionDepth, this, color);
         }
     }
 }
