@@ -69,7 +69,7 @@ public class MyContext : BaseContext
     public override List<string> MTRDebug { get; set; } = null;
     public override List<string> LastMTRDebug { get; set; } = null;
     public override bool DebugMTR { get; } = false;
-    public override Stack<string> DecompositionLog { get; set; } = null;
+    public override Queue<IBaseDecompositionLogEntry> DecompositionLog { get; set; } = null;
     public override bool LogDecomposition { get; } = false;
     
     public override IFactory Factory { get; set; } = new DefaultFactory();
@@ -440,10 +440,61 @@ When we implemented MyContext earlier, you might have noticed that we did an ove
 Sometimes we need to see what's going on under the hood to understand why the planner ends up with the plans we are given.
 We have some debug options in our context definition, as mentioned earlier. We can set LogDecomposition to true. What this does, is it allows our planning procedure to store information into our context about condition success and failure during decomposition. This can be a big help in understanding how the domain was decomposed into a plan. We can then read out the logs from DecompositionLog in our context. BaseContext will attempt to instantiate the debug collections automatically if the debug flags are set to true when its Init() function is called.
 ```C#
-while(ctx.DecompositionLog.Count > 0)
+if (_context.LogDecomposition)
 {
-    var log = ctx.DecompositionLog.Pop();
-    Console.WriteLine(log);
+    while (_context.DecompositionLog?.Count > 0)
+    {
+        var entry = _context.DecompositionLog.Dequeue();
+        var depth = FluidHTN.Debug.Debug.DepthToString(entry.Depth);
+        Console.ForegroundColor = entry.Color;
+        Console.WriteLine($"{depth}{entry.Name}: {entry.Description}");
+    }
+    Console.ResetColor();
+}
+```
+We can take further advantage of the decomposition log if we apply context log calls to our custom extensions. While the task implementation in Fluid HTN already has extensive decomposition logging support integrated that should cover most requirements, our custom conditions and effects could benefit from adding a custom log. Let's improve our custom condition and effect from earlier, by applying decomposition logging to them.
+```C#
+public class IfEnemyCondition : ICondition
+{
+    public string Name { get; } = "If Enemy";
+    
+    public bool IsValid(ICondition ctx)
+    {
+        if(ctx is MyContext c)
+        {
+            var result = c.HasState(WorldState.HasEnemy);
+            if (ctx.LogDecomposition) ctx.Log(Name, $"IfEnemyCondition.IsValid:{result}", ctx.CurrentDecompositionDepth+1, this, result ? ConsoleColor.DarkGreen : ConsoleColor.DarkRed);
+            return result;
+        }
+        
+        throw new Exception("Unexpected context type!");
+    }
+}
+```
+```C#
+public class SetLocationEffect : IEffect
+{
+    private Location _location;
+    
+    public SetLocation(Location location)
+    {
+        _location = location;
+        Name = $"Set Location[{location}]";
+    }
+    
+    public string Name { get; private set; }
+    public EffectType Type { get; } = EffectType.PlanOnly;
+    
+    public void Apply(IContext ctx)
+    {
+        if (ctx is T c)
+        {
+            if (ctx.LogDecomposition) ctx.Log(Name, $"SetLocationEffect.Apply:{Type}", ctx.CurrentDecompositionDepth+1, this);
+            c.SetState(WorldState.Location, _location);
+        }
+        else
+            throw new Exception("Unexpected context type!");
+    }
 }
 ```
 The planning system will encode our traversal through the HTN domain as we search for a plan. This method traversal record (MTR) simply stores the method index chosen for each selector that was decomposed to create the plan, recording branching in our decomposition. We can set our context up so that the planner will also provide us with a debug version of this traversal record, which record more information. We simply set DebugMTR to true in our context.
