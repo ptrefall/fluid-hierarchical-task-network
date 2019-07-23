@@ -27,7 +27,7 @@ namespace FluidHTN.Conditions
             if (ctx is T c)
             {
                 var result = _func?.Invoke(c) ?? false;
-                if (c.LogDecomposition) ctx.DecompositionLog.Push($"{Name}: {result}");
+                if (ctx.LogDecomposition) ctx.Log(Name, $"FuncCondition.IsValid:{result}", ctx.CurrentDecompositionDepth+1, this, result ? ConsoleColor.DarkGreen : ConsoleColor.DarkRed);
                 return result;
             }
 

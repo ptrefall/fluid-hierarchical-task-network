@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using FluidHTN.PrimitiveTasks;
 
 namespace FluidHTN.Compounds
@@ -15,12 +16,19 @@ namespace FluidHTN.Compounds
         {
             // Check that our preconditions are valid first.
             if (base.IsValid(ctx) == false)
+            {
+                if (ctx.LogDecomposition) Log(ctx, $"Selector.IsValid:Failed:Preconditions not met!", ConsoleColor.Red);
                 return false;
+            }
 
             // Selector requires there to be at least one sub-task to successfully select from.
             if (Subtasks.Count == 0)
+            {
+                if (ctx.LogDecomposition) Log(ctx, $"Selector.IsValid:Failed:No sub-tasks!", ConsoleColor.Red);
                 return false;
+            }
 
+            if (ctx.LogDecomposition) Log(ctx, $"Selector.IsValid:Success!", ConsoleColor.Green);
             return true;
         }
 
@@ -38,9 +46,11 @@ namespace FluidHTN.Compounds
 
             for (var taskIndex = startIndex; taskIndex < Subtasks.Count; taskIndex++)
             {
+                if (ctx.LogDecomposition) Log(ctx, $"Selector.OnDecompose:Task index: {taskIndex}: {Subtasks[taskIndex]?.Name}");
                 // If the last plan is still running, we need to check whether the
                 // new decomposition can possibly beat it.
                 if (ctx.LastMTR != null && ctx.LastMTR.Count > 0)
+                {
                     if (ctx.MethodTraversalRecord.Count < ctx.LastMTR.Count)
                     {
                         // If the last plan's traversal record for this decomposition layer 
@@ -53,10 +63,14 @@ namespace FluidHTN.Compounds
                             ctx.MethodTraversalRecord.Add(-1);
                             if (ctx.DebugMTR) ctx.MTRDebug.Add($"REPLAN FAIL {Subtasks[taskIndex].Name}");
 
+                            if (ctx.LogDecomposition)
+                                Log(ctx,
+                                    $"Selector.OnDecompose:Rejected:Index {currentDecompositionIndex} is beat by last method traversal record!", ConsoleColor.Red);
                             result = null;
                             return DecompositionStatus.Rejected;
                         }
                     }
+                }
 
                 var task = Subtasks[taskIndex];
 
@@ -82,6 +96,7 @@ namespace FluidHTN.Compounds
         {
             if (task.IsValid(ctx) == false)
             {
+                if (ctx.LogDecomposition) Log(ctx, $"Selector.OnDecomposeTask:Failed:Task {task.Name}.IsValid returned false!", ConsoleColor.Red);
                 result = Plan;
                 return DecompositionStatus.Failed;
             }
@@ -93,6 +108,7 @@ namespace FluidHTN.Compounds
 
             if (task is IPrimitiveTask primitiveTask)
             {
+                if (ctx.LogDecomposition) Log(ctx, $"Selector.OnDecomposeTask:Pushed {primitiveTask.Name} to plan!", ConsoleColor.Blue);
                 primitiveTask.ApplyEffects(ctx);
                 Plan.Enqueue(task);
             }
@@ -103,7 +119,10 @@ namespace FluidHTN.Compounds
             }
 
             result = Plan;
-            return result.Count == 0 ? DecompositionStatus.Failed : DecompositionStatus.Succeeded;
+            var status = result.Count == 0 ? DecompositionStatus.Failed : DecompositionStatus.Succeeded;
+
+            if (ctx.LogDecomposition) Log(ctx, $"Selector.OnDecomposeTask:{status}!", status == DecompositionStatus.Succeeded ? ConsoleColor.Green : ConsoleColor.Red);
+            return status;
         }
 
         protected override DecompositionStatus OnDecomposeCompoundTask(IContext ctx, ICompoundTask task, int taskIndex,
@@ -119,6 +138,7 @@ namespace FluidHTN.Compounds
             // If status is rejected, that means the entire planning procedure should cancel.
             if (status == DecompositionStatus.Rejected)
             {
+                if (ctx.LogDecomposition) Log(ctx, $"Selector.OnDecomposeCompoundTask:{status}: Decomposing {task.Name} was rejected.", ConsoleColor.Red);
                 result = null;
                 return DecompositionStatus.Rejected;
             }
@@ -129,23 +149,30 @@ namespace FluidHTN.Compounds
                 // Remove the taskIndex if it failed to decompose.
                 ctx.MethodTraversalRecord.RemoveAt(ctx.MethodTraversalRecord.Count - 1);
                 if (ctx.DebugMTR) ctx.MTRDebug.RemoveAt(ctx.MTRDebug.Count - 1);
+
+                if (ctx.LogDecomposition) Log(ctx, $"Selector.OnDecomposeCompoundTask:{status}: Decomposing {task.Name} failed.", ConsoleColor.Red);
                 result = Plan;
                 return DecompositionStatus.Failed;
             }
 
             while (subPlan.Count > 0)
             {
-                Plan.Enqueue(subPlan.Dequeue());
+                var p = subPlan.Dequeue();
+                if (ctx.LogDecomposition) Log(ctx, $"Selector.OnDecomposeCompoundTask:Decomposing {task.Name}:Pushed {p.Name} to plan!", ConsoleColor.Blue);
+                Plan.Enqueue(p);
             }
 
             if (ctx.HasPausedPartialPlan)
             {
+                if (ctx.LogDecomposition) Log(ctx, $"Selector.OnDecomposeCompoundTask:Return partial plan at index {taskIndex}!", ConsoleColor.DarkBlue);
                 result = Plan;
                 return DecompositionStatus.Partial;
             }
 
             result = Plan;
-            return result.Count == 0 ? DecompositionStatus.Failed : DecompositionStatus.Succeeded;
+            var s = result.Count == 0 ? DecompositionStatus.Failed : DecompositionStatus.Succeeded;
+            if (ctx.LogDecomposition) Log(ctx, $"Selector.OnDecomposeCompoundTask:{s}!", s == DecompositionStatus.Succeeded ? ConsoleColor.Green : ConsoleColor.Red);
+            return s;
         }
 
         protected override DecompositionStatus OnDecomposeSlot(IContext ctx, Slot task, int taskIndex, int[] oldStackDepth, out Queue<ITask> result)
@@ -160,6 +187,7 @@ namespace FluidHTN.Compounds
             // If status is rejected, that means the entire planning procedure should cancel.
             if (status == DecompositionStatus.Rejected)
             {
+                if (ctx.LogDecomposition) Log(ctx, $"Selector.OnDecomposeSlot:{status}: Decomposing {task.Name} was rejected.", ConsoleColor.Red);
                 result = null;
                 return DecompositionStatus.Rejected;
             }
@@ -170,23 +198,30 @@ namespace FluidHTN.Compounds
                 // Remove the taskIndex if it failed to decompose.
                 ctx.MethodTraversalRecord.RemoveAt(ctx.MethodTraversalRecord.Count - 1);
                 if (ctx.DebugMTR) ctx.MTRDebug.RemoveAt(ctx.MTRDebug.Count - 1);
+
+                if (ctx.LogDecomposition) Log(ctx, $"Selector.OnDecomposeSlot:{status}: Decomposing {task.Name} failed.", ConsoleColor.Red);
                 result = Plan;
                 return DecompositionStatus.Failed;
             }
 
             while (subPlan.Count > 0)
             {
-                Plan.Enqueue(subPlan.Dequeue());
+                var p = subPlan.Dequeue();
+                if (ctx.LogDecomposition) Log(ctx, $"Selector.OnDecomposeSlot:Decomposing {task.Name}:Pushed {p.Name} to plan!", ConsoleColor.Blue);
+                Plan.Enqueue(p);
             }
 
             if (ctx.HasPausedPartialPlan)
             {
+                if (ctx.LogDecomposition) Log(ctx, $"Selector.OnDecomposeSlot:Return partial plan!", ConsoleColor.DarkBlue);
                 result = Plan;
                 return DecompositionStatus.Partial;
             }
 
             result = Plan;
-            return result.Count == 0 ? DecompositionStatus.Failed : DecompositionStatus.Succeeded;
+            var s = result.Count == 0 ? DecompositionStatus.Failed : DecompositionStatus.Succeeded;
+            if (ctx.LogDecomposition) Log(ctx, $"Selector.OnDecomposeSlot:{s}!", s == DecompositionStatus.Succeeded ? ConsoleColor.Green : ConsoleColor.Red);
+            return s;
         }
     }
 }

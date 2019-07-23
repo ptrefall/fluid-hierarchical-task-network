@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using FluidHTN.Conditions;
+using FluidHTN.Debug;
 
 namespace FluidHTN.Compounds
 {
@@ -31,7 +33,10 @@ namespace FluidHTN.Compounds
 
         public DecompositionStatus Decompose(IContext ctx, int startIndex, out Queue<ITask> result)
         {
-            return OnDecompose(ctx, startIndex, out result);
+            if (ctx.LogDecomposition) ctx.CurrentDecompositionDepth++;
+            var status = OnDecompose(ctx, startIndex, out result);
+            if (ctx.LogDecomposition) ctx.CurrentDecompositionDepth--;
+            return status;
         }
 
         protected abstract DecompositionStatus OnDecompose(IContext ctx, int startIndex, out Queue<ITask> result);
@@ -47,10 +52,23 @@ namespace FluidHTN.Compounds
         public virtual bool IsValid(IContext ctx)
         {
             foreach (var condition in Conditions)
-                if (condition.IsValid(ctx) == false)
+            {
+                var result = condition.IsValid(ctx);
+                if (ctx.LogDecomposition) Log(ctx, $"PrimitiveTask.IsValid:{(result ? "Success" : "Failed")}:{condition.Name} is{(result ? "" : " not")} valid!", result ? ConsoleColor.DarkGreen : ConsoleColor.DarkRed);
+                if (result == false)
+                {
                     return false;
+                }
+            }
 
             return true;
+        }
+
+        // ========================================================= LOGGING
+
+        protected virtual void Log(IContext ctx, string description, ConsoleColor color = ConsoleColor.White)
+        {
+            ctx.Log(Name, description, ctx.CurrentDecompositionDepth, this, color);
         }
     }
 }

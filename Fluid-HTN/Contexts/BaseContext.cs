@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using FluidHTN.Compounds;
+using FluidHTN.Conditions;
+using FluidHTN.Debug;
 using FluidHTN.Factory;
 
 namespace FluidHTN.Contexts
@@ -10,13 +13,14 @@ namespace FluidHTN.Contexts
 
         public bool IsDirty { get; set; }
         public ContextState ContextState { get; set; } = ContextState.Executing;
+        public int CurrentDecompositionDepth { get; set; } = 0;
         public abstract IFactory Factory { get; set; }
         public List<int> MethodTraversalRecord { get; set; } = new List<int>();
         public List<int> LastMTR { get; } = new List<int>();
         public abstract List<string> MTRDebug { get; set; }
         public abstract List<string> LastMTRDebug { get; set; }
         public abstract bool DebugMTR { get; }
-        public abstract Stack<string> DecompositionLog { get; set; }
+        public abstract Queue<IBaseDecompositionLogEntry> DecompositionLog { get; set; }
         public abstract bool LogDecomposition { get; }
         public Queue<PartialPlanEntry> PartialPlanQueue { get; set; } = new Queue<PartialPlanEntry>();
         public bool HasPausedPartialPlan { get; set; } = false;
@@ -44,7 +48,7 @@ namespace FluidHTN.Contexts
 
             if (LogDecomposition)
             {
-                if (DecompositionLog == null) DecompositionLog = new Stack<string>();
+                if (DecompositionLog == null) DecompositionLog = new Queue<IBaseDecompositionLogEntry>();
             }
         }
 
@@ -126,6 +130,53 @@ namespace FluidHTN.Contexts
                 MTRDebug?.Clear();
                 LastMTRDebug?.Clear();
             }
+        }
+
+        // ========================================================= DECOMPOSITION LOGGING
+
+        public void Log(string name, string description, int depth, ITask task, ConsoleColor color = ConsoleColor.White)
+        {
+            if (LogDecomposition == false)
+                return;
+
+            DecompositionLog.Enqueue(new DecomposedCompoundTaskEntry
+            {
+                Name = name,
+                Description = description,
+                Entry = task,
+                Depth = depth,
+                Color = color,
+            });
+        }
+
+        public void Log(string name, string description, int depth, ICondition condition, ConsoleColor color = ConsoleColor.DarkGreen)
+        {
+            if (LogDecomposition == false)
+                return;
+
+            DecompositionLog.Enqueue(new DecomposedConditionEntry
+            {
+                Name = name,
+                Description = description,
+                Entry = condition,
+                Depth = depth,
+                Color = color
+            });
+        }
+
+        public void Log(string name, string description, int depth, IEffect effect, ConsoleColor color = ConsoleColor.DarkYellow)
+        {
+            if (LogDecomposition == false)
+                return;
+
+            DecompositionLog.Enqueue(new DecomposedEffectEntry
+            {
+                Name = name,
+                Description = description,
+                Entry = effect,
+                Depth = depth,
+                Color = color,
+            });
         }
     }
 }

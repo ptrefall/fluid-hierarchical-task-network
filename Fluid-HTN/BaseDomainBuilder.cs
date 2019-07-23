@@ -311,7 +311,7 @@ namespace FluidHTN
         {
             if (Pointer is ICompoundTask compoundTask)
             {
-                var slot = new Slot() { SlotId = slotId };
+                var slot = new Slot() { SlotId = slotId, Name = $"Slot {slotId}" };
                 _domain.Add(compoundTask, slot);
             }
             else

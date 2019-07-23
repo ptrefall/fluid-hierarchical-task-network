@@ -1,6 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using FluidHTN.Compounds;
+using FluidHTN.Conditions;
+using FluidHTN.Debug;
 using FluidHTN.Factory;
+using FluidHTN.PrimitiveTasks;
 
 namespace FluidHTN
 {
@@ -23,6 +27,7 @@ namespace FluidHTN
     {
         bool IsDirty { get; set; }
         ContextState ContextState { get; set; }
+        int CurrentDecompositionDepth { get; set; }
 
         IFactory Factory { get; set; }
 
@@ -60,7 +65,7 @@ namespace FluidHTN
 
         /// <summary>
         /// </summary>
-        Stack<string> DecompositionLog { get; set; }
+        Queue<IBaseDecompositionLogEntry> DecompositionLog { get; set; }
 
         /// <summary>
         /// Whether our planning system should log our decomposition. Specially condition success vs failure.
@@ -95,5 +100,9 @@ namespace FluidHTN
         void SetState(int state, byte value, bool setAsDirty = true, EffectType e = EffectType.Permanent);
 
         int[] GetWorldStateChangeDepth(IFactory factory);
+
+        void Log(string name, string description, int depth, ITask task, ConsoleColor color = ConsoleColor.White);
+        void Log(string name, string description, int depth, ICondition condition, ConsoleColor color = ConsoleColor.DarkGreen);
+        void Log(string name, string description, int depth, IEffect effect, ConsoleColor color = ConsoleColor.DarkYellow);
     }
 }
