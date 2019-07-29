@@ -570,6 +570,7 @@ Example projects have been pulled into their own repositories, as not to clutter
 * [Fluid Troll Bridge](https://github.com/ptrefall/fluid-troll-bridge) (requires Unity)
 * [Fluid Goap Coffai](https://github.com/ptrefall/fluid-goap-coffai)
 * [Fluid Smart Objects](https://github.com/ptrefall/fluid-smart-objects)
+* [Fluid Roguelike](https://github.com/ptrefall/fluid_roguelike) (requires Unity, work in progress)
 
 ## TODO
 Review the [Projects area](https://github.com/ptrefall/fluid-hierarchical-task-network/projects) of this project to get an overview of what's on the todo-list of this project, and which new features are in progress.
