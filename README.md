@@ -554,13 +554,7 @@ public Action<IPrimitiveTask> OnCurrentTaskContinues = null;
 ```
 
 ### Using Fluid HTN with Unity
-In UnityProject/Packages/manifest.json add the following line under dependencies and edit the path to point to where you have cloned the Fluid HTN repository.
-```json
-"fluid.htn": "file:path/to/fluid-hierarchical-task-network/Fluid-HTN"
-```
-Your Unity project should now have integrated Fluid HTN via the Package Manager, and you should be able to proceed with the Getting Started example above. Slightly more elaborate examples based on Unity is also available in the Examples section below.
-
-If preferred, the FluidHTN folder of the planner can also be copy/pasted somewhere into your Unity project's Assets folder.
+In Unity, open the Package Manager via the Windows menu. [Click the Add package from disk button, which allows you to specify the location of an external package](https://docs.unity3d.com/Manual/upm-ui-local.html).
 
 ## Extensions
 The [Fluid HTN Extension library](https://github.com/ptrefall/fluid-hierarchical-task-network-ext) adds extended selector implementations, like Random Select, Utility Select, Always Succeed decorator, Invert Status decorator and GOAP Sequence. There is also a JSON serialization of HTN Domains in the works.
