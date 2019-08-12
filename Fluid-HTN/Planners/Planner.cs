@@ -96,6 +96,7 @@ namespace FluidHTN
         /// <param name="ctx"></param>
         public void Tick(Domain<T> domain, T ctx, bool allowImmediateReplan = true)
         {
+            DecompositionStatus decompositionStatus = DecompositionStatus.Failed;
             // Check whether state has changed or the current plan has finished running.
             // and if so, try to find a new plan.
             if (_currentTask == null && (_plan.Count == 0) || ctx.IsDirty)
@@ -135,8 +136,8 @@ namespace FluidHTN
                     }
                 }
 
-                var status = domain.FindPlan(ctx, out var newPlan);
-                if (status == DecompositionStatus.Succeeded || status == DecompositionStatus.Partial)
+                decompositionStatus = domain.FindPlan(ctx, out var newPlan);
+                if (decompositionStatus == DecompositionStatus.Succeeded || decompositionStatus == DecompositionStatus.Partial)
                 {
                     if (OnReplacePlan != null && (_plan.Count > 0 || _currentTask != null))
                     {
@@ -306,6 +307,13 @@ namespace FluidHTN
                         LastStatus = TaskStatus.Failure;
                     }
                 }
+
+            if (_currentTask == null && _plan.Count == 0 &&
+                (decompositionStatus == DecompositionStatus.Failed ||
+                 decompositionStatus == DecompositionStatus.Rejected))
+            {
+                LastStatus = TaskStatus.Failure;
+            }
         }
 
         // ========================================================= RESET
@@ -313,8 +321,8 @@ namespace FluidHTN
         public void Reset(IContext ctx)
         {
             _plan.Clear();
-            
-            if(_currentTask != null && _currentTask is IPrimitiveTask task)
+
+            if (_currentTask != null && _currentTask is IPrimitiveTask task)
             {
                 task.Stop(ctx);
             }
