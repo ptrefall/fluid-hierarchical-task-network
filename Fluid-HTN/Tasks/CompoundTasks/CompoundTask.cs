@@ -15,6 +15,13 @@ namespace FluidHTN.Compounds
         public TaskStatus LastStatus { get; private set; }
         public List<ITask> Subtasks { get; } = new List<ITask>();
 
+        // ========================================================= VALIDITY
+
+        public virtual DecompositionStatus OnIsValidFailed(IContext ctx)
+        {
+            return DecompositionStatus.Failed;
+        }
+
         // ========================================================= ADDERS
 
         public ITask AddCondition(ICondition condition)

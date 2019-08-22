@@ -39,5 +39,7 @@ namespace FluidHTN
         /// <param name="ctx"></param>
         /// <returns></returns>
         bool IsValid(IContext ctx);
+
+        DecompositionStatus OnIsValidFailed(IContext ctx);
     }
 }

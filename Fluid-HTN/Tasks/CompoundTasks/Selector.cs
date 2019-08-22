@@ -98,7 +98,7 @@ namespace FluidHTN.Compounds
             {
                 if (ctx.LogDecomposition) Log(ctx, $"Selector.OnDecomposeTask:Failed:Task {task.Name}.IsValid returned false!", ConsoleColor.Red);
                 result = Plan;
-                return DecompositionStatus.Failed;
+                return task.OnIsValidFailed(ctx);
             }
 
             if (task is ICompoundTask compoundTask)

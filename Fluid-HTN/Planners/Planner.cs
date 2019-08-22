@@ -97,6 +97,7 @@ namespace FluidHTN
         public void Tick(Domain<T> domain, T ctx, bool allowImmediateReplan = true)
         {
             DecompositionStatus decompositionStatus = DecompositionStatus.Failed;
+            bool isTryingToReplacePlan = false;
             // Check whether state has changed or the current plan has finished running.
             // and if so, try to find a new plan.
             if (_currentTask == null && (_plan.Count == 0) || ctx.IsDirty)
@@ -137,6 +138,7 @@ namespace FluidHTN
                 }
 
                 decompositionStatus = domain.FindPlan(ctx, out var newPlan);
+                isTryingToReplacePlan = _plan.Count > 0;
                 if (decompositionStatus == DecompositionStatus.Succeeded || decompositionStatus == DecompositionStatus.Partial)
                 {
                     if (OnReplacePlan != null && (_plan.Count > 0 || _currentTask != null))
@@ -308,7 +310,7 @@ namespace FluidHTN
                     }
                 }
 
-            if (_currentTask == null && _plan.Count == 0 &&
+            if (_currentTask == null && _plan.Count == 0 && isTryingToReplacePlan == false &&
                 (decompositionStatus == DecompositionStatus.Failed ||
                  decompositionStatus == DecompositionStatus.Rejected))
             {

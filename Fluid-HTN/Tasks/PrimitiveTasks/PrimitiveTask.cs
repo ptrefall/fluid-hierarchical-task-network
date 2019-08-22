@@ -18,6 +18,13 @@ namespace FluidHTN.PrimitiveTasks
         public IOperator Operator { get; private set; }
         public List<IEffect> Effects { get; } = new List<IEffect>();
 
+        // ========================================================= VALIDITY
+
+        public DecompositionStatus OnIsValidFailed(IContext ctx)
+        {
+            return DecompositionStatus.Failed;
+        }
+
         // ========================================================= ADDERS
 
         public ITask AddCondition(ICondition condition)

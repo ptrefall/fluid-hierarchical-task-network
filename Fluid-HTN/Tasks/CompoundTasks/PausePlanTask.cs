@@ -15,6 +15,13 @@ namespace FluidHTN
         public List<IEffect> Effects { get; } = null;
         public TaskStatus LastStatus { get; }
 
+        // ========================================================= VALIDITY
+
+        public DecompositionStatus OnIsValidFailed(IContext ctx)
+        {
+            return DecompositionStatus.Failed;
+        }
+
         // ========================================================= ADDERS
 
         public ITask AddCondition(ICondition condition)

@@ -80,7 +80,7 @@ namespace FluidHTN.Compounds
                 Plan.Clear();
                 ctx.TrimToStackDepth(oldStackDepth);
                 result = Plan;
-                return DecompositionStatus.Failed;
+                return task.OnIsValidFailed(ctx);
             }
 
             if (task is ICompoundTask compoundTask)
