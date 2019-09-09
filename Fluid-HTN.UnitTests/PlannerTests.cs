@@ -40,8 +40,8 @@ namespace Fluid_HTN.UnitTests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(NullReferenceException), AllowDerivedTypes = false)]
-        public void TickWithNullDomainThrowsNRE_ExpectedBehavior()
+        [ExpectedException(typeof(Exception), AllowDerivedTypes = false)]
+        public void TickWithNullDomainThrowsException_ExpectedBehavior()
         {
             var ctx = new MyContext();
             var planner = new Planner<MyContext>();
@@ -49,8 +49,8 @@ namespace Fluid_HTN.UnitTests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(NullReferenceException), AllowDerivedTypes = false)]
-        public void TickWithoutInitializedContextThrowsNRE_ExpectedBehavior()
+        [ExpectedException(typeof(Exception), AllowDerivedTypes = false)]
+        public void TickWithoutInitializedContextThrowsException_ExpectedBehavior()
         {
             var ctx = new MyContext();
             var domain = new Domain<MyContext>("Test");

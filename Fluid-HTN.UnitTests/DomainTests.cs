@@ -39,8 +39,8 @@ namespace Fluid_HTN.UnitTests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(NullReferenceException), AllowDerivedTypes = false)]
-        public void FindPlanUninitializedContextThrowsNRE_ExpectedBehavior()
+        [ExpectedException(typeof(Exception), AllowDerivedTypes = false)]
+        public void FindPlanUninitializedContextThrowsException_ExpectedBehavior()
         {
             var ctx = new MyContext();
             var domain = new Domain<MyContext>("Test");

@@ -25,6 +25,7 @@ namespace FluidHTN
 
     public interface IContext
     {
+        bool IsInitialized { get; }
         bool IsDirty { get; set; }
         ContextState ContextState { get; set; }
         int CurrentDecompositionDepth { get; set; }

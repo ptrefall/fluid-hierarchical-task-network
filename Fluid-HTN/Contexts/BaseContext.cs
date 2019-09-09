@@ -11,6 +11,7 @@ namespace FluidHTN.Contexts
     {
         // ========================================================= PROPERTIES
 
+        public bool IsInitialized { get; protected set; } = false;
         public bool IsDirty { get; set; }
         public ContextState ContextState { get; set; } = ContextState.Executing;
         public int CurrentDecompositionDepth { get; set; } = 0;
@@ -50,6 +51,8 @@ namespace FluidHTN.Contexts
             {
                 if (DecompositionLog == null) DecompositionLog = new Queue<IBaseDecompositionLogEntry>();
             }
+
+            IsInitialized = true;
         }
 
         // ========================================================= STATE HANDLING
@@ -130,6 +133,8 @@ namespace FluidHTN.Contexts
                 MTRDebug?.Clear();
                 LastMTRDebug?.Clear();
             }
+
+            IsInitialized = false;
         }
 
         // ========================================================= DECOMPOSITION LOGGING

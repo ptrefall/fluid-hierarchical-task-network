@@ -96,6 +96,9 @@ namespace FluidHTN
         /// <param name="ctx"></param>
         public void Tick(Domain<T> domain, T ctx, bool allowImmediateReplan = true)
         {
+            if (ctx.IsInitialized == false)
+                throw new Exception("Context was not initialized!");
+
             DecompositionStatus decompositionStatus = DecompositionStatus.Failed;
             bool isTryingToReplacePlan = false;
             // Check whether state has changed or the current plan has finished running.

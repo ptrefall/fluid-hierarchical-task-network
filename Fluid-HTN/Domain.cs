@@ -59,6 +59,9 @@ namespace FluidHTN
 
         public DecompositionStatus FindPlan(T ctx, out Queue<ITask> plan)
         {
+            if (ctx.IsInitialized == false)
+                throw new Exception("Context was not initialized!");
+
             if (ctx.MethodTraversalRecord == null)
                 throw new Exception("We require the Method Traversal Record to have a valid instance.");
 
