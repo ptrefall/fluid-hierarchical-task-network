@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using FluidHTN.Compounds;
 using FluidHTN.Conditions;
 
 namespace FluidHTN.Debug

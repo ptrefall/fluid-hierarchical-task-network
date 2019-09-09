@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using FluidHTN.Compounds;
 using FluidHTN.Conditions;
 using FluidHTN.Debug;
 using FluidHTN.Factory;
