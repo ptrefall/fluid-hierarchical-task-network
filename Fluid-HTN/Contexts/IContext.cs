@@ -16,13 +16,13 @@ namespace FluidHTN
         Executing
     }
 
-    public struct PartialPlanEntry
+    public struct PartialPlanEntry<TWorldStateEntry>
     {
-        public ICompoundTask Task;
+        public ICompoundTask<TWorldStateEntry> Task;
         public int TaskIndex;
     }
 
-    public interface IContext
+    public interface IContext<TWorldStateEntry>
     {
         bool IsInitialized { get; }
         bool IsDirty { get; set; }
@@ -75,17 +75,17 @@ namespace FluidHTN
         /// <summary>
         /// 
         /// </summary>
-        Queue<PartialPlanEntry> PartialPlanQueue { get; set; }
+        Queue<PartialPlanEntry<TWorldStateEntry>> PartialPlanQueue { get; set; }
 
         bool HasPausedPartialPlan { get; set; }
 
-        byte[] WorldState { get; }
+        TWorldStateEntry[] WorldState { get; }
 
         /// <summary>
         ///     A stack of changes applied to each world state entry during planning.
         ///     This is necessary if one wants to support planner-only and plan&execute effects.
         /// </summary>
-        Stack<KeyValuePair<EffectType, byte>>[] WorldStateChangeStack { get; }
+        Stack<KeyValuePair<EffectType, TWorldStateEntry>>[] WorldStateChangeStack { get; }
 
         /// <summary>
         ///     Reset the context state to default values.
@@ -95,14 +95,14 @@ namespace FluidHTN
         void TrimForExecution();
         void TrimToStackDepth(int[] stackDepth);
 
-        bool HasState(int state, byte value);
-        byte GetState(int state);
-        void SetState(int state, byte value, bool setAsDirty = true, EffectType e = EffectType.Permanent);
+        bool HasState(int state, TWorldStateEntry value);
+        TWorldStateEntry GetState(int state);
+        void SetState(int state, TWorldStateEntry value, bool setAsDirty = true, EffectType e = EffectType.Permanent);
 
         int[] GetWorldStateChangeDepth(IFactory factory);
 
-        void Log(string name, string description, int depth, ITask task, ConsoleColor color = ConsoleColor.White);
-        void Log(string name, string description, int depth, ICondition condition, ConsoleColor color = ConsoleColor.DarkGreen);
-        void Log(string name, string description, int depth, IEffect effect, ConsoleColor color = ConsoleColor.DarkYellow);
+        void Log(string name, string description, int depth, ITask<TWorldStateEntry> task, ConsoleColor color = ConsoleColor.White);
+        void Log(string name, string description, int depth, ICondition<TWorldStateEntry> condition, ConsoleColor color = ConsoleColor.DarkGreen);
+        void Log(string name, string description, int depth, IEffect<TWorldStateEntry> effect, ConsoleColor color = ConsoleColor.DarkYellow);
     }
 }

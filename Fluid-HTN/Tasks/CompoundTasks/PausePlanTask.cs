@@ -5,44 +5,44 @@ using FluidHTN.Conditions;
 
 namespace FluidHTN
 {
-    public class PausePlanTask : ITask
+    public class PausePlanTask<TWorldStateEntry> : ITask<TWorldStateEntry>
     {
         // ========================================================= PROPERTIES
 
         public string Name { get; set; }
-        public ICompoundTask Parent { get; set; }
-        public List<ICondition> Conditions { get; } = null;
-        public List<IEffect> Effects { get; } = null;
+        public ICompoundTask<TWorldStateEntry> Parent { get; set; }
+        public List<ICondition<TWorldStateEntry>> Conditions { get; } = null;
+        public List<IEffect<TWorldStateEntry>> Effects { get; } = null;
         public TaskStatus LastStatus { get; }
 
         // ========================================================= VALIDITY
 
-        public DecompositionStatus OnIsValidFailed(IContext ctx)
+        public DecompositionStatus OnIsValidFailed(IContext<TWorldStateEntry> ctx)
         {
             return DecompositionStatus.Failed;
         }
 
         // ========================================================= ADDERS
 
-        public ITask AddCondition(ICondition condition)
+        public ITask<TWorldStateEntry> AddCondition(ICondition<TWorldStateEntry> condition)
         {
             throw new Exception("Pause Plan tasks does not support conditions.");
         }
 
-        public ITask AddEffect(IEffect effect)
+        public ITask<TWorldStateEntry> AddEffect(IEffect<TWorldStateEntry> effect)
         {
             throw new Exception("Pause Plan tasks does not support effects.");
         }
 
         // ========================================================= FUNCTIONALITY
 
-        public void ApplyEffects(IContext ctx)
+        public void ApplyEffects(IContext<TWorldStateEntry> ctx)
         {
         }
 
         // ========================================================= VALIDITY
 
-        public bool IsValid(IContext ctx)
+        public bool IsValid(IContext<TWorldStateEntry> ctx)
         {
             if (ctx.LogDecomposition) Log(ctx, $"PausePlanTask.IsValid:Success!");
             return true;
@@ -50,7 +50,7 @@ namespace FluidHTN
 
         // ========================================================= LOGGING
 
-        protected virtual void Log(IContext ctx, string description)
+        protected virtual void Log(IContext<TWorldStateEntry> ctx, string description)
         {
             ctx.Log(Name, description, ctx.CurrentDecompositionDepth, this, ConsoleColor.Green);
         }

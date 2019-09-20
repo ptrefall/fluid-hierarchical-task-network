@@ -2,7 +2,7 @@
 
 namespace FluidHTN.Operators
 {
-    public class FuncOperator<T> : IOperator where T : IContext
+    public class FuncOperator<T, TWorldStateEntry> : IOperator<TWorldStateEntry> where T : IContext<TWorldStateEntry>
     {
         // ========================================================= FIELDS
 
@@ -19,14 +19,14 @@ namespace FluidHTN.Operators
 
         // ========================================================= FUNCTIONALITY
 
-        public TaskStatus Update(IContext ctx)
+        public TaskStatus Update(IContext<TWorldStateEntry> ctx)
         {
             if (ctx is T c)
                 return _func?.Invoke(c) ?? TaskStatus.Failure;
             throw new Exception("Unexpected context type!");
         }
 
-        public void Stop(IContext ctx)
+        public void Stop(IContext<TWorldStateEntry> ctx)
         {
             if (ctx is T c)
                 _funcStop?.Invoke(c);

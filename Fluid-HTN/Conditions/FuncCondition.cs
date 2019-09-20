@@ -2,7 +2,7 @@
 
 namespace FluidHTN.Conditions
 {
-    public class FuncCondition<T> : ICondition where T : IContext
+    public class FuncCondition<T, TWorldStateEntry> : ICondition<TWorldStateEntry> where T : IContext<TWorldStateEntry>
     {
         // ========================================================= FIELDS
 
@@ -22,7 +22,7 @@ namespace FluidHTN.Conditions
 
         // ========================================================= VALIDITY
 
-        public bool IsValid(IContext ctx)
+        public bool IsValid(IContext<TWorldStateEntry> ctx)
         {
             if (ctx is T c)
             {

@@ -1,9 +1,9 @@
 ﻿namespace FluidHTN
 {
-    public interface IEffect
+    public interface IEffect<TWorldStateEntry>
     {
         string Name { get; }
         EffectType Type { get; }
-        void Apply(IContext ctx);
+        void Apply(IContext<TWorldStateEntry> ctx);
     }
 }

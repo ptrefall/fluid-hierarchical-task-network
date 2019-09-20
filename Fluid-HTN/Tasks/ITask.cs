@@ -4,7 +4,7 @@ using FluidHTN.Conditions;
 
 namespace FluidHTN
 {
-    public interface ITask
+    public interface ITask<TWorldStateEntry>
     {
         /// <summary>
         ///     Used for debugging and identification purposes
@@ -14,12 +14,12 @@ namespace FluidHTN
         /// <summary>
         ///     The parent of this task in the hierarchy
         /// </summary>
-        ICompoundTask Parent { get; set; }
+        ICompoundTask<TWorldStateEntry> Parent { get; set; }
 
         /// <summary>
         ///     The conditions that must be satisfied for this task to pass as valid.
         /// </summary>
-        List<ICondition> Conditions { get; }
+        List<ICondition<TWorldStateEntry>> Conditions { get; }
 
         /// <summary>
         ///     Last status returned by Update
@@ -31,15 +31,15 @@ namespace FluidHTN
         /// </summary>
         /// <param name="condition"></param>
         /// <returns></returns>
-        ITask AddCondition(ICondition condition);
+        ITask<TWorldStateEntry> AddCondition(ICondition<TWorldStateEntry> condition);
 
         /// <summary>
         ///     Check the task's preconditions, returns true if all preconditions are valid.
         /// </summary>
         /// <param name="ctx"></param>
         /// <returns></returns>
-        bool IsValid(IContext ctx);
+        bool IsValid(IContext<TWorldStateEntry> ctx);
 
-        DecompositionStatus OnIsValidFailed(IContext ctx);
+        DecompositionStatus OnIsValidFailed(IContext<TWorldStateEntry> ctx);
     }
 }

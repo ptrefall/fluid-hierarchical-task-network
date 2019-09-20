@@ -8,8 +8,8 @@ namespace FluidHTN
     ///     functionality of the domain builder, extend BaseDomainBuilder instead.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public sealed class DomainBuilder<T> : BaseDomainBuilder<DomainBuilder<T>, T>
-        where T : IContext
+    public sealed class DomainBuilder<T, TWorldStateEntry> : BaseDomainBuilder<DomainBuilder<T, TWorldStateEntry>, T, TWorldStateEntry>
+        where T : IContext<TWorldStateEntry>
     {
         // ========================================================= CONSTRUCTION
 

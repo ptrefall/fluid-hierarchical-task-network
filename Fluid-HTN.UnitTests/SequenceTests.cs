@@ -15,8 +15,8 @@ namespace Fluid_HTN.UnitTests
         [TestMethod]
         public void AddCondition_ExpectedBehavior()
         {
-            var task = new Sequence() { Name = "Test" };
-            var t = task.AddCondition(new FuncCondition<MyContext>("TestCondition", context => context.Done == false));
+            var task = new Sequence<byte>() { Name = "Test" };
+            var t = task.AddCondition(new FuncCondition<MyContext, byte>("TestCondition", context => context.Done == false));
 
             Assert.IsTrue(t == task);
             Assert.IsTrue(task.Conditions.Count == 1);
@@ -25,8 +25,8 @@ namespace Fluid_HTN.UnitTests
         [TestMethod]
         public void AddSubtask_ExpectedBehavior()
         {
-            var task = new Sequence() { Name = "Test" };
-            var t = task.AddSubtask(new PrimitiveTask() { Name = "Sub-task" });
+            var task = new Sequence<byte>() { Name = "Test" };
+            var t = task.AddSubtask(new PrimitiveTask<byte>() { Name = "Sub-task" });
 
             Assert.IsTrue(t == task);
             Assert.IsTrue(task.Subtasks.Count == 1);
@@ -36,7 +36,7 @@ namespace Fluid_HTN.UnitTests
         public void IsValidFailsWithoutSubtasks_ExpectedBehavior()
         {
             var ctx = new MyContext();
-            var task = new Sequence() { Name = "Test" };
+            var task = new Sequence<byte>() { Name = "Test" };
 
             Assert.IsFalse(task.IsValid(ctx));
         }
@@ -45,8 +45,8 @@ namespace Fluid_HTN.UnitTests
         public void IsValid_ExpectedBehavior()
         {
             var ctx = new MyContext();
-            var task = new Sequence() { Name = "Test" };
-            task.AddSubtask(new PrimitiveTask() { Name = "Sub-task" });
+            var task = new Sequence<byte>() { Name = "Test" };
+            task.AddSubtask(new PrimitiveTask<byte>() { Name = "Sub-task" });
 
             Assert.IsTrue(task.IsValid(ctx));
         }
@@ -56,7 +56,7 @@ namespace Fluid_HTN.UnitTests
         public void DecomposeRequiresContextInitFails_ExpectedBehavior()
         {
             var ctx = new MyContext();
-            var task = new Sequence() { Name = "Test" };
+            var task = new Sequence<byte>() { Name = "Test" };
             var status = task.Decompose(ctx, 0, out var plan);
         }
 
@@ -65,7 +65,7 @@ namespace Fluid_HTN.UnitTests
         {
             var ctx = new MyContext();
             ctx.Init();
-            var task = new Sequence() { Name = "Test" };
+            var task = new Sequence<byte>() { Name = "Test" };
             var status = task.Decompose(ctx, 0, out var plan);
 
             Assert.IsTrue(status == DecompositionStatus.Failed);
@@ -78,9 +78,9 @@ namespace Fluid_HTN.UnitTests
         {
             var ctx = new MyContext();
             ctx.Init();
-            var task = new Sequence() { Name = "Test" };
-            task.AddSubtask(new PrimitiveTask() { Name = "Sub-task1" });
-            task.AddSubtask(new PrimitiveTask() { Name = "Sub-task2" });
+            var task = new Sequence<byte>() { Name = "Test" };
+            task.AddSubtask(new PrimitiveTask<byte>() { Name = "Sub-task1" });
+            task.AddSubtask(new PrimitiveTask<byte>() { Name = "Sub-task2" });
             var status = task.Decompose(ctx, 0, out var plan);
 
             Assert.IsTrue(status == DecompositionStatus.Succeeded);
@@ -95,17 +95,17 @@ namespace Fluid_HTN.UnitTests
             var ctx = new MyContext();
             ctx.Init();
 
-            var task = new Sequence() { Name = "Test" };
-            var task2 = new Selector() { Name = "Test2" };
-            var task3 = new Selector() { Name = "Test3" };
-            task3.AddSubtask(new PrimitiveTask() { Name = "Sub-task1" }.AddCondition(new FuncCondition<MyContext>("Done == true", context => context.Done == true)));
-            task3.AddSubtask(new PrimitiveTask() { Name = "Sub-task2" });
+            var task = new Sequence<byte>() { Name = "Test" };
+            var task2 = new Selector<byte>() { Name = "Test2" };
+            var task3 = new Selector<byte>() { Name = "Test3" };
+            task3.AddSubtask(new PrimitiveTask<byte>() { Name = "Sub-task1" }.AddCondition(new FuncCondition<MyContext, byte>("Done == true", context => context.Done == true)));
+            task3.AddSubtask(new PrimitiveTask<byte>() { Name = "Sub-task2" });
 
             task2.AddSubtask(task3);
-            task2.AddSubtask(new PrimitiveTask() { Name = "Sub-task3" });
+            task2.AddSubtask(new PrimitiveTask<byte>() { Name = "Sub-task3" });
 
             task.AddSubtask(task2);
-            task.AddSubtask(new PrimitiveTask() { Name = "Sub-task4" });
+            task.AddSubtask(new PrimitiveTask<byte>() { Name = "Sub-task4" });
 
             var status = task.Decompose(ctx, 0, out var plan);
 
@@ -123,9 +123,9 @@ namespace Fluid_HTN.UnitTests
             ctx.Init();
             ctx.ContextState = ContextState.Planning;
 
-            var task = new Sequence() { Name = "Test" };
-            task.AddSubtask(new PrimitiveTask() { Name = "Sub-task1" });
-            task.AddSubtask(new PrimitiveTask() { Name = "Sub-task2" }.AddCondition(new FuncCondition<MyContext>("Done == true", context => context.Done == true)));
+            var task = new Sequence<byte>() { Name = "Test" };
+            task.AddSubtask(new PrimitiveTask<byte>() { Name = "Sub-task1" });
+            task.AddSubtask(new PrimitiveTask<byte>() { Name = "Sub-task2" }.AddCondition(new FuncCondition<MyContext, byte>("Done == true", context => context.Done == true)));
             var status = task.Decompose(ctx, 0, out var plan);
 
             Assert.IsTrue(status == DecompositionStatus.Failed);
@@ -140,9 +140,9 @@ namespace Fluid_HTN.UnitTests
             ctx.Init();
             ctx.ContextState = ContextState.Planning;
 
-            var task = new Sequence() { Name = "Test" };
-            task.AddSubtask(new Selector() { Name = "Sub-task1" });
-            task.AddSubtask(new PrimitiveTask() { Name = "Sub-task2" });
+            var task = new Sequence<byte>() { Name = "Test" };
+            task.AddSubtask(new Selector<byte>() { Name = "Sub-task1" });
+            task.AddSubtask(new PrimitiveTask<byte>() { Name = "Sub-task2" });
             var status = task.Decompose(ctx, 0, out var plan);
 
             Assert.IsTrue(status == DecompositionStatus.Failed);
@@ -160,10 +160,10 @@ namespace Fluid_HTN.UnitTests
             ctx.SetState(MyWorldState.HasB, true, EffectType.Permanent);
             ctx.SetState(MyWorldState.HasC, true, EffectType.PlanOnly);
 
-            var task = new Sequence() { Name = "Test" };
-            task.AddSubtask(new PrimitiveTask() { Name = "Sub-task1" }
-                .AddEffect(new ActionEffect<MyContext>("TestEffect", EffectType.Permanent, (context, type) => context.SetState(MyWorldState.HasA, false, EffectType.PlanOnly))));
-            task.AddSubtask(new Selector() { Name = "Sub-task2" });
+            var task = new Sequence<byte>() { Name = "Test" };
+            task.AddSubtask(new PrimitiveTask<byte>() { Name = "Sub-task1" }
+                .AddEffect(new ActionEffect<MyContext, byte>("TestEffect", EffectType.Permanent, (context, type) => context.SetState(MyWorldState.HasA, false, EffectType.PlanOnly))));
+            task.AddSubtask(new Selector<byte>() { Name = "Sub-task2" });
             var status = task.Decompose(ctx, 0, out var plan);
 
             Assert.IsTrue(status == DecompositionStatus.Failed);
@@ -184,17 +184,17 @@ namespace Fluid_HTN.UnitTests
             ctx.Init();
             ctx.ContextState = ContextState.Planning;
 
-            var task = new Sequence() { Name = "Test" };
-            var task2 = new Selector() { Name = "Test2" };
-            var task3 = new Selector() { Name = "Test3" };
-            task3.AddSubtask(new PrimitiveTask() { Name = "Sub-task1" }.AddCondition(new FuncCondition<MyContext>("Done == true", context => context.Done == true)));
-            task3.AddSubtask(new PrimitiveTask() { Name = "Sub-task2" });
+            var task = new Sequence<byte>() { Name = "Test" };
+            var task2 = new Selector<byte>() { Name = "Test2" };
+            var task3 = new Selector<byte>() { Name = "Test3" };
+            task3.AddSubtask(new PrimitiveTask<byte>() { Name = "Sub-task1" }.AddCondition(new FuncCondition<MyContext, byte>("Done == true", context => context.Done == true)));
+            task3.AddSubtask(new PrimitiveTask<byte>() { Name = "Sub-task2" });
 
             task2.AddSubtask(task3);
-            task2.AddSubtask(new PrimitiveTask() { Name = "Sub-task3" });
+            task2.AddSubtask(new PrimitiveTask<byte>() { Name = "Sub-task3" });
 
             task.AddSubtask(task2);
-            task.AddSubtask(new PrimitiveTask() { Name = "Sub-task4" });
+            task.AddSubtask(new PrimitiveTask<byte>() { Name = "Sub-task4" });
 
             ctx.LastMTR.Add(0);
             ctx.LastMTR.Add(0);
@@ -214,17 +214,17 @@ namespace Fluid_HTN.UnitTests
             ctx.Init();
             ctx.ContextState = ContextState.Planning;
 
-            var task = new Sequence() { Name = "Test" };
-            var task2 = new Selector() { Name = "Test2" };
-            var task3 = new Selector() { Name = "Test3" };
-            task3.AddSubtask(new PrimitiveTask() { Name = "Sub-task1" }.AddCondition(new FuncCondition<MyContext>("Done == true", context => context.Done == true)));
-            task3.AddSubtask(new PrimitiveTask() { Name = "Sub-task2" });
+            var task = new Sequence<byte>() { Name = "Test" };
+            var task2 = new Selector<byte>() { Name = "Test2" };
+            var task3 = new Selector<byte>() { Name = "Test3" };
+            task3.AddSubtask(new PrimitiveTask<byte>() { Name = "Sub-task1" }.AddCondition(new FuncCondition<MyContext, byte>("Done == true", context => context.Done == true)));
+            task3.AddSubtask(new PrimitiveTask<byte>() { Name = "Sub-task2" });
 
-            task2.AddSubtask(new PrimitiveTask() { Name = "Sub-task3" }.AddCondition(new FuncCondition<MyContext>("Done == true", context => context.Done == true)));
+            task2.AddSubtask(new PrimitiveTask<byte>() { Name = "Sub-task3" }.AddCondition(new FuncCondition<MyContext, byte>("Done == true", context => context.Done == true)));
             task2.AddSubtask(task3);
 
             task.AddSubtask(task2);
-            task.AddSubtask(new PrimitiveTask() { Name = "Sub-task4" });
+            task.AddSubtask(new PrimitiveTask<byte>() { Name = "Sub-task4" });
 
             ctx.LastMTR.Add(1);
             ctx.LastMTR.Add(0);
@@ -243,17 +243,17 @@ namespace Fluid_HTN.UnitTests
             var ctx = new MyContext();
             ctx.Init();
 
-            var task = new Sequence() { Name = "Test" };
-            var task2 = new Selector() { Name = "Test2" };
-            var task3 = new Selector() { Name = "Test3" };
-            task3.AddSubtask(new PrimitiveTask() { Name = "Sub-task2" }.AddCondition(new FuncCondition<MyContext>("Done == true", context => context.Done == true)));
-            task3.AddSubtask(new PrimitiveTask() { Name = "Sub-task3" });
+            var task = new Sequence<byte>() { Name = "Test" };
+            var task2 = new Selector<byte>() { Name = "Test2" };
+            var task3 = new Selector<byte>() { Name = "Test3" };
+            task3.AddSubtask(new PrimitiveTask<byte>() { Name = "Sub-task2" }.AddCondition(new FuncCondition<MyContext, byte>("Done == true", context => context.Done == true)));
+            task3.AddSubtask(new PrimitiveTask<byte>() { Name = "Sub-task3" });
 
-            task2.AddSubtask(new PrimitiveTask() { Name = "Sub-task1" }.AddCondition(new FuncCondition<MyContext>("Done == true", context => context.Done == true)));
+            task2.AddSubtask(new PrimitiveTask<byte>() { Name = "Sub-task1" }.AddCondition(new FuncCondition<MyContext, byte>("Done == true", context => context.Done == true)));
             task2.AddSubtask(task3);
 
             task.AddSubtask(task2);
-            task.AddSubtask(new PrimitiveTask() { Name = "Sub-task4" });
+            task.AddSubtask(new PrimitiveTask<byte>() { Name = "Sub-task4" });
 
             ctx.LastMTR.Add(1);
             ctx.LastMTR.Add(1);
@@ -278,19 +278,19 @@ namespace Fluid_HTN.UnitTests
             ctx.SetState(MyWorldState.HasB, true, EffectType.Permanent);
             ctx.SetState(MyWorldState.HasC, true, EffectType.PlanOnly);
 
-            var task = new Sequence() { Name = "Test" };
-            var task2 = new Selector() { Name = "Test2" };
-            var task3 = new Selector() { Name = "Test3" };
-            task3.AddSubtask(new PrimitiveTask() { Name = "Sub-task2" }.AddCondition(new FuncCondition<MyContext>("Done == true", context => context.Done == true)));
-            task3.AddSubtask(new PrimitiveTask() { Name = "Sub-task3" }.AddEffect(new ActionEffect<MyContext>("TestEffect", EffectType.Permanent, (context, type) => context.SetState(MyWorldState.HasA, false, EffectType.PlanOnly))));
+            var task = new Sequence<byte>() { Name = "Test" };
+            var task2 = new Selector<byte>() { Name = "Test2" };
+            var task3 = new Selector<byte>() { Name = "Test3" };
+            task3.AddSubtask(new PrimitiveTask<byte>() { Name = "Sub-task2" }.AddCondition(new FuncCondition<MyContext, byte>("Done == true", context => context.Done == true)));
+            task3.AddSubtask(new PrimitiveTask<byte>() { Name = "Sub-task3" }.AddEffect(new ActionEffect<MyContext, byte>("TestEffect", EffectType.Permanent, (context, type) => context.SetState(MyWorldState.HasA, false, EffectType.PlanOnly))));
 
             task2.AddSubtask(task3);
-            task2.AddSubtask(new PrimitiveTask() { Name = "Sub-task4" }.AddEffect(new ActionEffect<MyContext>("TestEffect", EffectType.Permanent, (context, type) => context.SetState(MyWorldState.HasB, false, EffectType.PlanOnly))));
+            task2.AddSubtask(new PrimitiveTask<byte>() { Name = "Sub-task4" }.AddEffect(new ActionEffect<MyContext, byte>("TestEffect", EffectType.Permanent, (context, type) => context.SetState(MyWorldState.HasB, false, EffectType.PlanOnly))));
 
-            task.AddSubtask(new PrimitiveTask() { Name = "Sub-task1" }
-                .AddEffect(new ActionEffect<MyContext>("TestEffect", EffectType.Permanent, (context, type) => context.SetState(MyWorldState.HasA, false, EffectType.PlanOnly))));
+            task.AddSubtask(new PrimitiveTask<byte>() { Name = "Sub-task1" }
+                .AddEffect(new ActionEffect<MyContext, byte>("TestEffect", EffectType.Permanent, (context, type) => context.SetState(MyWorldState.HasA, false, EffectType.PlanOnly))));
             task.AddSubtask(task2);
-            task.AddSubtask(new PrimitiveTask() { Name = "Sub-task5" }.AddEffect(new ActionEffect<MyContext>("TestEffect", EffectType.Permanent, (context, type) => context.SetState(MyWorldState.HasC, false, EffectType.PlanOnly))));
+            task.AddSubtask(new PrimitiveTask<byte>() { Name = "Sub-task5" }.AddEffect(new ActionEffect<MyContext, byte>("TestEffect", EffectType.Permanent, (context, type) => context.SetState(MyWorldState.HasC, false, EffectType.PlanOnly))));
 
             ctx.LastMTR.Add(0);
             ctx.LastMTR.Add(0);
@@ -319,19 +319,19 @@ namespace Fluid_HTN.UnitTests
             ctx.SetState(MyWorldState.HasB, true, EffectType.Permanent);
             ctx.SetState(MyWorldState.HasC, true, EffectType.PlanOnly);
 
-            var task = new Sequence() { Name = "Test" };
-            var task2 = new Sequence() { Name = "Test2" };
-            var task3 = new Sequence() { Name = "Test3" };
-            task3.AddSubtask(new PrimitiveTask() { Name = "Sub-task2" }.AddCondition(new FuncCondition<MyContext>("Done == true", context => context.Done == true)));
-            task3.AddSubtask(new PrimitiveTask() { Name = "Sub-task3" }.AddEffect(new ActionEffect<MyContext>("TestEffect", EffectType.Permanent, (context, type) => context.SetState(MyWorldState.HasA, false, EffectType.PlanOnly))));
+            var task = new Sequence<byte>() { Name = "Test" };
+            var task2 = new Sequence<byte>() { Name = "Test2" };
+            var task3 = new Sequence<byte>() { Name = "Test3" };
+            task3.AddSubtask(new PrimitiveTask<byte>() { Name = "Sub-task2" }.AddCondition(new FuncCondition<MyContext, byte>("Done == true", context => context.Done == true)));
+            task3.AddSubtask(new PrimitiveTask<byte>() { Name = "Sub-task3" }.AddEffect(new ActionEffect<MyContext, byte>("TestEffect", EffectType.Permanent, (context, type) => context.SetState(MyWorldState.HasA, false, EffectType.PlanOnly))));
 
             task2.AddSubtask(task3);
-            task2.AddSubtask(new PrimitiveTask() { Name = "Sub-task4" }.AddEffect(new ActionEffect<MyContext>("TestEffect", EffectType.Permanent, (context, type) => context.SetState(MyWorldState.HasB, false, EffectType.PlanOnly))));
+            task2.AddSubtask(new PrimitiveTask<byte>() { Name = "Sub-task4" }.AddEffect(new ActionEffect<MyContext, byte>("TestEffect", EffectType.Permanent, (context, type) => context.SetState(MyWorldState.HasB, false, EffectType.PlanOnly))));
 
-            task.AddSubtask(new PrimitiveTask() { Name = "Sub-task1" }
-                .AddEffect(new ActionEffect<MyContext>("TestEffect", EffectType.Permanent, (context, type) => context.SetState(MyWorldState.HasA, false, EffectType.PlanOnly))));
+            task.AddSubtask(new PrimitiveTask<byte>() { Name = "Sub-task1" }
+                .AddEffect(new ActionEffect<MyContext, byte>("TestEffect", EffectType.Permanent, (context, type) => context.SetState(MyWorldState.HasA, false, EffectType.PlanOnly))));
             task.AddSubtask(task2);
-            task.AddSubtask(new PrimitiveTask() { Name = "Sub-task5" }.AddEffect(new ActionEffect<MyContext>("TestEffect", EffectType.Permanent, (context, type) => context.SetState(MyWorldState.HasC, false, EffectType.PlanOnly))));
+            task.AddSubtask(new PrimitiveTask<byte>() { Name = "Sub-task5" }.AddEffect(new ActionEffect<MyContext, byte>("TestEffect", EffectType.Permanent, (context, type) => context.SetState(MyWorldState.HasC, false, EffectType.PlanOnly))));
 
             var status = task.Decompose(ctx, 0, out var plan);
 
@@ -352,10 +352,10 @@ namespace Fluid_HTN.UnitTests
             var ctx = new MyContext();
             ctx.Init();
 
-            var task = new Sequence() { Name = "Test" };
-            task.AddSubtask(new PrimitiveTask() { Name = "Sub-task1" });
-            task.AddSubtask(new PausePlanTask());
-            task.AddSubtask(new PrimitiveTask() { Name = "Sub-task2" });
+            var task = new Sequence<byte>() { Name = "Test" };
+            task.AddSubtask(new PrimitiveTask<byte>() { Name = "Sub-task1" });
+            task.AddSubtask(new PausePlanTask<byte>());
+            task.AddSubtask(new PrimitiveTask<byte>() { Name = "Sub-task2" });
 
             var status = task.Decompose(ctx, 0, out var plan);
 
@@ -375,10 +375,10 @@ namespace Fluid_HTN.UnitTests
             var ctx = new MyContext();
             ctx.Init();
 
-            var task = new Sequence() { Name = "Test" };
-            task.AddSubtask(new PrimitiveTask() { Name = "Sub-task1" });
-            task.AddSubtask(new PausePlanTask());
-            task.AddSubtask(new PrimitiveTask() { Name = "Sub-task2" });
+            var task = new Sequence<byte>() { Name = "Test" };
+            task.AddSubtask(new PrimitiveTask<byte>() { Name = "Sub-task1" });
+            task.AddSubtask(new PausePlanTask<byte>());
+            task.AddSubtask(new PrimitiveTask<byte>() { Name = "Sub-task2" });
 
             var status = task.Decompose(ctx, 0, out var plan);
 
@@ -392,7 +392,7 @@ namespace Fluid_HTN.UnitTests
             Assert.AreEqual(2, ctx.PartialPlanQueue.Peek().TaskIndex);
 
             ctx.HasPausedPartialPlan = false;
-            plan = new Queue<ITask>();
+            plan = new Queue<ITask<byte>>();
             while (ctx.PartialPlanQueue.Count > 0)
             {
                 var kvp = ctx.PartialPlanQueue.Dequeue();
@@ -416,18 +416,18 @@ namespace Fluid_HTN.UnitTests
             var ctx = new MyContext();
             ctx.Init();
 
-            var task = new Sequence() { Name = "Test" };
-            var task2 = new Selector() { Name = "Test2" };
-            var task3 = new Sequence() { Name = "Test3" };
-            task3.AddSubtask(new PrimitiveTask() { Name = "Sub-task1" });
-            task3.AddSubtask(new PausePlanTask());
-            task3.AddSubtask(new PrimitiveTask() { Name = "Sub-task2" });
+            var task = new Sequence<byte>() { Name = "Test" };
+            var task2 = new Selector<byte>() { Name = "Test2" };
+            var task3 = new Sequence<byte>() { Name = "Test3" };
+            task3.AddSubtask(new PrimitiveTask<byte>() { Name = "Sub-task1" });
+            task3.AddSubtask(new PausePlanTask<byte>());
+            task3.AddSubtask(new PrimitiveTask<byte>() { Name = "Sub-task2" });
 
             task2.AddSubtask(task3);
-            task2.AddSubtask(new PrimitiveTask() { Name = "Sub-task3" });
+            task2.AddSubtask(new PrimitiveTask<byte>() { Name = "Sub-task3" });
 
             task.AddSubtask(task2);
-            task.AddSubtask(new PrimitiveTask() { Name = "Sub-task4" });
+            task.AddSubtask(new PrimitiveTask<byte>() { Name = "Sub-task4" });
 
             var status = task.Decompose(ctx, 0, out var plan);
 
@@ -450,18 +450,18 @@ namespace Fluid_HTN.UnitTests
             var ctx = new MyContext();
             ctx.Init();
 
-            var task = new Sequence() { Name = "Test" };
-            var task2 = new Selector() { Name = "Test2" };
-            var task3 = new Sequence() { Name = "Test3" };
-            task3.AddSubtask(new PrimitiveTask() { Name = "Sub-task1" });
-            task3.AddSubtask(new PausePlanTask());
-            task3.AddSubtask(new PrimitiveTask() { Name = "Sub-task2" });
+            var task = new Sequence<byte>() { Name = "Test" };
+            var task2 = new Selector<byte>() { Name = "Test2" };
+            var task3 = new Sequence<byte>() { Name = "Test3" };
+            task3.AddSubtask(new PrimitiveTask<byte>() { Name = "Sub-task1" });
+            task3.AddSubtask(new PausePlanTask<byte>());
+            task3.AddSubtask(new PrimitiveTask<byte>() { Name = "Sub-task2" });
 
             task2.AddSubtask(task3);
-            task2.AddSubtask(new PrimitiveTask() { Name = "Sub-task3" });
+            task2.AddSubtask(new PrimitiveTask<byte>() { Name = "Sub-task3" });
 
             task.AddSubtask(task2);
-            task.AddSubtask(new PrimitiveTask() { Name = "Sub-task4" });
+            task.AddSubtask(new PrimitiveTask<byte>() { Name = "Sub-task4" });
 
             var status = task.Decompose(ctx, 0, out var plan);
 
@@ -478,7 +478,7 @@ namespace Fluid_HTN.UnitTests
             Assert.AreEqual(1, queueAsArray[1].TaskIndex);
 
             ctx.HasPausedPartialPlan = false;
-            plan = new Queue<ITask>();
+            plan = new Queue<ITask<byte>>();
             while (ctx.PartialPlanQueue.Count > 0)
             {
                 var kvp = ctx.PartialPlanQueue.Dequeue();
@@ -508,25 +508,25 @@ namespace Fluid_HTN.UnitTests
             var ctx = new MyContext();
             ctx.Init();
 
-            var task = new Sequence() { Name = "Test" };
-            var task2 = new Selector() { Name = "Test2" };
-            var task3 = new Sequence() { Name = "Test3" };
-            var task4 = new Sequence() { Name = "Test4" };
-            task3.AddSubtask(new PrimitiveTask() { Name = "Sub-task1" });
-            task3.AddSubtask(new PausePlanTask());
-            task3.AddSubtask(new PrimitiveTask() { Name = "Sub-task2" });
+            var task = new Sequence<byte>() { Name = "Test" };
+            var task2 = new Selector<byte>() { Name = "Test2" };
+            var task3 = new Sequence<byte>() { Name = "Test3" };
+            var task4 = new Sequence<byte>() { Name = "Test4" };
+            task3.AddSubtask(new PrimitiveTask<byte>() { Name = "Sub-task1" });
+            task3.AddSubtask(new PausePlanTask<byte>());
+            task3.AddSubtask(new PrimitiveTask<byte>() { Name = "Sub-task2" });
 
             task2.AddSubtask(task3);
-            task2.AddSubtask(new PrimitiveTask() { Name = "Sub-task3" });
+            task2.AddSubtask(new PrimitiveTask<byte>() { Name = "Sub-task3" });
 
-            task4.AddSubtask(new PrimitiveTask() { Name = "Sub-task5" });
-            task4.AddSubtask(new PausePlanTask());
-            task4.AddSubtask(new PrimitiveTask() { Name = "Sub-task6" });
+            task4.AddSubtask(new PrimitiveTask<byte>() { Name = "Sub-task5" });
+            task4.AddSubtask(new PausePlanTask<byte>());
+            task4.AddSubtask(new PrimitiveTask<byte>() { Name = "Sub-task6" });
 
             task.AddSubtask(task2);
-            task.AddSubtask(new PrimitiveTask() { Name = "Sub-task4" });
+            task.AddSubtask(new PrimitiveTask<byte>() { Name = "Sub-task4" });
             task.AddSubtask(task4);
-            task.AddSubtask(new PrimitiveTask() { Name = "Sub-task7" });
+            task.AddSubtask(new PrimitiveTask<byte>() { Name = "Sub-task7" });
 
             var status = task.Decompose(ctx, 0, out var plan);
 
@@ -543,7 +543,7 @@ namespace Fluid_HTN.UnitTests
             Assert.AreEqual(1, queueAsArray[1].TaskIndex);
 
             ctx.HasPausedPartialPlan = false;
-            plan = new Queue<ITask>();
+            plan = new Queue<ITask<byte>>();
             while (ctx.PartialPlanQueue.Count > 0)
             {
                 var kvp = ctx.PartialPlanQueue.Dequeue();
@@ -568,7 +568,7 @@ namespace Fluid_HTN.UnitTests
             Assert.AreEqual("Sub-task5", plan.Dequeue().Name);
 
             ctx.HasPausedPartialPlan = false;
-            plan = new Queue<ITask>();
+            plan = new Queue<ITask<byte>>();
             while (ctx.PartialPlanQueue.Count > 0)
             {
                 var kvp = ctx.PartialPlanQueue.Dequeue();

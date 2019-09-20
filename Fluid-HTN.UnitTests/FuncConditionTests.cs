@@ -10,7 +10,7 @@ namespace Fluid_HTN.UnitTests
         [TestMethod]
         public void SetsName_ExpectedBehavior()
         {
-            var c = new FuncCondition<MyContext>("Name", null);
+            var c = new FuncCondition<MyContext, byte>("Name", null);
 
             Assert.AreEqual("Name", c.Name);
         }
@@ -19,7 +19,7 @@ namespace Fluid_HTN.UnitTests
         public void IsValidFailsWithoutFunctionPtr_ExpectedBehavior()
         {
             var ctx = new MyContext();
-            var c = new FuncCondition<MyContext>("Name", null);
+            var c = new FuncCondition<MyContext, byte>("Name", null);
 
             var result = c.IsValid(ctx);
 
@@ -30,7 +30,7 @@ namespace Fluid_HTN.UnitTests
         [ExpectedException(typeof(Exception), AllowDerivedTypes = false)]
         public void IsValidThrowsIfBadContext_ExpectedBehavior()
         {
-            var c = new FuncCondition<MyContext>("Name", null);
+            var c = new FuncCondition<MyContext, byte>("Name", null);
 
             c.IsValid(null);
         }
@@ -39,7 +39,7 @@ namespace Fluid_HTN.UnitTests
         public void IsValidCallsInternalFunctionPtr_ExpectedBehavior()
         {
             var ctx = new MyContext();
-            var c = new FuncCondition<MyContext>("Done == false", (context) => context.Done == false);
+            var c = new FuncCondition<MyContext, byte>("Done == false", (context) => context.Done == false);
 
             var result = c.IsValid(ctx);
 

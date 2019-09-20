@@ -4,34 +4,34 @@ using FluidHTN.Conditions;
 
 namespace FluidHTN.Compounds
 {
-    public class Slot : ITask
+    public class Slot<TWorldStateEntry> : ITask<TWorldStateEntry>
     {
         // ========================================================= PROPERTIES
 
         public int SlotId { get; set; }
         public string Name { get; set; }
-        public ICompoundTask Parent { get; set; }
-        public List<ICondition> Conditions { get; } = null;
+        public ICompoundTask<TWorldStateEntry> Parent { get; set; }
+        public List<ICondition<TWorldStateEntry>> Conditions { get; } = null;
         public TaskStatus LastStatus { get; private set; }
-        public ICompoundTask Subtask { get; private set; } = null;
+        public ICompoundTask<TWorldStateEntry> Subtask { get; private set; } = null;
 
         // ========================================================= VALIDITY
 
-        public DecompositionStatus OnIsValidFailed(IContext ctx)
+        public DecompositionStatus OnIsValidFailed(IContext<TWorldStateEntry> ctx)
         {
             return DecompositionStatus.Failed;
         }
 
         // ========================================================= ADDERS
 
-        public ITask AddCondition(ICondition condition)
+        public ITask<TWorldStateEntry> AddCondition(ICondition<TWorldStateEntry> condition)
         {
             throw new Exception("Slot tasks does not support conditions.");
         }
 
         // ========================================================= SET / REMOVE
 
-        public bool Set(ICompoundTask subtask)
+        public bool Set(ICompoundTask<TWorldStateEntry> subtask)
         {
             if(Subtask != null)
             {
@@ -49,7 +49,7 @@ namespace FluidHTN.Compounds
 
         // ========================================================= DECOMPOSITION
 
-        public DecompositionStatus Decompose(IContext ctx, int startIndex, out Queue<ITask> result)
+        public DecompositionStatus Decompose(IContext<TWorldStateEntry> ctx, int startIndex, out Queue<ITask<TWorldStateEntry>> result)
         {
             if(Subtask != null)
             {
@@ -62,7 +62,7 @@ namespace FluidHTN.Compounds
 
         // ========================================================= VALIDITY
 
-        public virtual bool IsValid(IContext ctx)
+        public virtual bool IsValid(IContext<TWorldStateEntry> ctx)
         {
             var result = Subtask != null;
             if (ctx.LogDecomposition) Log(ctx, $"Slot.IsValid:{(result ? "Success" : "Failed")}!", result ? ConsoleColor.Green : ConsoleColor.Red);
@@ -71,7 +71,7 @@ namespace FluidHTN.Compounds
 
         // ========================================================= LOGGING
 
-        protected virtual void Log(IContext ctx, string description, ConsoleColor color = ConsoleColor.White)
+        protected virtual void Log(IContext<TWorldStateEntry> ctx, string description, ConsoleColor color = ConsoleColor.White)
         {
             ctx.Log(Name, description, ctx.CurrentDecompositionDepth, this, color);
         }

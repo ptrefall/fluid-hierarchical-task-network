@@ -12,7 +12,7 @@ namespace Fluid_HTN.UnitTests
         public void UpdateDoesNothingWithoutFunctionPtr_ExpectedBehavior()
         {
             var ctx = new MyContext();
-            var e = new FuncOperator<MyContext>(null, null);
+            var e = new FuncOperator<MyContext, byte>(null, null);
 
             e.Update(ctx);
         }
@@ -21,7 +21,7 @@ namespace Fluid_HTN.UnitTests
         public void StopDoesNothingWithoutFunctionPtr_ExpectedBehavior()
         {
             var ctx = new MyContext();
-            var e = new FuncOperator<MyContext>(null, null);
+            var e = new FuncOperator<MyContext, byte>(null, null);
 
             e.Stop(ctx);
         }
@@ -30,7 +30,7 @@ namespace Fluid_HTN.UnitTests
         [ExpectedException(typeof(Exception), AllowDerivedTypes = false)]
         public void UpdateThrowsIfBadContext_ExpectedBehavior()
         {
-            var e = new FuncOperator<MyContext>(null, null);
+            var e = new FuncOperator<MyContext, byte>(null, null);
 
             e.Update(null);
         }
@@ -39,7 +39,7 @@ namespace Fluid_HTN.UnitTests
         [ExpectedException(typeof(Exception), AllowDerivedTypes = false)]
         public void StopThrowsIfBadContext_ExpectedBehavior()
         {
-            var e = new FuncOperator<MyContext>(null, null);
+            var e = new FuncOperator<MyContext, byte>(null, null);
 
             e.Stop(null);
         }
@@ -48,7 +48,7 @@ namespace Fluid_HTN.UnitTests
         public void UpdateReturnsStatusInternalFunctionPtr_ExpectedBehavior()
         {
             var ctx = new MyContext();
-            var e = new FuncOperator<MyContext>((context) => TaskStatus.Success, null);
+            var e = new FuncOperator<MyContext, byte>((context) => TaskStatus.Success, null);
 
             var status = e.Update(ctx);
 
@@ -59,7 +59,7 @@ namespace Fluid_HTN.UnitTests
         public void StopCallsInternalFunctionPtr_ExpectedBehavior()
         {
             var ctx = new MyContext();
-            var e = new FuncOperator<MyContext>(null, (context) => context.Done = true);
+            var e = new FuncOperator<MyContext, byte>(null, (context) => context.Done = true);
 
             e.Stop(ctx);
 

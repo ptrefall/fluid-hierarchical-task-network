@@ -6,7 +6,7 @@ using FluidHTN.Factory;
 
 namespace FluidHTN.Contexts
 {
-    public abstract class BaseContext : IContext
+    public abstract class BaseContext<TWorldStateEntry> : IContext<TWorldStateEntry>
     {
         // ========================================================= PROPERTIES
 
@@ -22,12 +22,12 @@ namespace FluidHTN.Contexts
         public abstract bool DebugMTR { get; }
         public abstract Queue<IBaseDecompositionLogEntry> DecompositionLog { get; set; }
         public abstract bool LogDecomposition { get; }
-        public Queue<PartialPlanEntry> PartialPlanQueue { get; set; } = new Queue<PartialPlanEntry>();
+        public Queue<PartialPlanEntry<TWorldStateEntry>> PartialPlanQueue { get; set; } = new Queue<PartialPlanEntry<TWorldStateEntry>>();
         public bool HasPausedPartialPlan { get; set; } = false;
 
-        public abstract byte[] WorldState { get; }
+        public abstract TWorldStateEntry[] WorldState { get; }
 
-        public Stack<KeyValuePair<EffectType, byte>>[] WorldStateChangeStack { get; protected set; }
+        public Stack<KeyValuePair<EffectType, TWorldStateEntry>>[] WorldStateChangeStack { get; protected set; }
 
         // ========================================================= INITIALIZATION
 
@@ -35,9 +35,9 @@ namespace FluidHTN.Contexts
         {
             if (WorldStateChangeStack == null)
             {
-                WorldStateChangeStack = new Stack<KeyValuePair<EffectType, byte>>[WorldState.Length];
+                WorldStateChangeStack = new Stack<KeyValuePair<EffectType, TWorldStateEntry>>[WorldState.Length];
                 for (var i = 0; i < WorldState.Length; i++)
-                    WorldStateChangeStack[i] = new Stack<KeyValuePair<EffectType, byte>>();
+                    WorldStateChangeStack[i] = new Stack<KeyValuePair<EffectType, TWorldStateEntry>> ();
             }
 
             if (DebugMTR)
@@ -56,12 +56,12 @@ namespace FluidHTN.Contexts
 
         // ========================================================= STATE HANDLING
 
-        public bool HasState(int state, byte value)
+        public bool HasState(int state, TWorldStateEntry value)
         {
-            return GetState(state) == value;
+            return GetState(state).Equals(value);
         }
 
-        public byte GetState(int state)
+        public TWorldStateEntry GetState(int state)
         {
             if (ContextState == ContextState.Executing) return WorldState[state];
 
@@ -70,12 +70,12 @@ namespace FluidHTN.Contexts
             return WorldStateChangeStack[state].Peek().Value;
         }
 
-        public virtual void SetState(int state, byte value, bool setAsDirty = true, EffectType e = EffectType.Permanent)
+        public virtual void SetState(int state, TWorldStateEntry value, bool setAsDirty = true, EffectType e = EffectType.Permanent)
         {
             if (ContextState == ContextState.Executing)
             {
                 // Prevent setting the world state dirty if we're not changing anything.
-                if (WorldState[state] == value)
+                if (WorldState[state].Equals(value))
                     return;
 
                 WorldState[state] = value;
@@ -84,7 +84,7 @@ namespace FluidHTN.Contexts
             }
             else
             {
-                WorldStateChangeStack[state].Push(new KeyValuePair<EffectType, byte>(e, value));
+                WorldStateChangeStack[state].Push(new KeyValuePair<EffectType, TWorldStateEntry> (e, value));
             }
         }
 
@@ -138,12 +138,12 @@ namespace FluidHTN.Contexts
 
         // ========================================================= DECOMPOSITION LOGGING
 
-        public void Log(string name, string description, int depth, ITask task, ConsoleColor color = ConsoleColor.White)
+        public void Log(string name, string description, int depth, ITask<TWorldStateEntry> task, ConsoleColor color = ConsoleColor.White)
         {
             if (LogDecomposition == false)
                 return;
 
-            DecompositionLog.Enqueue(new DecomposedCompoundTaskEntry
+            DecompositionLog.Enqueue(new DecomposedCompoundTaskEntry<TWorldStateEntry>
             {
                 Name = name,
                 Description = description,
@@ -153,12 +153,12 @@ namespace FluidHTN.Contexts
             });
         }
 
-        public void Log(string name, string description, int depth, ICondition condition, ConsoleColor color = ConsoleColor.DarkGreen)
+        public void Log(string name, string description, int depth, ICondition<TWorldStateEntry> condition, ConsoleColor color = ConsoleColor.DarkGreen)
         {
             if (LogDecomposition == false)
                 return;
 
-            DecompositionLog.Enqueue(new DecomposedConditionEntry
+            DecompositionLog.Enqueue(new DecomposedConditionEntry<TWorldStateEntry>
             {
                 Name = name,
                 Description = description,
@@ -168,12 +168,12 @@ namespace FluidHTN.Contexts
             });
         }
 
-        public void Log(string name, string description, int depth, IEffect effect, ConsoleColor color = ConsoleColor.DarkYellow)
+        public void Log(string name, string description, int depth, IEffect<TWorldStateEntry> effect, ConsoleColor color = ConsoleColor.DarkYellow)
         {
             if (LogDecomposition == false)
                 return;
 
-            DecompositionLog.Enqueue(new DecomposedEffectEntry
+            DecompositionLog.Enqueue(new DecomposedEffectEntry<TWorldStateEntry>
             {
                 Name = name,
                 Description = description,

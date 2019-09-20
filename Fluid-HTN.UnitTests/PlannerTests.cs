@@ -15,7 +15,7 @@ namespace Fluid_HTN.UnitTests
         [TestMethod]
         public void GetPlanReturnsClearInstanceAtStart_ExpectedBehavior()
         {
-            var planner = new Planner<MyContext>();
+            var planner = new Planner<MyContext, byte>();
             var plan = planner.GetPlan();
 
             Assert.IsTrue(plan != null);
@@ -25,7 +25,7 @@ namespace Fluid_HTN.UnitTests
         [TestMethod]
         public void GetCurrentTaskReturnsNullAtStart_ExpectedBehavior()
         {
-            var planner = new Planner<MyContext>();
+            var planner = new Planner<MyContext, byte>();
             var task = planner.GetCurrentTask();
 
             Assert.IsTrue(task == null);
@@ -35,7 +35,7 @@ namespace Fluid_HTN.UnitTests
         [ExpectedException(typeof(NullReferenceException), AllowDerivedTypes = false)]
         public void TickWithNullParametersThrowsNRE_ExpectedBehavior()
         {
-            var planner = new Planner<MyContext>();
+            var planner = new Planner<MyContext, byte>();
             planner.Tick(null, null);
         }
 
@@ -44,7 +44,7 @@ namespace Fluid_HTN.UnitTests
         public void TickWithNullDomainThrowsException_ExpectedBehavior()
         {
             var ctx = new MyContext();
-            var planner = new Planner<MyContext>();
+            var planner = new Planner<MyContext, byte>();
             planner.Tick(null, ctx);
         }
 
@@ -53,8 +53,8 @@ namespace Fluid_HTN.UnitTests
         public void TickWithoutInitializedContextThrowsException_ExpectedBehavior()
         {
             var ctx = new MyContext();
-            var domain = new Domain<MyContext>("Test");
-            var planner = new Planner<MyContext>();
+            var domain = new Domain<MyContext, byte>("Test");
+            var planner = new Planner<MyContext, byte>();
             planner.Tick(domain, ctx);
         }
 
@@ -63,8 +63,8 @@ namespace Fluid_HTN.UnitTests
         {
             var ctx = new MyContext();
             ctx.Init();
-            var domain = new Domain<MyContext>("Test");
-            var planner = new Planner<MyContext>();
+            var domain = new Domain<MyContext, byte>("Test");
+            var planner = new Planner<MyContext, byte>();
             planner.Tick(domain, ctx);
         }
 
@@ -73,10 +73,10 @@ namespace Fluid_HTN.UnitTests
         {
             var ctx = new MyContext();
             ctx.Init();
-            var planner = new Planner<MyContext>();
-            var domain = new Domain<MyContext>("Test");
-            var task1 = new Selector() { Name = "Test" };
-            var task2 = new PrimitiveTask() { Name = "Sub-task" };
+            var planner = new Planner<MyContext, byte>();
+            var domain = new Domain<MyContext, byte>("Test");
+            var task1 = new Selector<byte>() { Name = "Test" };
+            var task2 = new PrimitiveTask<byte>() { Name = "Sub-task" };
             domain.Add(domain.Root, task1);
             domain.Add(task1, task2);
 
@@ -92,11 +92,11 @@ namespace Fluid_HTN.UnitTests
         {
             var ctx = new MyContext();
             ctx.Init();
-            var planner = new Planner<MyContext>();
-            var domain = new Domain<MyContext>("Test");
-            var task1 = new Selector() { Name = "Test" };
-            var task2 = new PrimitiveTask() { Name = "Sub-task" };
-            task2.SetOperator(new FuncOperator<MyContext>(null));
+            var planner = new Planner<MyContext, byte>();
+            var domain = new Domain<MyContext, byte>("Test");
+            var task1 = new Selector<byte>() { Name = "Test" };
+            var task2 = new PrimitiveTask<byte>() { Name = "Sub-task" };
+            task2.SetOperator(new FuncOperator<MyContext, byte>(null));
             domain.Add(domain.Root, task1);
             domain.Add(task1, task2);
 
@@ -112,11 +112,11 @@ namespace Fluid_HTN.UnitTests
         {
             var ctx = new MyContext();
             ctx.Init();
-            var planner = new Planner<MyContext>();
-            var domain = new Domain<MyContext>("Test");
-            var task1 = new Selector() { Name = "Test" };
-            var task2 = new PrimitiveTask() { Name = "Sub-task" };
-            task2.SetOperator(new FuncOperator<MyContext>((context) => TaskStatus.Success));
+            var planner = new Planner<MyContext, byte>();
+            var domain = new Domain<MyContext, byte>("Test");
+            var task1 = new Selector<byte>() { Name = "Test" };
+            var task2 = new PrimitiveTask<byte>() { Name = "Sub-task" };
+            task2.SetOperator(new FuncOperator<MyContext, byte>((context) => TaskStatus.Success));
             domain.Add(domain.Root, task1);
             domain.Add(task1, task2);
 
@@ -132,11 +132,11 @@ namespace Fluid_HTN.UnitTests
         {
             var ctx = new MyContext();
             ctx.Init();
-            var planner = new Planner<MyContext>();
-            var domain = new Domain<MyContext>("Test");
-            var task1 = new Selector() { Name = "Test" };
-            var task2 = new PrimitiveTask() { Name = "Sub-task" };
-            task2.SetOperator(new FuncOperator<MyContext>((context) => TaskStatus.Continue));
+            var planner = new Planner<MyContext, byte>();
+            var domain = new Domain<MyContext, byte>("Test");
+            var task1 = new Selector<byte>() { Name = "Test" };
+            var task2 = new PrimitiveTask<byte>() { Name = "Sub-task" };
+            task2.SetOperator(new FuncOperator<MyContext, byte>((context) => TaskStatus.Continue));
             domain.Add(domain.Root, task1);
             domain.Add(task1, task2);
 
@@ -153,12 +153,12 @@ namespace Fluid_HTN.UnitTests
             bool test = false;
             var ctx = new MyContext();
             ctx.Init();
-            var planner = new Planner<MyContext>();
+            var planner = new Planner<MyContext, byte>();
             planner.OnNewPlan = (p) => { test = p.Count == 1; };
-            var domain = new Domain<MyContext>("Test");
-            var task1 = new Selector() { Name = "Test" };
-            var task2 = new PrimitiveTask() { Name = "Sub-task" };
-            task2.SetOperator(new FuncOperator<MyContext>((context) => TaskStatus.Continue));
+            var domain = new Domain<MyContext, byte>("Test");
+            var task1 = new Selector<byte>() { Name = "Test" };
+            var task2 = new PrimitiveTask<byte>() { Name = "Sub-task" };
+            task2.SetOperator(new FuncOperator<MyContext, byte>((context) => TaskStatus.Continue));
             domain.Add(domain.Root, task1);
             domain.Add(task1, task2);
 
@@ -173,15 +173,15 @@ namespace Fluid_HTN.UnitTests
             bool test = false;
             var ctx = new MyContext();
             ctx.Init();
-            var planner = new Planner<MyContext>();
+            var planner = new Planner<MyContext, byte>();
             planner.OnReplacePlan = (op, ct, p) => { test = op.Count == 0 && ct != null && p.Count == 1; };
-            var domain = new Domain<MyContext>("Test");
-            var task1 = new Selector() { Name = "Test1" };
-            var task2 = new Selector() { Name = "Test2" };
-            var task3 = (IPrimitiveTask) new PrimitiveTask() { Name = "Sub-task1" }.AddCondition(new FuncCondition<MyContext>("TestCondition", context => context.Done == false));
-            var task4 = new PrimitiveTask() { Name = "Sub-task2" };
-            task3.SetOperator(new FuncOperator<MyContext>((context) => TaskStatus.Continue));
-            task4.SetOperator(new FuncOperator<MyContext>((context) => TaskStatus.Continue));
+            var domain = new Domain<MyContext, byte>("Test");
+            var task1 = new Selector<byte>() { Name = "Test1" };
+            var task2 = new Selector<byte>() { Name = "Test2" };
+            var task3 = (IPrimitiveTask<byte>) new PrimitiveTask<byte>() { Name = "Sub-task1" }.AddCondition(new FuncCondition<MyContext, byte>("TestCondition", context => context.Done == false));
+            var task4 = new PrimitiveTask<byte>() { Name = "Sub-task2" };
+            task3.SetOperator(new FuncOperator<MyContext, byte>((context) => TaskStatus.Continue));
+            task4.SetOperator(new FuncOperator<MyContext, byte>((context) => TaskStatus.Continue));
             domain.Add(domain.Root, task1);
             domain.Add(domain.Root, task2);
             domain.Add(task1, task3);
@@ -203,12 +203,12 @@ namespace Fluid_HTN.UnitTests
             bool test = false;
             var ctx = new MyContext();
             ctx.Init();
-            var planner = new Planner<MyContext>();
+            var planner = new Planner<MyContext, byte>();
             planner.OnNewTask = (t) => { test = t.Name == "Sub-task"; };
-            var domain = new Domain<MyContext>("Test");
-            var task1 = new Selector() { Name = "Test" };
-            var task2 = new PrimitiveTask() { Name = "Sub-task" };
-            task2.SetOperator(new FuncOperator<MyContext>((context) => TaskStatus.Continue));
+            var domain = new Domain<MyContext, byte>("Test");
+            var task1 = new Selector<byte>() { Name = "Test" };
+            var task2 = new PrimitiveTask<byte>() { Name = "Sub-task" };
+            task2.SetOperator(new FuncOperator<MyContext, byte>((context) => TaskStatus.Continue));
             domain.Add(domain.Root, task1);
             domain.Add(task1, task2);
 
@@ -223,20 +223,20 @@ namespace Fluid_HTN.UnitTests
             bool test = false;
             var ctx = new MyContext();
             ctx.Init();
-            var planner = new Planner<MyContext>();
+            var planner = new Planner<MyContext, byte>();
             planner.OnNewTaskConditionFailed = (t, c) => { test = t.Name == "Sub-task1"; };
-            var domain = new Domain<MyContext>("Test");
-            var task1 = new Selector() { Name = "Test1" };
-            var task2 = new Selector() { Name = "Test2" };
-            var task3 = (IPrimitiveTask) new PrimitiveTask() { Name = "Sub-task1" }.AddCondition(new FuncCondition<MyContext>("TestCondition", context => context.Done == false));
-            var task4 = new PrimitiveTask() { Name = "Sub-task2" };
-            task3.SetOperator(new FuncOperator<MyContext>((context) => TaskStatus.Success));
+            var domain = new Domain<MyContext, byte>("Test");
+            var task1 = new Selector<byte>() { Name = "Test1" };
+            var task2 = new Selector<byte>() { Name = "Test2" };
+            var task3 = (IPrimitiveTask<byte>) new PrimitiveTask<byte>() { Name = "Sub-task1" }.AddCondition(new FuncCondition<MyContext, byte>("TestCondition", context => context.Done == false));
+            var task4 = new PrimitiveTask<byte>() { Name = "Sub-task2" };
+            task3.SetOperator(new FuncOperator<MyContext, byte>((context) => TaskStatus.Success));
             // Note that one should not use AddEffect on types that's not part of WorldState unless you
             // know what you're doing. Outside of the WorldState, we don't get automatic trimming of 
             // state change. This method is used here only to invoke the desired callback, not because
             // its correct practice.
-            task3.AddEffect(new ActionEffect<MyContext>("TestEffect", EffectType.PlanAndExecute, (context, type) => context.Done = true));
-            task4.SetOperator(new FuncOperator<MyContext>((context) => TaskStatus.Continue));
+            task3.AddEffect(new ActionEffect<MyContext, byte>("TestEffect", EffectType.PlanAndExecute, (context, type) => context.Done = true));
+            task4.SetOperator(new FuncOperator<MyContext, byte>((context) => TaskStatus.Continue));
             domain.Add(domain.Root, task1);
             domain.Add(domain.Root, task2);
             domain.Add(task1, task3);
@@ -258,15 +258,15 @@ namespace Fluid_HTN.UnitTests
             bool test = false;
             var ctx = new MyContext();
             ctx.Init();
-            var planner = new Planner<MyContext>();
+            var planner = new Planner<MyContext, byte>();
             planner.OnStopCurrentTask = (t) => { test = t.Name == "Sub-task2"; };
-            var domain = new Domain<MyContext>("Test");
-            var task1 = new Selector() { Name = "Test1" };
-            var task2 = new Selector() { Name = "Test2" };
-            var task3 = (IPrimitiveTask) new PrimitiveTask() { Name = "Sub-task1" }.AddCondition(new FuncCondition<MyContext>("TestCondition", context => context.Done == false));
-            var task4 = new PrimitiveTask() { Name = "Sub-task2" };
-            task3.SetOperator(new FuncOperator<MyContext>((context) => TaskStatus.Continue));
-            task4.SetOperator(new FuncOperator<MyContext>((context) => TaskStatus.Continue));
+            var domain = new Domain<MyContext, byte>("Test");
+            var task1 = new Selector<byte>() { Name = "Test1" };
+            var task2 = new Selector<byte>() { Name = "Test2" };
+            var task3 = (IPrimitiveTask<byte>) new PrimitiveTask<byte>() { Name = "Sub-task1" }.AddCondition(new FuncCondition<MyContext, byte>("TestCondition", context => context.Done == false));
+            var task4 = new PrimitiveTask<byte>() { Name = "Sub-task2" };
+            task3.SetOperator(new FuncOperator<MyContext, byte>((context) => TaskStatus.Continue));
+            task4.SetOperator(new FuncOperator<MyContext, byte>((context) => TaskStatus.Continue));
             domain.Add(domain.Root, task1);
             domain.Add(domain.Root, task2);
             domain.Add(task1, task3);
@@ -288,15 +288,15 @@ namespace Fluid_HTN.UnitTests
             bool test = false;
             var ctx = new MyContext();
             ctx.Init();
-            var planner = new Planner<MyContext>();
+            var planner = new Planner<MyContext, byte>();
             planner.OnCurrentTaskCompletedSuccessfully = (t) => { test = t.Name == "Sub-task1"; };
-            var domain = new Domain<MyContext>("Test");
-            var task1 = new Selector() { Name = "Test1" };
-            var task2 = new Selector() { Name = "Test2" };
-            var task3 = (IPrimitiveTask) new PrimitiveTask() { Name = "Sub-task1" }.AddCondition(new FuncCondition<MyContext>("TestCondition", context => context.Done == false));
-            var task4 = new PrimitiveTask() { Name = "Sub-task2" };
-            task3.SetOperator(new FuncOperator<MyContext>((context) => TaskStatus.Success));
-            task4.SetOperator(new FuncOperator<MyContext>((context) => TaskStatus.Continue));
+            var domain = new Domain<MyContext, byte>("Test");
+            var task1 = new Selector<byte>() { Name = "Test1" };
+            var task2 = new Selector<byte>() { Name = "Test2" };
+            var task3 = (IPrimitiveTask<byte>) new PrimitiveTask<byte>() { Name = "Sub-task1" }.AddCondition(new FuncCondition<MyContext, byte>("TestCondition", context => context.Done == false));
+            var task4 = new PrimitiveTask<byte>() { Name = "Sub-task2" };
+            task3.SetOperator(new FuncOperator<MyContext, byte>((context) => TaskStatus.Success));
+            task4.SetOperator(new FuncOperator<MyContext, byte>((context) => TaskStatus.Continue));
             domain.Add(domain.Root, task1);
             domain.Add(domain.Root, task2);
             domain.Add(task1, task3);
@@ -318,16 +318,16 @@ namespace Fluid_HTN.UnitTests
             bool test = false;
             var ctx = new MyContext();
             ctx.Init();
-            var planner = new Planner<MyContext>();
+            var planner = new Planner<MyContext, byte>();
             planner.OnApplyEffect = (e) => { test = e.Name == "TestEffect"; };
-            var domain = new Domain<MyContext>("Test");
-            var task1 = new Selector() { Name = "Test1" };
-            var task2 = new Selector() { Name = "Test2" };
-            var task3 = (IPrimitiveTask) new PrimitiveTask() { Name = "Sub-task1" }.AddCondition(new FuncCondition<MyContext>("TestCondition", context => !context.HasState(MyWorldState.HasA)));
-            var task4 = new PrimitiveTask() { Name = "Sub-task2" };
-            task3.SetOperator(new FuncOperator<MyContext>((context) => TaskStatus.Success));
-            task3.AddEffect(new ActionEffect<MyContext>("TestEffect", EffectType.PlanAndExecute, (context, type) => context.SetState(MyWorldState.HasA, true, type)));
-            task4.SetOperator(new FuncOperator<MyContext>((context) => TaskStatus.Continue));
+            var domain = new Domain<MyContext, byte>("Test");
+            var task1 = new Selector<byte>() { Name = "Test1" };
+            var task2 = new Selector<byte>() { Name = "Test2" };
+            var task3 = (IPrimitiveTask<byte>) new PrimitiveTask<byte>() { Name = "Sub-task1" }.AddCondition(new FuncCondition<MyContext, byte>("TestCondition", context => !context.HasState(MyWorldState.HasA)));
+            var task4 = new PrimitiveTask<byte>() { Name = "Sub-task2" };
+            task3.SetOperator(new FuncOperator<MyContext, byte>((context) => TaskStatus.Success));
+            task3.AddEffect(new ActionEffect<MyContext, byte>("TestEffect", EffectType.PlanAndExecute, (context, type) => context.SetState(MyWorldState.HasA, true, type)));
+            task4.SetOperator(new FuncOperator<MyContext, byte>((context) => TaskStatus.Continue));
             domain.Add(domain.Root, task1);
             domain.Add(domain.Root, task2);
             domain.Add(task1, task3);
@@ -350,12 +350,12 @@ namespace Fluid_HTN.UnitTests
             bool test = false;
             var ctx = new MyContext();
             ctx.Init();
-            var planner = new Planner<MyContext>();
+            var planner = new Planner<MyContext, byte>();
             planner.OnCurrentTaskFailed = (t) => { test = t.Name == "Sub-task"; };
-            var domain = new Domain<MyContext>("Test");
-            var task1 = new Selector() { Name = "Test" };
-            var task2 = new PrimitiveTask() { Name = "Sub-task" };
-            task2.SetOperator(new FuncOperator<MyContext>((context) => TaskStatus.Failure));
+            var domain = new Domain<MyContext, byte>("Test");
+            var task1 = new Selector<byte>() { Name = "Test" };
+            var task2 = new PrimitiveTask<byte>() { Name = "Sub-task" };
+            task2.SetOperator(new FuncOperator<MyContext, byte>((context) => TaskStatus.Failure));
             domain.Add(domain.Root, task1);
             domain.Add(task1, task2);
 
@@ -370,12 +370,12 @@ namespace Fluid_HTN.UnitTests
             bool test = false;
             var ctx = new MyContext();
             ctx.Init();
-            var planner = new Planner<MyContext>();
+            var planner = new Planner<MyContext, byte>();
             planner.OnCurrentTaskContinues = (t) => { test = t.Name == "Sub-task"; };
-            var domain = new Domain<MyContext>("Test");
-            var task1 = new Selector() { Name = "Test" };
-            var task2 = new PrimitiveTask() { Name = "Sub-task" };
-            task2.SetOperator(new FuncOperator<MyContext>((context) => TaskStatus.Continue));
+            var domain = new Domain<MyContext, byte>("Test");
+            var task1 = new Selector<byte>() { Name = "Test" };
+            var task2 = new PrimitiveTask<byte>() { Name = "Sub-task" };
+            task2.SetOperator(new FuncOperator<MyContext, byte>((context) => TaskStatus.Continue));
             domain.Add(domain.Root, task1);
             domain.Add(task1, task2);
 
@@ -390,13 +390,13 @@ namespace Fluid_HTN.UnitTests
             bool test = false;
             var ctx = new MyContext();
             ctx.Init();
-            var planner = new Planner<MyContext>();
+            var planner = new Planner<MyContext, byte>();
             planner.OnCurrentTaskExecutingConditionFailed = (t, c) => { test = t.Name == "Sub-task" && c.Name == "TestCondition"; };
-            var domain = new Domain<MyContext>("Test");
-            var task1 = new Selector() { Name = "Test" };
-            var task2 = new PrimitiveTask() { Name = "Sub-task" };
-            task2.SetOperator(new FuncOperator<MyContext>((context) => TaskStatus.Continue));
-            task2.AddExecutingCondition(new FuncCondition<MyContext>("TestCondition", context => context.Done));
+            var domain = new Domain<MyContext, byte>("Test");
+            var task1 = new Selector<byte>() { Name = "Test" };
+            var task2 = new PrimitiveTask<byte>() { Name = "Sub-task" };
+            task2.SetOperator(new FuncOperator<MyContext, byte>((context) => TaskStatus.Continue));
+            task2.AddExecutingCondition(new FuncCondition<MyContext, byte>("TestCondition", context => context.Done));
             domain.Add(domain.Root, task1);
             domain.Add(task1, task2);
 

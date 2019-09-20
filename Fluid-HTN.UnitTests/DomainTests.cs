@@ -14,7 +14,7 @@ namespace Fluid_HTN.UnitTests
         [TestMethod]
         public void DomainHasRootWithDomainName_ExpectedBehavior()
         {
-            var domain = new Domain<MyContext>("Test");
+            var domain = new Domain<MyContext, byte>("Test");
             Assert.IsTrue(domain.Root != null);
             Assert.IsTrue(domain.Root.Name == "Test");
         }
@@ -22,9 +22,9 @@ namespace Fluid_HTN.UnitTests
         [TestMethod]
         public void AddSubtaskToParent_ExpectedBehavior()
         {
-            var domain = new Domain<MyContext>("Test");
-            var task1 = new Selector() { Name = "Test" };
-            var task2 = new PrimitiveTask() { Name = "Test" };
+            var domain = new Domain<MyContext, byte>("Test");
+            var task1 = new Selector<byte>() { Name = "Test" };
+            var task2 = new PrimitiveTask<byte>() { Name = "Test" };
             domain.Add(task1, task2);
             Assert.IsTrue(task1.Subtasks.Contains(task2));
             Assert.IsTrue(task2.Parent == task1);
@@ -34,7 +34,7 @@ namespace Fluid_HTN.UnitTests
         [ExpectedException(typeof(NullReferenceException), AllowDerivedTypes = false)]
         public void FindPlanNoCtxThrowsNRE_ExpectedBehavior()
         {
-            var domain = new Domain<MyContext>("Test");
+            var domain = new Domain<MyContext, byte>("Test");
             var status = domain.FindPlan(null, out var plan);
         }
 
@@ -43,7 +43,7 @@ namespace Fluid_HTN.UnitTests
         public void FindPlanUninitializedContextThrowsException_ExpectedBehavior()
         {
             var ctx = new MyContext();
-            var domain = new Domain<MyContext>("Test");
+            var domain = new Domain<MyContext, byte>("Test");
             var status = domain.FindPlan(ctx, out var plan);
             Assert.IsTrue(status == DecompositionStatus.Failed);
             Assert.IsTrue(plan != null);
@@ -55,7 +55,7 @@ namespace Fluid_HTN.UnitTests
         {
             var ctx = new MyContext();
             ctx.Init();
-            var domain = new Domain<MyContext>("Test");
+            var domain = new Domain<MyContext, byte>("Test");
             var status = domain.FindPlan(ctx, out var plan);
             Assert.IsTrue(status == DecompositionStatus.Rejected);
             Assert.IsTrue(plan == null);
@@ -69,7 +69,7 @@ namespace Fluid_HTN.UnitTests
             ctx.Init();
             ctx.MethodTraversalRecord = null;
 
-            var domain = new Domain<MyContext>("Test");
+            var domain = new Domain<MyContext, byte>("Test");
             var status = domain.FindPlan(ctx, out var plan);
         }
 
@@ -78,7 +78,7 @@ namespace Fluid_HTN.UnitTests
         {
             var ctx = new MyContext();
             ctx.Init();
-            var domain = new Domain<MyContext>("Test");
+            var domain = new Domain<MyContext, byte>("Test");
             var status = domain.FindPlan(ctx, out var plan);
             Assert.IsTrue(ctx.ContextState == ContextState.Executing);
         }
@@ -88,9 +88,9 @@ namespace Fluid_HTN.UnitTests
         {
             var ctx = new MyContext();
             ctx.Init();
-            var domain = new Domain<MyContext>("Test");
-            var task1 = new Selector() { Name = "Test" };
-            var task2 = new PrimitiveTask() { Name = "Sub-task" };
+            var domain = new Domain<MyContext, byte>("Test");
+            var task1 = new Selector<byte>() { Name = "Test" };
+            var task2 = new PrimitiveTask<byte>() { Name = "Sub-task" };
             domain.Add(domain.Root, task1);
             domain.Add(task1, task2);
             var status = domain.FindPlan(ctx, out var plan);
@@ -106,11 +106,11 @@ namespace Fluid_HTN.UnitTests
         {
             var ctx = new MyContext();
             ctx.Init();
-            var domain = new Domain<MyContext>("Test");
-            var task1 = new Sequence() { Name = "Test" };
-            var task2 = new PrimitiveTask() { Name = "Sub-task1" }.AddEffect(new ActionEffect<MyContext>("TestEffect1", EffectType.PlanOnly, (context, type) => context.SetState(MyWorldState.HasA, true, type)));
-            var task3 = new PrimitiveTask() { Name = "Sub-task2" }.AddEffect(new ActionEffect<MyContext>("TestEffect2", EffectType.PlanAndExecute, (context, type) => context.SetState(MyWorldState.HasB, true, type)));
-            var task4 = new PrimitiveTask() { Name = "Sub-task3" }.AddEffect(new ActionEffect<MyContext>("TestEffect3", EffectType.Permanent, (context, type) => context.SetState(MyWorldState.HasC, true, type)));
+            var domain = new Domain<MyContext, byte>("Test");
+            var task1 = new Sequence<byte>() { Name = "Test" };
+            var task2 = new PrimitiveTask<byte>() { Name = "Sub-task1" }.AddEffect(new ActionEffect<MyContext, byte>("TestEffect1", EffectType.PlanOnly, (context, type) => context.SetState(MyWorldState.HasA, true, type)));
+            var task3 = new PrimitiveTask<byte>() { Name = "Sub-task2" }.AddEffect(new ActionEffect<MyContext, byte>("TestEffect2", EffectType.PlanAndExecute, (context, type) => context.SetState(MyWorldState.HasB, true, type)));
+            var task4 = new PrimitiveTask<byte>() { Name = "Sub-task3" }.AddEffect(new ActionEffect<MyContext, byte>("TestEffect3", EffectType.Permanent, (context, type) => context.SetState(MyWorldState.HasC, true, type)));
             domain.Add(domain.Root, task1);
             domain.Add(task1, task2);
             domain.Add(task1, task3);
@@ -132,12 +132,12 @@ namespace Fluid_HTN.UnitTests
         {
             var ctx = new MyContext();
             ctx.Init();
-            var domain = new Domain<MyContext>("Test");
-            var task1 = new Sequence() { Name = "Test" };
-            var task2 = new PrimitiveTask() { Name = "Sub-task1" }.AddEffect(new ActionEffect<MyContext>("TestEffect1", EffectType.PlanOnly, (context, type) => context.SetState(MyWorldState.HasA, true, type)));
-            var task3 = new PrimitiveTask() { Name = "Sub-task2" }.AddEffect(new ActionEffect<MyContext>("TestEffect2", EffectType.PlanAndExecute, (context, type) => context.SetState(MyWorldState.HasB, true, type)));
-            var task4 = new PrimitiveTask() { Name = "Sub-task3" }.AddEffect(new ActionEffect<MyContext>("TestEffect3", EffectType.Permanent, (context, type) => context.SetState(MyWorldState.HasC, true, type)));
-            var task5 = new PrimitiveTask() { Name = "Sub-task4" }.AddCondition(new FuncCondition<MyContext>("TestCondition", context => context.Done == true));
+            var domain = new Domain<MyContext, byte>("Test");
+            var task1 = new Sequence<byte>() { Name = "Test" };
+            var task2 = new PrimitiveTask<byte>() { Name = "Sub-task1" }.AddEffect(new ActionEffect<MyContext, byte>("TestEffect1", EffectType.PlanOnly, (context, type) => context.SetState(MyWorldState.HasA, true, type)));
+            var task3 = new PrimitiveTask<byte>() { Name = "Sub-task2" }.AddEffect(new ActionEffect<MyContext, byte>("TestEffect2", EffectType.PlanAndExecute, (context, type) => context.SetState(MyWorldState.HasB, true, type)));
+            var task4 = new PrimitiveTask<byte>() { Name = "Sub-task3" }.AddEffect(new ActionEffect<MyContext, byte>("TestEffect3", EffectType.Permanent, (context, type) => context.SetState(MyWorldState.HasC, true, type)));
+            var task5 = new PrimitiveTask<byte>() { Name = "Sub-task4" }.AddCondition(new FuncCondition<MyContext, byte>("TestCondition", context => context.Done == true));
             domain.Add(domain.Root, task1);
             domain.Add(task1, task2);
             domain.Add(task1, task3);
@@ -165,13 +165,13 @@ namespace Fluid_HTN.UnitTests
             // Root is a Selector that branch off into task1 selector or task2 sequence.
             // MTR only tracks decomposition of compound tasks, so our MTR is only 1 layer deep here,
             // Since both compound tasks decompose into primitive tasks.
-            var domain = new Domain<MyContext>("Test");
-            var task1 = new Sequence() { Name = "Test1" };
-            var task2 = new Selector() { Name = "Test2" };
-            var task3 = new PrimitiveTask() { Name = "Sub-task1" }.AddCondition(new FuncCondition<MyContext>("TestCondition", context => context.Done == true));
-            var task4 = new PrimitiveTask() { Name = "Sub-task1" };
-            var task5 = new PrimitiveTask() { Name = "Sub-task2" }.AddCondition(new FuncCondition<MyContext>("TestCondition", context => context.Done == true));
-            var task6 = new PrimitiveTask() { Name = "Sub-task3" };
+            var domain = new Domain<MyContext, byte>("Test");
+            var task1 = new Sequence<byte>() { Name = "Test1" };
+            var task2 = new Selector<byte>() { Name = "Test2" };
+            var task3 = new PrimitiveTask<byte>() { Name = "Sub-task1" }.AddCondition(new FuncCondition<MyContext, byte>("TestCondition", context => context.Done == true));
+            var task4 = new PrimitiveTask<byte>() { Name = "Sub-task1" };
+            var task5 = new PrimitiveTask<byte>() { Name = "Sub-task2" }.AddCondition(new FuncCondition<MyContext, byte>("TestCondition", context => context.Done == true));
+            var task6 = new PrimitiveTask<byte>() { Name = "Sub-task3" };
             domain.Add(domain.Root, task1);
             domain.Add(domain.Root, task2);
             domain.Add(task1, task3);
@@ -190,12 +190,12 @@ namespace Fluid_HTN.UnitTests
         {
             var ctx = new MyContext();
             ctx.Init();
-            var domain = new Domain<MyContext>("Test");
-            var task = new Sequence() { Name = "Test" };
+            var domain = new Domain<MyContext, byte>("Test");
+            var task = new Sequence<byte>() { Name = "Test" };
             domain.Add(domain.Root, task);
-            domain.Add(task, new PrimitiveTask() { Name = "Sub-task1" });
-            domain.Add(task, new PausePlanTask());
-            domain.Add(task, new PrimitiveTask() { Name = "Sub-task2" });
+            domain.Add(task, new PrimitiveTask<byte>() { Name = "Sub-task1" });
+            domain.Add(task, new PausePlanTask<byte>());
+            domain.Add(task, new PrimitiveTask<byte>() { Name = "Sub-task2" });
 
             var status = domain.FindPlan(ctx, out var plan);
             
@@ -215,12 +215,12 @@ namespace Fluid_HTN.UnitTests
             var ctx = new MyContext();
             ctx.Init();
 
-            var domain = new Domain<MyContext>("Test");
-            var task = new Sequence() { Name = "Test" };
+            var domain = new Domain<MyContext, byte>("Test");
+            var task = new Sequence<byte>() { Name = "Test" };
             domain.Add(domain.Root, task);
-            domain.Add(task, new PrimitiveTask() { Name = "Sub-task1" });
-            domain.Add(task, new PausePlanTask());
-            domain.Add(task, new PrimitiveTask() { Name = "Sub-task2" });
+            domain.Add(task, new PrimitiveTask<byte>() { Name = "Sub-task1" });
+            domain.Add(task, new PausePlanTask<byte>());
+            domain.Add(task, new PrimitiveTask<byte>() { Name = "Sub-task2" });
 
             var status = domain.FindPlan(ctx, out var plan);
 
@@ -247,21 +247,21 @@ namespace Fluid_HTN.UnitTests
             var ctx = new MyContext();
             ctx.Init();
 
-            var domain = new Domain<MyContext>("Test");
-            var task = new Sequence() { Name = "Test" };
-            var task2 = new Selector() { Name = "Test2" };
-            var task3 = new Sequence() { Name = "Test3" };
+            var domain = new Domain<MyContext, byte>("Test");
+            var task = new Sequence<byte>() { Name = "Test" };
+            var task2 = new Selector<byte>() { Name = "Test2" };
+            var task3 = new Sequence<byte>() { Name = "Test3" };
 
             domain.Add(domain.Root, task);
             domain.Add(task, task2);
-            domain.Add(task, new PrimitiveTask() { Name = "Sub-task4" });
+            domain.Add(task, new PrimitiveTask<byte>() { Name = "Sub-task4" });
 
             domain.Add(task2, task3);
-            domain.Add(task2, new PrimitiveTask() { Name = "Sub-task3" });
+            domain.Add(task2, new PrimitiveTask<byte>() { Name = "Sub-task3" });
 
-            domain.Add(task3, new PrimitiveTask() { Name = "Sub-task1" });
-            domain.Add(task3, new PausePlanTask());
-            domain.Add(task3, new PrimitiveTask() { Name = "Sub-task2" });
+            domain.Add(task3, new PrimitiveTask<byte>() { Name = "Sub-task1" });
+            domain.Add(task3, new PausePlanTask<byte>());
+            domain.Add(task3, new PrimitiveTask<byte>() { Name = "Sub-task2" });
 
             var status = domain.FindPlan(ctx, out var plan);
 
@@ -283,22 +283,22 @@ namespace Fluid_HTN.UnitTests
         {
             var ctx = new MyContext();
             ctx.Init();
-            var domain = new Domain<MyContext>("Test");
+            var domain = new Domain<MyContext, byte>("Test");
 
-            var task = new Sequence() { Name = "Test" };
-            var task2 = new Selector() { Name = "Test2" };
-            var task3 = new Sequence() { Name = "Test3" };
+            var task = new Sequence<byte>() { Name = "Test" };
+            var task2 = new Selector<byte>() { Name = "Test2" };
+            var task3 = new Sequence<byte>() { Name = "Test3" };
 
             domain.Add(domain.Root, task);
             domain.Add(task, task2);
-            domain.Add(task, new PrimitiveTask() { Name = "Sub-task4" });
+            domain.Add(task, new PrimitiveTask<byte>() { Name = "Sub-task4" });
 
             domain.Add(task2, task3);
-            domain.Add(task2, new PrimitiveTask() { Name = "Sub-task3" });
+            domain.Add(task2, new PrimitiveTask<byte>() { Name = "Sub-task3" });
 
-            domain.Add(task3, new PrimitiveTask() { Name = "Sub-task1" });
-            domain.Add(task3, new PausePlanTask());
-            domain.Add(task3, new PrimitiveTask() { Name = "Sub-task2" });
+            domain.Add(task3, new PrimitiveTask<byte>() { Name = "Sub-task1" });
+            domain.Add(task3, new PausePlanTask<byte>());
+            domain.Add(task3, new PrimitiveTask<byte>() { Name = "Sub-task2" });
 
             var status = domain.FindPlan(ctx, out var plan);
 
@@ -328,30 +328,30 @@ namespace Fluid_HTN.UnitTests
         {
             var ctx = new MyContext();
             ctx.Init();
-            var domain = new Domain<MyContext>("Test");
+            var domain = new Domain<MyContext, byte>("Test");
 
-            var task = new Sequence() { Name = "Test" };
-            var task2 = new Selector() { Name = "Test2" };
-            var task3 = new Sequence() { Name = "Test3" };
-            var task4 = new Sequence() { Name = "Test4" };
+            var task = new Sequence<byte>() { Name = "Test" };
+            var task2 = new Selector<byte>() { Name = "Test2" };
+            var task3 = new Sequence<byte>() { Name = "Test3" };
+            var task4 = new Sequence<byte>() { Name = "Test4" };
 
             domain.Add(domain.Root, task);
 
-            domain.Add(task3, new PrimitiveTask() { Name = "Sub-task1" });
-            domain.Add(task3, new PausePlanTask());
-            domain.Add(task3, new PrimitiveTask() { Name = "Sub-task2" });
+            domain.Add(task3, new PrimitiveTask<byte>() { Name = "Sub-task1" });
+            domain.Add(task3, new PausePlanTask<byte>());
+            domain.Add(task3, new PrimitiveTask<byte>() { Name = "Sub-task2" });
 
             domain.Add(task2, task3);
-            domain.Add(task2, new PrimitiveTask() { Name = "Sub-task3" });
+            domain.Add(task2, new PrimitiveTask<byte>() { Name = "Sub-task3" });
 
-            domain.Add(task4, new PrimitiveTask() { Name = "Sub-task5" });
-            domain.Add(task4, new PausePlanTask());
-            domain.Add(task4, new PrimitiveTask() { Name = "Sub-task6" });
+            domain.Add(task4, new PrimitiveTask<byte>() { Name = "Sub-task5" });
+            domain.Add(task4, new PausePlanTask<byte>());
+            domain.Add(task4, new PrimitiveTask<byte>() { Name = "Sub-task6" });
 
             domain.Add(task, task2);
-            domain.Add(task, new PrimitiveTask() { Name = "Sub-task4" });
+            domain.Add(task, new PrimitiveTask<byte>() { Name = "Sub-task4" });
             domain.Add(task, task4);
-            domain.Add(task, new PrimitiveTask() { Name = "Sub-task7" });
+            domain.Add(task, new PrimitiveTask<byte>() { Name = "Sub-task7" });
 
             var status = domain.FindPlan(ctx, out var plan);
 

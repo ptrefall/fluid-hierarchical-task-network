@@ -2,7 +2,7 @@
 
 namespace FluidHTN
 {
-    public class TaskRoot : Selector
+    public class TaskRoot<TWorldStateEntry> : Selector<TWorldStateEntry>
     {
     }
 }

@@ -12,7 +12,7 @@ public enum MyWorldState : byte
     HasC
 }
 
-internal class MyContext : BaseContext
+internal class MyContext : BaseContext<byte>
 {
     private byte[] _worldState = new byte[Enum.GetValues(typeof(MyWorldState)).Length];
     public override IFactory Factory { get; set; } = new DefaultFactory();

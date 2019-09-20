@@ -6,7 +6,7 @@
     ///     For a task to support Pause Plan tasks, needed for partial planning, it must be
     ///     a decompose-all compound task type.
     /// </summary>
-    public interface IDecomposeAll : ICompoundTask
+    public interface IDecomposeAll<TWorldStateEntry> : ICompoundTask<TWorldStateEntry>
     {
     }
 }

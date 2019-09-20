@@ -31,28 +31,28 @@ namespace FluidHTN.Debug
         T Entry { get; set; }
     }
 
-    public struct DecomposedCompoundTaskEntry : IDecompositionLogEntry<ITask>
+    public struct DecomposedCompoundTaskEntry<TWorldStateEntry> : IDecompositionLogEntry<ITask<TWorldStateEntry>>
     {
         public string Name { get; set; }
         public string Description { get; set; }
         public int Depth { get; set; }
         public ConsoleColor Color { get; set; }
-        public ITask Entry { get; set; }
+        public ITask<TWorldStateEntry> Entry { get; set; }
     }
 
-    public struct DecomposedConditionEntry : IDecompositionLogEntry<ICondition> {
+    public struct DecomposedConditionEntry<TWorldStateEntry> : IDecompositionLogEntry<ICondition<TWorldStateEntry>> {
         public string Name { get; set; }
         public string Description { get; set; }
         public int Depth { get; set; }
         public ConsoleColor Color { get; set; }
-        public ICondition Entry { get; set; }
+        public ICondition<TWorldStateEntry> Entry { get; set; }
     }
 
-    public struct DecomposedEffectEntry : IDecompositionLogEntry<IEffect> {
+    public struct DecomposedEffectEntry<TWorldStateEntry> : IDecompositionLogEntry<IEffect<TWorldStateEntry>> {
         public string Name { get; set; }
         public string Description { get; set; }
         public int Depth { get; set; }
         public ConsoleColor Color { get; set; }
-        public IEffect Entry { get; set; }
+        public IEffect<TWorldStateEntry> Entry { get; set; }
     }
 }

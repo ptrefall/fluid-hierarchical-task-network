@@ -2,7 +2,7 @@
 
 namespace FluidHTN.Effects
 {
-    public class ActionEffect<T> : IEffect where T : IContext
+    public class ActionEffect<T, TWorldStateEntry> : IEffect<TWorldStateEntry> where T : IContext<TWorldStateEntry>
     {
         // ========================================================= FIELDS
 
@@ -24,7 +24,7 @@ namespace FluidHTN.Effects
 
         // ========================================================= FUNCTIONALITY
 
-        public void Apply(IContext ctx)
+        public void Apply(IContext<TWorldStateEntry> ctx)
         {
             if (ctx is T c)
             {

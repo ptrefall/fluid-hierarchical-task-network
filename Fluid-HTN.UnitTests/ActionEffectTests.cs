@@ -11,7 +11,7 @@ namespace Fluid_HTN.UnitTests
         [TestMethod]
         public void SetsName_ExpectedBehavior()
         {
-            var e = new ActionEffect<MyContext>("Name", EffectType.PlanOnly, null);
+            var e = new ActionEffect<MyContext, byte>("Name", EffectType.PlanOnly, null);
 
             Assert.AreEqual("Name", e.Name);
         }
@@ -19,7 +19,7 @@ namespace Fluid_HTN.UnitTests
         [TestMethod]
         public void SetsType_ExpectedBehavior()
         {
-            var e = new ActionEffect<MyContext>("Name", EffectType.PlanOnly, null);
+            var e = new ActionEffect<MyContext, byte>("Name", EffectType.PlanOnly, null);
 
             Assert.AreEqual(EffectType.PlanOnly, e.Type);
         }
@@ -28,7 +28,7 @@ namespace Fluid_HTN.UnitTests
         public void ApplyDoesNothingWithoutFunctionPtr_ExpectedBehavior()
         {
             var ctx = new MyContext();
-            var e = new ActionEffect<MyContext>("Name", EffectType.PlanOnly, null);
+            var e = new ActionEffect<MyContext, byte>("Name", EffectType.PlanOnly, null);
 
             e.Apply(ctx);
         }
@@ -37,7 +37,7 @@ namespace Fluid_HTN.UnitTests
         [ExpectedException(typeof(Exception), AllowDerivedTypes = false)]
         public void ApplyThrowsIfBadContext_ExpectedBehavior()
         {
-            var e = new ActionEffect<MyContext>("Name", EffectType.PlanOnly, null);
+            var e = new ActionEffect<MyContext, byte>("Name", EffectType.PlanOnly, null);
 
             e.Apply(null);
         }
@@ -46,7 +46,7 @@ namespace Fluid_HTN.UnitTests
         public void ApplyCallsInternalFunctionPtr_ExpectedBehavior()
         {
             var ctx = new MyContext();
-            var e = new ActionEffect<MyContext>("Name", EffectType.PlanOnly, (c, et) => c.Done = true);
+            var e = new ActionEffect<MyContext, byte>("Name", EffectType.PlanOnly, (c, et) => c.Done = true);
 
             e.Apply(ctx);
 
