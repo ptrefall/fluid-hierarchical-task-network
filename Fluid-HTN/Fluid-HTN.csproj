@@ -48,6 +48,7 @@
     <Compile Include="DomainBuilder.cs" />
     <Compile Include="Factory\DefaultFactory.cs" />
     <Compile Include="Factory\IFactory.cs" />
+    <Compile Include="IDomain.cs" />
     <Compile Include="Tasks\CompoundTasks\DecompositionStatus.cs" />
     <Compile Include="Tasks\CompoundTasks\IDecomposeAll.cs" />
     <Compile Include="Tasks\CompoundTasks\PausePlanTask.cs" />

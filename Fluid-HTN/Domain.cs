@@ -4,7 +4,7 @@ using FluidHTN.Compounds;
 
 namespace FluidHTN
 {
-    public class Domain<T> where T : IContext
+    public class Domain<T> : IDomain where T : IContext
     {
         // ========================================================= FIELDS
 
