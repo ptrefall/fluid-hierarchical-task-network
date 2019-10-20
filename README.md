@@ -261,7 +261,7 @@ public class IfEnemyCondition : ICondition
 {
     public string Name { get; } = "If Enemy";
     
-    public bool IsValid(ICondition ctx)
+    public bool IsValid(IContext ctx)
     {
         if(ctx is MyContext c)
         {
