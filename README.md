@@ -434,7 +434,62 @@ public DB RandomSelect(string name)
     return CompoundTask<RandomSelector>(name);
 }
 ```
-#### Custom factory
+#### Tips for domain builder usage
+We are not limited to only use the domain builder to expose simple tasks, conditions or effects, we can build entire sub-domain-like functions in here too, with the advantage of auto-indentation from scope-brackets. What we lose is the ability to add conditions and effects outside of the function, so its going to solve very specialized sub-domains, but sometimes that's exactly what we need, and it does clean up the domain definition, making them more readable. Consider this modification to our domain definition above:
+```C#
+var domain = new MyDomainBuilder("Trunk Thumper")
+    .AttackEnemySequence()
+    .PatrolNextBridgeSequence()
+    .Build();
+```
+Let's extend out MyDomainBuild with these new sequences.
+```C#
+public DB AttackEnemySequence()
+{
+    Sequence("Attack enemy");
+    {
+        IfEnemy();
+        MoveTo(Location.Enemy, Speed.Sprint);
+        {
+            SetLocation(Location.Enemy);
+            SetIsTired();
+        }
+        End();
+        TrunkSlam();
+        {
+            IfLocation(Location.Enemy);
+        }
+        End();
+    }
+    End();
+    return this;
+}
+
+public DB PatrolNextBridgeSequence()
+{
+    Sequence("Patrol next bridge");
+    {
+        FindBridge();
+        {
+        }
+        End();
+        MoveTo(Location.Bridge, Speed.Walk);
+        {
+            SetLocation(Location.Bridge);
+        }
+        End();
+        CheckBridge();
+        {
+            IfLocation(Location.Bridge);
+            SetBored();
+        }
+        End();
+    }
+    End();
+    return this;
+}
+```
+### Custom factory
 When we implemented MyContext earlier, you might have noticed that we did an override to implement Factory, and set it to DefaultFactory. We also sent a DefaultFactory to BaseDomainBuilder when we looked at extending domain builders. This is where you're free to implement your own factory methods, like PooledFactory, and have Fluid HTN use it via the IFactory interface. DefaultFactory will just do normal new operations and set the collection reference to null when the Free* API is called. The Create* and Free* API of the IFactory is used internally with the support of pooling in mind, but we leave it up to the user how they prefer to do this.
 
 ### Debugging the planner
