@@ -14,7 +14,7 @@ enum class ContextState
 
 struct PartialPlanEntry
 {
-    std::shared_ptr<class ITask> Task;
+    SharedPtr<class ITask> Task;
     int                          TaskIndex;
 };
 
@@ -22,7 +22,7 @@ static_assert(std::is_integral<WORLDSTATEPROPERTY_ID_TYPE>::value,
               "WorldState Id must be integral type. Change the vector type to hash table otherwise");
 // An array of stacks per property of the world state.
 typedef std::stack<std::pair<EffectType, WORLDSTATEPROPERTY_VALUE_TYPE>> WorldStateStackType;
-typedef std::vector<WorldStateStackType>                                 WorldStateStackArrayType;
+typedef ArrayType<WorldStateStackType>                                 WorldStateStackArrayType;
 
 typedef std::queue<PartialPlanEntry> PartialPlanQueueType;
 class IContext
@@ -35,15 +35,15 @@ protected:
     bool                                   _DebugMTR = false;
     std::queue<IBaseDecompositionLogEntry> _DecompositionLog;
     bool                                   _LogDecomposition = false;
-    std::vector<int>                       _MethodTraversalRecord;
-    std::vector<std::string>               _MTRDebug;
+    ArrayType<int>                       _MethodTraversalRecord;
+    ArrayType<StringType>               _MTRDebug;
 
-    std::vector<int>         _LastMTR;
-    std::vector<std::string> _LastMTRDebug;
+    ArrayType<int>         _LastMTR;
+    ArrayType<StringType> _LastMTRDebug;
 
     PartialPlanQueueType               _PartialPlanQueue;
     bool                               _HasPausedPartialPlan = false;
-    std::shared_ptr<class IWorldState> _WorldState;
+    SharedPtr<class IWorldState> _WorldState;
 
     WorldStateStackArrayType _WorldStateChangeStackArray;
 
@@ -67,8 +67,8 @@ public:
     ///     the user is free to use pooled instances, or whatever optimization they
     ///     see fit.
     /// </summary>
-    std::vector<int>&         MethodTraversalRecord() { return _MethodTraversalRecord; }
-    std::vector<std::string>& MTRDebug() { return _MTRDebug; }
+    ArrayType<int>&         MethodTraversalRecord() { return _MethodTraversalRecord; }
+    ArrayType<StringType>& MTRDebug() { return _MTRDebug; }
 
     /// <summary>
     ///     The Method Traversal Record that was recorded for the currently
@@ -78,8 +78,8 @@ public:
     ///     the user is free to use pooled instances, or whatever optimization they
     ///     see fit.
     /// </summary>
-    virtual std::vector<int>& LastMTR() { return _LastMTR; }
-    virtual std::vector<std::string>& LastMTRDebug() { return _LastMTRDebug; }
+    virtual ArrayType<int>& LastMTR() { return _LastMTR; }
+    virtual ArrayType<StringType>& LastMTRDebug() { return _LastMTRDebug; }
 
     /// <summary>
     /// Whether the planning system should collect debug information about our Method Traversal Record.
@@ -113,7 +113,7 @@ public:
     virtual void Reset() = 0;
 
     virtual void TrimForExecution() = 0;
-    virtual void TrimToStackDepth(std::vector<int>& stackDepth) = 0;
+    virtual void TrimToStackDepth(ArrayType<int>& stackDepth) = 0;
 
     virtual bool                           HasState(WORLDSTATEPROPERTY_ID_TYPE state, WORLDSTATEPROPERTY_VALUE_TYPE& value) = 0;
     virtual WORLDSTATEPROPERTY_VALUE_TYPE& GetState(WORLDSTATEPROPERTY_ID_TYPE state) = 0;
@@ -122,22 +122,22 @@ public:
                                                     bool                          setAsDirty = true,
                                                     EffectType                    e = EffectType::Permanent) = 0;
 
-    virtual std::vector<int> GetWorldStateChangeDepth() = 0;
+    virtual ArrayType<int> GetWorldStateChangeDepth() = 0;
 
-    virtual void Log(std::string            name,
-                     std::string            description,
+    virtual void Log(StringType            name,
+                     StringType            description,
                      int                    depth,
-                     std::shared_ptr<class ITask> task,
+                     SharedPtr<class ITask> task,
                      ConsoleColor           color = ConsoleColor::White) = 0;
-    virtual void Log(std::string                 name,
-                     std::string                 description,
+    virtual void Log(StringType                 name,
+                     StringType                 description,
                      int                         depth,
-                     std::shared_ptr<class ICondition> condition,
+                     SharedPtr<class ICondition> condition,
                      ConsoleColor                color = ConsoleColor::DarkGreen) = 0;
-    virtual void Log(std::string              name,
-                     std::string              description,
+    virtual void Log(StringType              name,
+                     StringType              description,
                      int                      depth,
-                     std::shared_ptr<class IEffect> effect,
+                     SharedPtr<class IEffect> effect,
                      ConsoleColor             color = ConsoleColor::DarkYellow) = 0;
 };
 } // namespace FluidHTN

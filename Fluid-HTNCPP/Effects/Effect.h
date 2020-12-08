@@ -5,15 +5,15 @@
 
 namespace FluidHTN
 {
-class IEffect  : public std::enable_shared_from_this<IEffect>
+class IEffect  : public EnableSharedFromThis<IEffect>
 {
 protected:
-    std::string _Name;
+    StringType _Name;
     EffectType  _Type;
 
 
 public:
-    const std::string& Name() { return _Name; }
+    const StringType& Name() { return _Name; }
     EffectType         Type() { return _Type; }
     virtual void       Apply(class IContext& ctx) = 0;
 };
@@ -27,7 +27,7 @@ class ActionEffect : public IEffect
 
 public:
     ActionEffect() =delete;
-    ActionEffect(const std::string name, EffectType type, ActionType action)
+    ActionEffect(const StringType name, EffectType type, ActionType action)
     {
         _Name = name;
         _Type = type;

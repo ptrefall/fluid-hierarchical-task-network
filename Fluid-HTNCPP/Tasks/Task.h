@@ -32,7 +32,7 @@ enum class ITaskDerivedClassName
 };
 
 // not strictly an "interface", but design patterns are so 1999
-class ITask : public std::enable_shared_from_this<ITask>
+class ITask : public EnableSharedFromThis<ITask>
 {
     ITask() {}
 
@@ -45,9 +45,9 @@ protected:
         _Type = n;
         _SubTypes.insert(n);
     }
-    std::string                              _Name;
-    std::shared_ptr<CompoundTask>            _Parent;
-    std::vector<std::shared_ptr<ICondition>> _Conditions;
+    StringType                              _Name;
+    SharedPtr<CompoundTask>            _Parent;
+    ArrayType<SharedPtr<ICondition>> _Conditions;
     TaskStatus                               _LastStatus = TaskStatus::Failure;
 
 public:
@@ -58,15 +58,15 @@ public:
                 (_SubTypes.find(thetype) != _SubTypes.end()));
     }
 
-    virtual std::string& Name() { return _Name; }
+    virtual StringType& Name() { return _Name; }
 
-    virtual std::shared_ptr<CompoundTask>& Parent() { return _Parent; }
+    virtual SharedPtr<CompoundTask>& Parent() { return _Parent; }
 
-    virtual std::vector<std::shared_ptr<ICondition>>& Conditions() { return _Conditions; }
+    virtual ArrayType<SharedPtr<ICondition>>& Conditions() { return _Conditions; }
 
     virtual TaskStatus LastStatus() { return _LastStatus; }
 
-    virtual bool AddCondition(std::shared_ptr<ICondition>& Condition)
+    virtual bool AddCondition(SharedPtr<ICondition>& Condition)
     {
         _Conditions.push_back(Condition);
         return true;
@@ -77,6 +77,6 @@ public:
     virtual DecompositionStatus OnIsValidFailed(IContext& ctx) = 0;
 };
 
-typedef std::queue<std::shared_ptr<ITask>> TaskQueueType;
+typedef std::queue<SharedPtr<ITask>> TaskQueueType;
 
 } // namespace FluidHTN

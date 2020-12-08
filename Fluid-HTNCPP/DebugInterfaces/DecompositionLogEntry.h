@@ -18,9 +18,9 @@ enum class ConsoleColor
 class Debug
 {
 public:
-    static std::string DepthToString(int depth)
+    static StringType DepthToString(int depth)
     {
-        std::string s = ""s;
+        StringType s = ""s;
         for (auto i = 0; i < depth; i++)
         {
             s += "\t"s;
@@ -32,8 +32,8 @@ public:
 };
 struct IBaseDecompositionLogEntry
 {
-    std::string  Name;
-    std::string  Description;
+    StringType  Name;
+    StringType  Description;
     int          Depth;
     ConsoleColor Color;
 };
@@ -42,6 +42,6 @@ template <typename T>
 struct IDecompositionLogEntry : public IBaseDecompositionLogEntry
 {
 public:
-    std::shared_ptr<T> _Entry;
+    SharedPtr<T> _Entry;
 };
 } // namespace FluidHTN

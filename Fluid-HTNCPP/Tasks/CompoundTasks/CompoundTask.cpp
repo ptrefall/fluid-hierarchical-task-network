@@ -29,7 +29,7 @@ bool CompoundTask::IsValid(IContext& ctx)
         if (ctx.LogDecomposition())
         {
             Log(ctx,
-                "CompoundTask.IsValid: "s + std::to_string(result) + " for "s + condition->Name(),
+                "CompoundTask.IsValid: "s + ToString(result) + " for "s + condition->Name(),
                 result ? ConsoleColor::DarkGreen : ConsoleColor::DarkRed);
         }
         if (!result)
@@ -40,8 +40,8 @@ bool CompoundTask::IsValid(IContext& ctx)
     return true;
 }
 
-void CompoundTask::Log(IContext& ctx, std::string description, ConsoleColor color /*= ConsoleColor::White*/)
+void CompoundTask::Log(IContext& ctx, StringType description, ConsoleColor color /*= ConsoleColor::White*/)
 {
-    ctx.Log(_Name, description, ctx.CurrentDecompositionDepth(), shared_from_this(), color);
+    ctx.Log(_Name, description, ctx.CurrentDecompositionDepth(), SharedFromThis(), color);
 }
 } // namespace FluidHTN

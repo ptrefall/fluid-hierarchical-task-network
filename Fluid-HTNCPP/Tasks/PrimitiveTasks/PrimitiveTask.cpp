@@ -51,7 +51,7 @@ bool PrimitiveTask::IsValid(IContext& ctx)
         if (ctx.LogDecomposition())
         {
             Log(ctx,
-                "PrimitiveTask.IsValid:"s + std::to_string(result) + " for condition "s +  condition->Name(),
+                "PrimitiveTask.IsValid:"s + ToString(result) + " for condition "s +  condition->Name(),
                 result ? ConsoleColor::DarkGreen : ConsoleColor::DarkRed);
         }
         if (!result)
@@ -65,8 +65,8 @@ bool PrimitiveTask::IsValid(IContext& ctx)
     }
     return true;
 }
-void PrimitiveTask::Log(IContext& ctx, std::string description, ConsoleColor color /*= ConsoleColor::White*/)
+void PrimitiveTask::Log(IContext& ctx, StringType description, ConsoleColor color /*= ConsoleColor::White*/)
 {
-    ctx.Log(_Name, description, ctx.CurrentDecompositionDepth() + 1, shared_from_this(), color);
+    ctx.Log(_Name, description, ctx.CurrentDecompositionDepth() + 1, SharedFromThis(), color);
 }
 } // namespace FluidHTN

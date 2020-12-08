@@ -9,7 +9,7 @@ class Slot;
 
 class CompoundTask : public ITask
 {
-    std::vector<std::shared_ptr<ITask>> _Tasks;
+    ArrayType<SharedPtr<ITask>> _Tasks;
 
 protected:
     CompoundTask(ITaskDerivedClassName t)
@@ -24,9 +24,9 @@ public:
     {
     }
 
-    std::vector<std::shared_ptr<ITask>>& Subtasks() { return _Tasks; }
+    ArrayType<SharedPtr<ITask>>& Subtasks() { return _Tasks; }
 
-    bool AddSubTask(std::shared_ptr<ITask> subtask)
+    bool AddSubTask(SharedPtr<ITask> subtask)
     {
         _Tasks.push_back(subtask);
         return true;
@@ -43,16 +43,16 @@ public:
 protected:
     virtual DecompositionStatus OnDecompose(IContext& ctx, int startIndex, TaskQueueType& result) = 0;
     virtual DecompositionStatus OnDecomposeTask(
-        IContext& ctx, std::shared_ptr<ITask>& task, int taskIndex, std::vector<int> oldStackDepth, TaskQueueType& result) = 0;
+        IContext& ctx, SharedPtr<ITask>& task, int taskIndex, ArrayType<int> oldStackDepth, TaskQueueType& result) = 0;
     virtual DecompositionStatus OnDecomposeCompoundTask(IContext&                      ctx,
-                                                        std::shared_ptr<CompoundTask>& task,
+                                                        SharedPtr<CompoundTask>& task,
                                                         int                            taskIndex,
-                                                        std::vector<int>               oldStackDepth,
+                                                        ArrayType<int>               oldStackDepth,
                                                         TaskQueueType&                 result) = 0;
     virtual DecompositionStatus OnDecomposeSlot(
-        IContext& ctx, std::shared_ptr<Slot>& task, int taskIndex, std::vector<int> oldStackDepth, TaskQueueType& result) = 0;
+        IContext& ctx, SharedPtr<Slot>& task, int taskIndex, ArrayType<int> oldStackDepth, TaskQueueType& result) = 0;
 
-    virtual void Log(IContext& ctx, std::string description, ConsoleColor color = ConsoleColor::White);
+    virtual void Log(IContext& ctx, StringType description, ConsoleColor color = ConsoleColor::White);
     
 };
 

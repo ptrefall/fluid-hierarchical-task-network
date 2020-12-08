@@ -17,19 +17,19 @@ class IContext;
 class Domain 
 {
 protected:
-    std::shared_ptr<TaskRoot>                      _Root;
-    std::unordered_map<int, std::shared_ptr<Slot>> _slots;
+    SharedPtr<TaskRoot>                      _Root;
+    std::unordered_map<int, SharedPtr<Slot>> _slots;
 
 public:
-    Domain(const std::string& name);
+    Domain(const StringType& name);
 
-    virtual std::shared_ptr<TaskRoot>& Root() { return _Root; }
-    virtual bool Add(std::shared_ptr<CompoundTask>& parent, std::shared_ptr<ITask>& subtask) ;
-    virtual bool Add(std::shared_ptr<CompoundTask>& parent, std::shared_ptr<PrimitiveTask>& pt) ;
-    virtual bool Add(std::shared_ptr<CompoundTask>& parent, std::shared_ptr<TaskRoot>& root) ;
-    virtual bool Add(std::shared_ptr<CompoundTask>& parent, std::shared_ptr<Slot>& slot) ;
-    virtual bool Add(std::shared_ptr<TaskRoot>& root, std::shared_ptr<CompoundTask>& subtask) ;
-    virtual bool Add(std::shared_ptr<CompoundTask>& parent, std::shared_ptr<CompoundTask>& subtask) ;
+    virtual SharedPtr<TaskRoot>& Root() { return _Root; }
+    virtual bool Add(SharedPtr<CompoundTask>& parent, SharedPtr<ITask>& subtask) ;
+    virtual bool Add(SharedPtr<CompoundTask>& parent, SharedPtr<PrimitiveTask>& pt) ;
+    virtual bool Add(SharedPtr<CompoundTask>& parent, SharedPtr<TaskRoot>& root) ;
+    virtual bool Add(SharedPtr<CompoundTask>& parent, SharedPtr<Slot>& slot) ;
+    virtual bool Add(SharedPtr<TaskRoot>& root, SharedPtr<CompoundTask>& subtask) ;
+    virtual bool Add(SharedPtr<CompoundTask>& parent, SharedPtr<CompoundTask>& subtask) ;
 
     DecompositionStatus FindPlan(IContext& ctx, TaskQueueType& plan);
 
