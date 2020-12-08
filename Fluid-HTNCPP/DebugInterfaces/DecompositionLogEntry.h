@@ -4,16 +4,16 @@ namespace FluidHTN
 {
 enum class ConsoleColor
 {
-    Red = FOREGROUND_INTENSITY | FOREGROUND_RED,
-    DarkRed = FOREGROUND_RED,
-    Blue = FOREGROUND_INTENSITY | FOREGROUND_BLUE,
-    DarkBlue = FOREGROUND_BLUE,
-    Green = FOREGROUND_INTENSITY | FOREGROUND_GREEN,
-    DarkGreen = FOREGROUND_GREEN,
-    Black = 0,
-    White = FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE,
-    Yellow = FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN,
-    DarkYellow =  FOREGROUND_RED | FOREGROUND_GREEN,
+    Black,
+    Red,
+    DarkRed,
+    Blue,
+    DarkBlue,
+    Green,
+    DarkGreen,
+    White,
+    Yellow,
+    DarkYellow 
 };
 class Debug
 {

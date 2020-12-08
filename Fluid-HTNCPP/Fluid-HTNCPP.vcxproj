@@ -183,7 +183,6 @@
     <ClInclude Include="Domain.h" />
     <ClInclude Include="Effects\Effect.h" />
     <ClInclude Include="Effects\EffectType.h" />
-    <ClInclude Include="framework.h" />
     <ClInclude Include="Operators\Operator.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Planners\Planner.h" />
