@@ -23,7 +23,7 @@ public:
 
     virtual bool HasState(WORLDSTATEPROPERTY_ID_TYPE state, WORLDSTATEPROPERTY_VALUE_TYPE& value) override
     {
-        return _WorldState->HasState(state, value);
+        return (GetState(state) == value);
     }
     virtual WORLDSTATEPROPERTY_VALUE_TYPE& GetState(WORLDSTATEPROPERTY_ID_TYPE state) override
     {
