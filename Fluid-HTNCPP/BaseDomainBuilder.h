@@ -28,10 +28,7 @@ public:
     }
     const SharedPtr<ITask> Pointer()
     {
-        if (!_PointersValid)
-        {
-            throw std::exception("Pointers are null");
-        }
+        FHTN_FATAL_EXCEPTION(_PointersValid, "Pointers are null");
         if (_pointers.size() == 0)
         {
             return nullptr;

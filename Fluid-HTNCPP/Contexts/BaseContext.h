@@ -35,7 +35,7 @@ public:
         {
             return _WorldState->GetState(state);
         }
-        return _WorldStateChangeStackArray[state].top().second;
+        return _WorldStateChangeStackArray[state].top().Second();
     }
     virtual void SetState(WORLDSTATEPROPERTY_ID_TYPE    state,
                           WORLDSTATEPROPERTY_VALUE_TYPE value,
@@ -57,7 +57,8 @@ public:
         }
         else
         {
-            _WorldStateChangeStackArray[state].push(std::make_pair(e, value));
+            Pair p(e, value);
+            _WorldStateChangeStackArray[state].push(p);
         }
     }
     virtual ArrayType<int> GetWorldStateChangeDepth() override
@@ -76,7 +77,7 @@ public:
 
         for (auto& stack : _WorldStateChangeStackArray)
         {
-            while (stack.size() != 0 && stack.top().first != EffectType::Permanent)
+            while (stack.size() != 0 && stack.top().First() != EffectType::Permanent)
             {
                 stack.pop();
             }

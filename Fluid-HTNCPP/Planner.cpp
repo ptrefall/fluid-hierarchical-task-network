@@ -18,7 +18,7 @@ void Planner::Tick(class Domain& domain, IContext& ctx, bool allowImmediateRepla
     // and if so, try to find a new plan.
     if (((_currentTask == nullptr) && (_plan.size() == 0)) || ctx.IsDirty())
     {
-        std::queue<PartialPlanEntry> lastPartialPlanQueue;
+        Queue<PartialPlanEntry> lastPartialPlanQueue;
         bool                         worldStateDirtyReplan = ctx.IsDirty();
 
         if (worldStateDirtyReplan)

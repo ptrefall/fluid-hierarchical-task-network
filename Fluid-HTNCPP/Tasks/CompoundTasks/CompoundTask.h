@@ -15,7 +15,7 @@ protected:
     CompoundTask(ITaskDerivedClassName t)
         : ITask(t)
     {
-        _SubTypes.insert(ITaskDerivedClassName::CompoundTask);
+        _SubTypes.Insert(ITaskDerivedClassName::CompoundTask);
     }
 
 public:

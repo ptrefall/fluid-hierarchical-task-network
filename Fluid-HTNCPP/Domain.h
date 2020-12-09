@@ -18,7 +18,7 @@ class Domain
 {
 protected:
     SharedPtr<TaskRoot>                      _Root;
-    std::unordered_map<int, SharedPtr<Slot>> _slots;
+    Map<int, SharedPtr<Slot>> _slots;
 
 public:
     Domain(const StringType& name);

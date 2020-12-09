@@ -29,13 +29,10 @@ bool Domain::Add(SharedPtr<CompoundTask>& parent, SharedPtr<Slot>& slot)
     FHTN_FATAL_EXCEPTION(StaticCastPtr<ITask>(parent) != StaticCastPtr<ITask>(slot),
                          "Parent and slot cannot be the same");
 
-    if (_slots.find(slot->SlotId()) != _slots.end())
-    {
-        throw std::invalid_argument("slot already exists in domain definition");
-    }
+    FHTN_FATAL_EXCEPTION(_slots.Find(slot->SlotId()) == _slots.End(), "slot already exists in domain definition");
     parent->AddSubTask(StaticCastPtr<ITask>(slot));
     slot->Parent() = parent;
-    _slots.insert(std::make_pair(slot->SlotId(), slot));
+    _slots.Insert(MakePair(slot->SlotId(), slot));
     return true;
 }
 
@@ -68,7 +65,7 @@ DecompositionStatus Domain::FindPlan(IContext& ctx, TaskQueueType& plan)
 
     ctx.SetContextState(ContextState::Planning);
 
-    TaskQueueType().swap(plan);
+    plan.clear();
 
     auto status = DecompositionStatus::Rejected;
 
@@ -132,7 +129,7 @@ DecompositionStatus Domain::FindPlan(IContext& ctx, TaskQueueType& plan)
     }
     else
     {
-        std::queue<PartialPlanEntry> lastPartialPlanQueue;
+        Queue<PartialPlanEntry> lastPartialPlanQueue;
         if (ctx.HasPausedPartialPlan())
         {
             ctx.HasPausedPartialPlan() = false;
@@ -158,7 +155,7 @@ DecompositionStatus Domain::FindPlan(IContext& ctx, TaskQueueType& plan)
             if (status == DecompositionStatus::Rejected || status == DecompositionStatus::Failed)
             {
                 ctx.HasPausedPartialPlan() = true;
-                std::queue<PartialPlanEntry>().swap(ctx.PartialPlanQueue());
+                ctx.PartialPlanQueue().clear();
                 while (lastPartialPlanQueue.size() > 0)
                 {
                     ctx.PartialPlanQueue().push(lastPartialPlanQueue.front());
@@ -197,7 +194,7 @@ DecompositionStatus Domain::FindPlan(IContext& ctx, TaskQueueType& plan)
                 auto& stack = ctx.GetWorldStateChangeStack()[i];
                 if (stack.size() != 0)
                 {
-                    ctx.GetWorldState().SetState(static_cast<WORLDSTATEPROPERTY_ID_TYPE>(i), stack.top().second);
+                    ctx.GetWorldState().SetState(static_cast<WORLDSTATEPROPERTY_ID_TYPE>(i), stack.top().Second());
                     stack = WorldStateStackType();
                 }
             }
@@ -223,8 +220,8 @@ DecompositionStatus Domain::FindPlan(IContext& ctx, TaskQueueType& plan)
 
 bool Domain::TrySetSlotDomain(int slotId, Domain& subDomain)
 {
-    auto slot = _slots.find(slotId);
-    if(slot != _slots.end())
+    auto slot = _slots.Find(slotId);
+    if(slot != _slots.End())
         {
         return slot->second->Set(subDomain.Root());
     }
@@ -232,8 +229,8 @@ bool Domain::TrySetSlotDomain(int slotId, Domain& subDomain)
 }
 void Domain::ClearSlot(int slotId)
 {
-    auto iter = _slots.find(slotId);
-    if(iter != _slots.end())
+    auto iter = _slots.Find(slotId);
+    if(iter != _slots.End())
     {
         iter->second->Clear();
     }

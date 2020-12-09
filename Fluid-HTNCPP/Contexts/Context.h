@@ -21,10 +21,10 @@ struct PartialPlanEntry
 static_assert(std::is_integral<WORLDSTATEPROPERTY_ID_TYPE>::value,
               "WorldState Id must be integral type. Change the vector type to hash table otherwise");
 // An array of stacks per property of the world state.
-typedef std::stack<std::pair<EffectType, WORLDSTATEPROPERTY_VALUE_TYPE>> WorldStateStackType;
+typedef Stack<Pair<EffectType, WORLDSTATEPROPERTY_VALUE_TYPE>> WorldStateStackType;
 typedef ArrayType<WorldStateStackType>                                 WorldStateStackArrayType;
 
-typedef std::queue<PartialPlanEntry> PartialPlanQueueType;
+typedef Queue<PartialPlanEntry> PartialPlanQueueType;
 class IContext
 {
 protected:
@@ -33,7 +33,7 @@ protected:
     ContextState                           _ContextState = ContextState::Executing;
     int                                    _CurrentDecompositionDepth = 0;
     bool                                   _DebugMTR = false;
-    std::queue<IBaseDecompositionLogEntry> _DecompositionLog;
+    Queue<IBaseDecompositionLogEntry> _DecompositionLog;
     bool                                   _LogDecomposition = false;
     ArrayType<int>                       _MethodTraversalRecord;
     ArrayType<StringType>               _MTRDebug;
@@ -88,7 +88,7 @@ public:
 
     /// <summary>
     /// </summary>
-    std::queue<IBaseDecompositionLogEntry>& DecompositionLog() { return _DecompositionLog; }
+    Queue<IBaseDecompositionLogEntry>& DecompositionLog() { return _DecompositionLog; }
     /// <summary>
     /// Whether our planning system should log our decomposition. Specially condition success vs failure.
     /// </summary>

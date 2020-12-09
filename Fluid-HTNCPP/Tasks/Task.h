@@ -39,11 +39,11 @@ class ITask : public EnableSharedFromThis<ITask>
     ITaskDerivedClassName _Type = ITaskDerivedClassName::ITaskType;
 
 protected:
-    std::unordered_set<ITaskDerivedClassName> _SubTypes;
+    Set<ITaskDerivedClassName> _SubTypes;
     explicit ITask(ITaskDerivedClassName n)
     {
         _Type = n;
-        _SubTypes.insert(n);
+        _SubTypes.Insert(n);
     }
     StringType                              _Name;
     SharedPtr<CompoundTask>            _Parent;
@@ -55,7 +55,7 @@ public:
     bool                  IsTypeOf(ITaskDerivedClassName thetype)
     {
         return ((thetype == _Type) || (thetype == ITaskDerivedClassName::ITaskType) ||
-                (_SubTypes.find(thetype) != _SubTypes.end()));
+                (_SubTypes.Find(thetype) != _SubTypes.End()));
     }
 
     virtual StringType& Name() { return _Name; }
@@ -77,6 +77,6 @@ public:
     virtual DecompositionStatus OnIsValidFailed(IContext& ctx) = 0;
 };
 
-typedef std::queue<SharedPtr<ITask>> TaskQueueType;
+typedef Queue<SharedPtr<ITask>> TaskQueueType;
 
 } // namespace FluidHTN
