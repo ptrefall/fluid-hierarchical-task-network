@@ -5,7 +5,7 @@ namespace FluidHTN
 // These should be template parameters to IContext, but that propagates templates everywhere and I hate it.
 // Just define your own types here
 //
-#if !USE_CUSTOM_WORDSTATE_PROPERTIES
+#if !USE_CUSTOM_WORLDSTATE_PROPERTIES
 typedef int WORLDSTATEPROPERTY_ID_TYPE ;
 typedef uint8_t WORLDSTATEPROPERTY_VALUE_TYPE;
 #endif
