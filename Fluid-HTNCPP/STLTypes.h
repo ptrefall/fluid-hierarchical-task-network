@@ -3,6 +3,8 @@
 //
 #pragma once
 
+#if !USING_CUSTOM_STL
+
 template<typename T>
 using SharedPtr = std::shared_ptr<T>;
 
@@ -110,4 +112,17 @@ StringType ToString(const T& arg)
     return std::to_string(arg);
 }
 
+#ifndef FHTN_FATAL_EXCEPTION
+#define FHTN_FATAL_EXCEPTION(condition, msg)                                                                                          \
+    if (!(condition))                                                                                                              \
+    {                                                                                                                              \
+        throw std::exception(msg);                                                                                                \
+    }
 
+#endif
+
+#ifndef FHTN_FATAL_EXCEPTION_V
+#define FHTN_FATAL_EXCEPTION_V(condition, fmt, ...)  this is for UE4 checkf, verifymsg etc. do not t use elsewhere
+#endif
+
+#endif !USING_CUSTOM_STL
