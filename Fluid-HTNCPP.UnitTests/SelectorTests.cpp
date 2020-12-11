@@ -17,8 +17,8 @@ namespace FluidHTNCPPUnitTests
 	{
         TEST_METHOD(AddCondition_ExpectedBehavior)
         {
-            std::shared_ptr<CompoundTask>  task = std::make_shared<Selector>("Test"s);
-            std::shared_ptr<ICondition> c = std::make_shared<FuncCondition>("TestCondition"s, [](IContext& ctx) {
+            SharedPtr<CompoundTask>  task = MakeSharedPtr<Selector>("Test"s);
+            SharedPtr<ICondition> c = MakeSharedPtr<FuncCondition>("TestCondition"s, [](IContext& ctx) {
                 return (static_cast<DomainTestContext&>(ctx).Done() == false);
             });
             bool bRet = task->AddCondition(c);
@@ -28,8 +28,8 @@ namespace FluidHTNCPPUnitTests
 
         TEST_METHOD(AddSubtask_ExpectedBehavior)
         {
-            std::shared_ptr<CompoundTask>  task = std::make_shared<Selector>("Test"s);
-            std::shared_ptr<PrimitiveTask> task2 = std::make_shared<PrimitiveTask>("Sub-task");
+            SharedPtr<CompoundTask>  task = MakeSharedPtr<Selector>("Test"s);
+            SharedPtr<PrimitiveTask> task2 = MakeSharedPtr<PrimitiveTask>("Sub-task");
             bool bRet = task->AddSubTask(task2);
 
             Assert::IsTrue(bRet);
@@ -39,7 +39,7 @@ namespace FluidHTNCPPUnitTests
         TEST_METHOD(IsValidFailsWithoutSubtasks_ExpectedBehavior)
         {
             DomainTestContext              ctx;
-            std::shared_ptr<CompoundTask>  task = std::make_shared<Selector>("Test"s);
+            SharedPtr<CompoundTask>  task = MakeSharedPtr<Selector>("Test"s);
 
             Assert::IsFalse(task->IsValid(ctx));
         }
@@ -47,8 +47,8 @@ namespace FluidHTNCPPUnitTests
         TEST_METHOD(IsValid_ExpectedBehavior)
         {
             DomainTestContext              ctx;
-            std::shared_ptr<CompoundTask>  task = std::make_shared<Selector>("Test"s);
-            std::shared_ptr<PrimitiveTask> task2 = std::make_shared<PrimitiveTask>("Sub-task");
+            SharedPtr<CompoundTask>  task = MakeSharedPtr<Selector>("Test"s);
+            SharedPtr<PrimitiveTask> task2 = MakeSharedPtr<PrimitiveTask>("Sub-task");
             task->AddSubTask(task2);
 
             Assert::IsTrue(task->IsValid(ctx));
@@ -58,7 +58,7 @@ namespace FluidHTNCPPUnitTests
         {
             DomainTestContext              ctx;
             TaskQueueType                 plan;
-            std::shared_ptr<CompoundTask>  task = std::make_shared<Selector>("Test"s);
+            SharedPtr<CompoundTask>  task = MakeSharedPtr<Selector>("Test"s);
             auto status = task->Decompose(ctx, 0, plan);
 
             Assert::IsTrue(status == DecompositionStatus::Failed);
@@ -69,9 +69,9 @@ namespace FluidHTNCPPUnitTests
         {
             DomainTestContext              ctx;
             TaskQueueType                 plan;
-            std::shared_ptr<CompoundTask>  task = std::make_shared<Selector>("Test"s);
-            std::shared_ptr<PrimitiveTask> task2 = std::make_shared<PrimitiveTask>("Sub-task1");
-            std::shared_ptr<PrimitiveTask> task3 = std::make_shared<PrimitiveTask>("Sub-task2");
+            SharedPtr<CompoundTask>  task = MakeSharedPtr<Selector>("Test"s);
+            SharedPtr<PrimitiveTask> task2 = MakeSharedPtr<PrimitiveTask>("Sub-task1");
+            SharedPtr<PrimitiveTask> task3 = MakeSharedPtr<PrimitiveTask>("Sub-task2");
 
             task->AddSubTask(task2);
             task->AddSubTask(task3);
@@ -86,9 +86,9 @@ namespace FluidHTNCPPUnitTests
         {
             DomainTestContext              ctx;
             TaskQueueType                 plan;
-            std::shared_ptr<CompoundTask>  task = std::make_shared<Selector>("Test"s);
-            std::shared_ptr<CompoundTask>  task2 = std::make_shared<Selector>("Sub-task1"s);
-            std::shared_ptr<PrimitiveTask> task3 = std::make_shared<PrimitiveTask>("Sub-task2");
+            SharedPtr<CompoundTask>  task = MakeSharedPtr<Selector>("Test"s);
+            SharedPtr<CompoundTask>  task2 = MakeSharedPtr<Selector>("Sub-task1"s);
+            SharedPtr<PrimitiveTask> task3 = MakeSharedPtr<PrimitiveTask>("Sub-task2");
 
             task->AddSubTask(task2);
             task->AddSubTask(task3);
@@ -103,16 +103,16 @@ namespace FluidHTNCPPUnitTests
         {
             DomainTestContext              ctx;
             TaskQueueType                 plan;
-            std::shared_ptr<CompoundTask>  task = std::make_shared<Selector>("Test"s);
-            std::shared_ptr<PrimitiveTask> task2 = std::make_shared<PrimitiveTask>("Sub-task1");
+            SharedPtr<CompoundTask>  task = MakeSharedPtr<Selector>("Test"s);
+            SharedPtr<PrimitiveTask> task2 = MakeSharedPtr<PrimitiveTask>("Sub-task1");
 
-            std::shared_ptr<ICondition> c = std::make_shared<FuncCondition>("Done == true"s, [](IContext& ctx) {
+            SharedPtr<ICondition> c = MakeSharedPtr<FuncCondition>("Done == true"s, [](IContext& ctx) {
                 return (static_cast<DomainTestContext&>(ctx).Done() == true);
             });
 
             task2->AddCondition(c);
 
-            std::shared_ptr<PrimitiveTask> task3 = std::make_shared<PrimitiveTask>("Sub-task2");
+            SharedPtr<PrimitiveTask> task3 = MakeSharedPtr<PrimitiveTask>("Sub-task2");
 
             task->AddSubTask(task2);
             task->AddSubTask(task3);
@@ -128,15 +128,15 @@ namespace FluidHTNCPPUnitTests
         {
             DomainTestContext              ctx;
             TaskQueueType                 plan;
-            std::shared_ptr<CompoundTask>  task = std::make_shared<Selector>("Test"s);
-            std::shared_ptr<PrimitiveTask> task2 = std::make_shared<PrimitiveTask>("Sub-task1");
+            SharedPtr<CompoundTask>  task = MakeSharedPtr<Selector>("Test"s);
+            SharedPtr<PrimitiveTask> task2 = MakeSharedPtr<PrimitiveTask>("Sub-task1");
 
-            std::shared_ptr<ICondition> c = std::make_shared<FuncCondition>("Done == true"s, [](IContext& ctx) {
+            SharedPtr<ICondition> c = MakeSharedPtr<FuncCondition>("Done == true"s, [](IContext& ctx) {
                 return (static_cast<DomainTestContext&>(ctx).Done() == true);
             });
             task2->AddCondition(c);
 
-            std::shared_ptr<PrimitiveTask> task3 = std::make_shared<PrimitiveTask>("Sub-task2");
+            SharedPtr<PrimitiveTask> task3 = MakeSharedPtr<PrimitiveTask>("Sub-task2");
 
             task->AddSubTask(task2);
             task->AddSubTask(task3);
@@ -155,15 +155,15 @@ namespace FluidHTNCPPUnitTests
             TaskQueueType  plan;
             ctx.Init();
 
-            std::shared_ptr<CompoundTask>  task = std::make_shared<Selector>("Test"s);
-            std::shared_ptr<PrimitiveTask> task2 = std::make_shared<PrimitiveTask>("Sub-task1");
+            SharedPtr<CompoundTask>  task = MakeSharedPtr<Selector>("Test"s);
+            SharedPtr<PrimitiveTask> task2 = MakeSharedPtr<PrimitiveTask>("Sub-task1");
 
-            std::shared_ptr<ICondition> c = std::make_shared<FuncCondition>("Done == true"s, [](IContext& ctx) {
+            SharedPtr<ICondition> c = MakeSharedPtr<FuncCondition>("Done == true"s, [](IContext& ctx) {
                 return (static_cast<DomainTestContext&>(ctx).Done() == true);
             });
             task2->AddCondition(c);
             task->AddSubTask(task2);
-            std::shared_ptr<PrimitiveTask> task3 = std::make_shared<PrimitiveTask>("Sub-task2");
+            SharedPtr<PrimitiveTask> task3 = MakeSharedPtr<PrimitiveTask>("Sub-task2");
             task->AddSubTask(task3);
 
             ctx.LastMTR().push_back(0);
@@ -172,23 +172,23 @@ namespace FluidHTNCPPUnitTests
             Assert::IsTrue(status == DecompositionStatus::Rejected);
             Assert::IsTrue(plan.size() == 0);
             Assert::IsTrue(ctx.MTRDebug().size() == 1);
-            Assert::IsTrue(ctx.MTRDebug()[0].find("REPLAN FAIL"s) != std::string::npos);
-            Assert::IsTrue(ctx.MTRDebug()[0].find("Sub-task2"s) != std::string::npos);
+            Assert::IsTrue(ctx.MTRDebug()[0].find("REPLAN FAIL"s) != StringType::npos);
+            Assert::IsTrue(ctx.MTRDebug()[0].find("Sub-task2"s) != StringType::npos);
         }
 
         TEST_METHOD(DecomposeMTRSucceedsWhenEqual_ExpectedBehavior)
         {
             DomainTestContext              ctx;
             TaskQueueType                 plan;
-            std::shared_ptr<CompoundTask>  task = std::make_shared<Selector>("Test"s);
-            std::shared_ptr<PrimitiveTask> task2 = std::make_shared<PrimitiveTask>("Sub-task1");
+            SharedPtr<CompoundTask>  task = MakeSharedPtr<Selector>("Test"s);
+            SharedPtr<PrimitiveTask> task2 = MakeSharedPtr<PrimitiveTask>("Sub-task1");
 
-            std::shared_ptr<ICondition> c = std::make_shared<FuncCondition>("Done == true"s, [](IContext& ctx) {
+            SharedPtr<ICondition> c = MakeSharedPtr<FuncCondition>("Done == true"s, [](IContext& ctx) {
                 return (static_cast<DomainTestContext&>(ctx).Done() == true);
             });
             task2->AddCondition(c);
 
-            std::shared_ptr<PrimitiveTask> task3 = std::make_shared<PrimitiveTask>("Sub-task2");
+            SharedPtr<PrimitiveTask> task3 = MakeSharedPtr<PrimitiveTask>("Sub-task2");
 
             task->AddSubTask(task2);
             task->AddSubTask(task3);
@@ -205,21 +205,21 @@ namespace FluidHTNCPPUnitTests
         {
             DomainTestContext              ctx;
             TaskQueueType                 plan;
-            std::shared_ptr<CompoundTask>  task = std::make_shared<Selector>("Test"s);
-            std::shared_ptr<CompoundTask>  task2 = std::make_shared<Selector>("Test2"s);
+            SharedPtr<CompoundTask>  task = MakeSharedPtr<Selector>("Test"s);
+            SharedPtr<CompoundTask>  task2 = MakeSharedPtr<Selector>("Test2"s);
 
-            std::shared_ptr<PrimitiveTask> task3 = std::make_shared<PrimitiveTask>("Sub-task1");
+            SharedPtr<PrimitiveTask> task3 = MakeSharedPtr<PrimitiveTask>("Sub-task1");
 
-            std::shared_ptr<ICondition> c = std::make_shared<FuncCondition>("Done == true"s, [](IContext& ctx) {
+            SharedPtr<ICondition> c = MakeSharedPtr<FuncCondition>("Done == true"s, [](IContext& ctx) {
                 return (static_cast<DomainTestContext&>(ctx).Done() == true);
             });
             task3->AddCondition(c);
             task2->AddSubTask(task3);
-            std::shared_ptr<PrimitiveTask> task4 = std::make_shared<PrimitiveTask>("Sub-task2");
+            SharedPtr<PrimitiveTask> task4 = MakeSharedPtr<PrimitiveTask>("Sub-task2");
             task2->AddSubTask(task4);
 
             task->AddSubTask(task2);
-            std::shared_ptr<PrimitiveTask> task5 = std::make_shared<PrimitiveTask>("Sub-task3");
+            SharedPtr<PrimitiveTask> task5 = MakeSharedPtr<PrimitiveTask>("Sub-task3");
             task->AddSubTask(task5);
 
             auto status = task->Decompose(ctx, 0, plan);
@@ -235,16 +235,16 @@ namespace FluidHTNCPPUnitTests
         {
             DomainTestContext              ctx;
             TaskQueueType                 plan;
-            std::shared_ptr<CompoundTask>  task = std::make_shared<Selector>("Test"s);
-            std::shared_ptr<CompoundTask>  task2 = std::make_shared<Selector>("Test2"s);
+            SharedPtr<CompoundTask>  task = MakeSharedPtr<Selector>("Test"s);
+            SharedPtr<CompoundTask>  task2 = MakeSharedPtr<Selector>("Test2"s);
 
-            std::shared_ptr<PrimitiveTask> task3 = std::make_shared<PrimitiveTask>("Sub-task1");
-            std::shared_ptr<ICondition> c = std::make_shared<FuncCondition>("Done == true"s, [](IContext& ctx) {
+            SharedPtr<PrimitiveTask> task3 = MakeSharedPtr<PrimitiveTask>("Sub-task1");
+            SharedPtr<ICondition> c = MakeSharedPtr<FuncCondition>("Done == true"s, [](IContext& ctx) {
                 return (static_cast<DomainTestContext&>(ctx).Done() == true);
             });
             task3->AddCondition(c);
-            std::shared_ptr<PrimitiveTask> task4 = std::make_shared<PrimitiveTask>("Sub-task2");
-            std::shared_ptr<ICondition> c2 = std::make_shared<FuncCondition>("Done == true"s, [](IContext& ctx) {
+            SharedPtr<PrimitiveTask> task4 = MakeSharedPtr<PrimitiveTask>("Sub-task2");
+            SharedPtr<ICondition> c2 = MakeSharedPtr<FuncCondition>("Done == true"s, [](IContext& ctx) {
                 return (static_cast<DomainTestContext&>(ctx).Done() == true);
             });
             task4->AddCondition(c2);
@@ -253,7 +253,7 @@ namespace FluidHTNCPPUnitTests
             task2->AddSubTask(task4);
 
             task->AddSubTask(task2);
-            std::shared_ptr<PrimitiveTask> task5 = std::make_shared<PrimitiveTask>("Sub-task3");
+            SharedPtr<PrimitiveTask> task5 = MakeSharedPtr<PrimitiveTask>("Sub-task3");
             task->AddSubTask(task5);
 
             auto status = task->Decompose(ctx, 0, plan);
@@ -268,28 +268,28 @@ namespace FluidHTNCPPUnitTests
         {
             DomainTestContext              ctx;
             TaskQueueType                 plan;
-            std::shared_ptr<CompoundTask>  task = std::make_shared<Selector>("Test"s);
-            std::shared_ptr<CompoundTask>  task2 = std::make_shared<Selector>("Test2"s);
-            std::shared_ptr<CompoundTask>  task3 = std::make_shared<Selector>("Test3"s);
+            SharedPtr<CompoundTask>  task = MakeSharedPtr<Selector>("Test"s);
+            SharedPtr<CompoundTask>  task2 = MakeSharedPtr<Selector>("Test2"s);
+            SharedPtr<CompoundTask>  task3 = MakeSharedPtr<Selector>("Test3"s);
 
-            std::shared_ptr<PrimitiveTask> task4 = std::make_shared<PrimitiveTask>("Sub-task1");
-            std::shared_ptr<ICondition> c = std::make_shared<FuncCondition>("Done == true"s, [](IContext& ctx) {
+            SharedPtr<PrimitiveTask> task4 = MakeSharedPtr<PrimitiveTask>("Sub-task1");
+            SharedPtr<ICondition> c = MakeSharedPtr<FuncCondition>("Done == true"s, [](IContext& ctx) {
                 return (static_cast<DomainTestContext&>(ctx).Done() == true);
             });
             task4->AddCondition(c);
-            std::shared_ptr<PrimitiveTask> task5 = std::make_shared<PrimitiveTask>("Sub-task2");
+            SharedPtr<PrimitiveTask> task5 = MakeSharedPtr<PrimitiveTask>("Sub-task2");
             task5->AddCondition(c);
 
             task3->AddSubTask(task4);
             task3->AddSubTask(task5);
 
             task2->AddSubTask(task3);
-            std::shared_ptr<PrimitiveTask> task6 = std::make_shared<PrimitiveTask>("Sub-task3");
+            SharedPtr<PrimitiveTask> task6 = MakeSharedPtr<PrimitiveTask>("Sub-task3");
             task6->AddCondition(c);
             task2->AddSubTask(task6);
 
             task->AddSubTask(task2);
-            std::shared_ptr<PrimitiveTask> task7 = std::make_shared<PrimitiveTask>("Sub-task4");
+            SharedPtr<PrimitiveTask> task7 = MakeSharedPtr<PrimitiveTask>("Sub-task4");
             task->AddSubTask(task7);
 
             auto status = task->Decompose(ctx, 0, plan);
@@ -304,20 +304,20 @@ namespace FluidHTNCPPUnitTests
         {
             DomainTestContext              ctx;
             TaskQueueType                 plan;
-            std::shared_ptr<CompoundTask>  task = std::make_shared<Selector>("Test"s);
-            std::shared_ptr<CompoundTask>  task2 = std::make_shared<Selector>("Test2"s);
-            std::shared_ptr<PrimitiveTask> task3 = std::make_shared<PrimitiveTask>("Sub-task1");
-            std::shared_ptr<ICondition> c = std::make_shared<FuncCondition>("Done == true"s, [](IContext& ctx) {
+            SharedPtr<CompoundTask>  task = MakeSharedPtr<Selector>("Test"s);
+            SharedPtr<CompoundTask>  task2 = MakeSharedPtr<Selector>("Test2"s);
+            SharedPtr<PrimitiveTask> task3 = MakeSharedPtr<PrimitiveTask>("Sub-task1");
+            SharedPtr<ICondition> c = MakeSharedPtr<FuncCondition>("Done == true"s, [](IContext& ctx) {
                 return (static_cast<DomainTestContext&>(ctx).Done() == true);
             });
             task3->AddCondition(c);
 
             task2->AddSubTask(task3);
-            std::shared_ptr<PrimitiveTask> task4 = std::make_shared<PrimitiveTask>("Sub-task2");
+            SharedPtr<PrimitiveTask> task4 = MakeSharedPtr<PrimitiveTask>("Sub-task2");
             task2->AddSubTask(task4);
 
             task->AddSubTask(task2);
-            std::shared_ptr<PrimitiveTask> task5 = std::make_shared<PrimitiveTask>("Sub-task3");
+            SharedPtr<PrimitiveTask> task5 = MakeSharedPtr<PrimitiveTask>("Sub-task3");
             task->AddSubTask(task5);
 
             ctx.LastMTR().push_back(1);
@@ -334,20 +334,20 @@ namespace FluidHTNCPPUnitTests
         {
             DomainTestContext              ctx;
             TaskQueueType                 plan;
-            std::shared_ptr<CompoundTask>  task = std::make_shared<Selector>("Test"s);
-            std::shared_ptr<CompoundTask>  task2 = std::make_shared<Selector>("Test2"s);
-            std::shared_ptr<PrimitiveTask> task3 = std::make_shared<PrimitiveTask>("Sub-task1");
-            std::shared_ptr<ICondition> c = std::make_shared<FuncCondition>("Done == true"s, [](IContext& ctx) {
+            SharedPtr<CompoundTask>  task = MakeSharedPtr<Selector>("Test"s);
+            SharedPtr<CompoundTask>  task2 = MakeSharedPtr<Selector>("Test2"s);
+            SharedPtr<PrimitiveTask> task3 = MakeSharedPtr<PrimitiveTask>("Sub-task1");
+            SharedPtr<ICondition> c = MakeSharedPtr<FuncCondition>("Done == true"s, [](IContext& ctx) {
                 return (static_cast<DomainTestContext&>(ctx).Done() == true);
             });
             task3->AddCondition(c);
             task2->AddSubTask(task3);
 
-            std::shared_ptr<PrimitiveTask> task4 = std::make_shared<PrimitiveTask>("Sub-task2");
+            SharedPtr<PrimitiveTask> task4 = MakeSharedPtr<PrimitiveTask>("Sub-task2");
             task2->AddSubTask(task4);
 
             task->AddSubTask(task2);
-            std::shared_ptr<PrimitiveTask> task5 = std::make_shared<PrimitiveTask>("Sub-task3");
+            SharedPtr<PrimitiveTask> task5 = MakeSharedPtr<PrimitiveTask>("Sub-task3");
             task->AddSubTask(task5);
 
             ctx.LastMTR().push_back(0);
@@ -364,19 +364,19 @@ namespace FluidHTNCPPUnitTests
         {
             DomainTestContext              ctx;
             TaskQueueType                 plan;
-            std::shared_ptr<CompoundTask>  task = std::make_shared<Selector>("Test"s);
-            std::shared_ptr<CompoundTask>  task2 = std::make_shared<Selector>("Test2"s);
-            std::shared_ptr<PrimitiveTask> task3 = std::make_shared<PrimitiveTask>("Sub-task1");
-            std::shared_ptr<ICondition> c = std::make_shared<FuncCondition>("Done == true"s, [](IContext& ctx) {
+            SharedPtr<CompoundTask>  task = MakeSharedPtr<Selector>("Test"s);
+            SharedPtr<CompoundTask>  task2 = MakeSharedPtr<Selector>("Test2"s);
+            SharedPtr<PrimitiveTask> task3 = MakeSharedPtr<PrimitiveTask>("Sub-task1");
+            SharedPtr<ICondition> c = MakeSharedPtr<FuncCondition>("Done == true"s, [](IContext& ctx) {
                 return (static_cast<DomainTestContext&>(ctx).Done() == true);
             });
             task3->AddCondition(c);
             task2->AddSubTask(task3);
 
-            std::shared_ptr<PrimitiveTask> task4 = std::make_shared<PrimitiveTask>("Sub-task2");
+            SharedPtr<PrimitiveTask> task4 = MakeSharedPtr<PrimitiveTask>("Sub-task2");
             task2->AddSubTask(task4);
 
-            std::shared_ptr<PrimitiveTask> task5 = std::make_shared<PrimitiveTask>("Sub-task3");
+            SharedPtr<PrimitiveTask> task5 = MakeSharedPtr<PrimitiveTask>("Sub-task3");
             task5->AddCondition(c);
 
             task->AddSubTask(task5);

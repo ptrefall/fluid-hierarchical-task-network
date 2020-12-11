@@ -21,15 +21,15 @@ TEST_CLASS(FuncConditionTests)
 {
     TEST_METHOD(SetsName_ExpectedBehavior)
     {
-        auto c = std::make_shared<FuncCondition>("Name"s, nullptr);
+        auto c = MakeSharedPtr<FuncCondition>("Name"s, nullptr);
 
         Assert::AreEqual("Name"s, c->Name());
     }
 
     TEST_METHOD(IsValidFailsWithoutFunctionPtr_ExpectedBehavior)
     {
-        auto ctx = std::make_shared<BaseContext>();
-        auto c = std::make_shared<FuncCondition>("Name"s, nullptr);
+        auto ctx = MakeSharedPtr<BaseContext>();
+        auto c = MakeSharedPtr<FuncCondition>("Name"s, nullptr);
 
         auto result = c->IsValid(*ctx);
 
@@ -39,7 +39,7 @@ TEST_CLASS(FuncConditionTests)
     TEST_METHOD(IsValidCallsInternalFunctionPtr_ExpectedBehavior)
     {
         TestContext ctx;
-        auto        c = std::make_shared<FuncCondition>("Name"s,
+        auto        c = MakeSharedPtr<FuncCondition>("Name"s,
                                                  [](IContext& ctx) { return (static_cast<TestContext&>(ctx).Done() == false); });
         auto        result = c->IsValid(ctx);
 

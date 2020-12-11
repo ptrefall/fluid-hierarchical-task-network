@@ -42,7 +42,7 @@ DecompositionStatus Selector::OnDecompose(IContext& ctx, int startIndex, TaskQue
         if (ctx.LogDecomposition())
         {
             Log(ctx,
-                "Selector.OnDecompose:Task index: "s + std::to_string(taskIndex) + ": "s +
+                "Selector.OnDecompose:Task index: "s + ToString(taskIndex) + ": "s +
                     (Subtasks()[taskIndex] ? Subtasks()[taskIndex]->Name() : " no task"s));
         }
         // If the last plan is still running, we need to check whether the
@@ -67,7 +67,7 @@ DecompositionStatus Selector::OnDecompose(IContext& ctx, int startIndex, TaskQue
                     if (ctx.LogDecomposition())
                     {
                         Log(ctx,
-                            "Selector.OnDecompose:Rejected:Index "s + std::to_string(currentDecompositionIndex) +
+                            "Selector.OnDecompose:Rejected:Index "s + ToString(currentDecompositionIndex) +
                                 " is beat by last method traversal record!"s,
                             ConsoleColor::Red);
                     }
@@ -79,7 +79,7 @@ DecompositionStatus Selector::OnDecompose(IContext& ctx, int startIndex, TaskQue
 
         auto task = Subtasks()[taskIndex];
 
-        auto status = OnDecomposeTask(ctx, task, taskIndex, std::vector<int>(), result);
+        auto status = OnDecomposeTask(ctx, task, taskIndex, ArrayType<int>(), result);
         switch (status)
         {
             case DecompositionStatus::Rejected:
@@ -97,7 +97,7 @@ DecompositionStatus Selector::OnDecompose(IContext& ctx, int startIndex, TaskQue
 }
 
 DecompositionStatus Selector::OnDecomposeTask(
-    IContext& ctx, std::shared_ptr<ITask>& task, int taskIndex, std::vector<int> oldStackDepth, TaskQueueType& result)
+    IContext& ctx, SharedPtr<ITask>& task, int taskIndex, ArrayType<int> oldStackDepth, TaskQueueType& result)
 {
     if (task->IsValid(ctx) == false)
     {
@@ -112,13 +112,13 @@ DecompositionStatus Selector::OnDecomposeTask(
 
     if (task->IsTypeOf(ITaskDerivedClassName::CompoundTask))
     {
-        auto compoundTask = std::static_pointer_cast<CompoundTask>(task);
-        return OnDecomposeCompoundTask(ctx, compoundTask, taskIndex, std::vector<int>(), result);
+        auto compoundTask = StaticCastPtr<CompoundTask>(task);
+        return OnDecomposeCompoundTask(ctx, compoundTask, taskIndex, ArrayType<int>(), result);
     }
 
     if (task->IsTypeOf(ITaskDerivedClassName::PrimitiveTask))
     {
-        auto primitiveTask = std::static_pointer_cast<PrimitiveTask>(task);
+        auto primitiveTask = StaticCastPtr<PrimitiveTask>(task);
         if (ctx.LogDecomposition())
         {
             Log(ctx, "Selector.OnDecomposeTask:Pushed "s + primitiveTask->Name() + "to plan!"s, ConsoleColor::Blue);
@@ -129,8 +129,8 @@ DecompositionStatus Selector::OnDecomposeTask(
 
     if (task->IsTypeOf(ITaskDerivedClassName::Slot))
     {
-        auto slot = std::static_pointer_cast<Slot>(task);
-        return OnDecomposeSlot(ctx, slot, taskIndex, std::vector<int>(), result);
+        auto slot = StaticCastPtr<Slot>(task);
+        return OnDecomposeSlot(ctx, slot, taskIndex, ArrayType<int>(), result);
     }
 
     result = _Plan;
@@ -139,14 +139,14 @@ DecompositionStatus Selector::OnDecomposeTask(
     if (ctx.LogDecomposition())
     {
         Log(ctx,
-            "Selector.OnDecomposeTask " + std::to_string((int)status) + "!"s,
+            "Selector.OnDecomposeTask " + ToString((int)status) + "!"s,
             status == DecompositionStatus::Succeeded ? ConsoleColor::Green : ConsoleColor::Red);
     }
     return status;
 }
 
 DecompositionStatus Selector::OnDecomposeCompoundTask(
-    IContext& ctx, std::shared_ptr<CompoundTask>& task, int taskIndex, std::vector<int> oldStackDepth, TaskQueueType& result)
+    IContext& ctx, SharedPtr<CompoundTask>& task, int taskIndex, ArrayType<int> oldStackDepth, TaskQueueType& result)
 {
     // We need to record the task index before we decompose the task,
     // so that the traversal record is set up in the right order.
@@ -165,7 +165,7 @@ DecompositionStatus Selector::OnDecomposeCompoundTask(
         if (ctx.LogDecomposition())
         {
             Log(ctx,
-                "Selector.OnDecomposeCompoundTask:"s + std::to_string((int)status) + ": Decomposing "s + task->Name() +
+                "Selector.OnDecomposeCompoundTask:"s + ToString((int)status) + ": Decomposing "s + task->Name() +
                     " was rejected."s,
                 ConsoleColor::Red);
         }
@@ -185,7 +185,7 @@ DecompositionStatus Selector::OnDecomposeCompoundTask(
         if (ctx.LogDecomposition())
         {
             Log(ctx,
-                "Selector.OnDecomposeCompoundTask:"s + std::to_string((int)status) + ": Decomposing "s + task->Name() + " failed."s,
+                "Selector.OnDecomposeCompoundTask:"s + ToString((int)status) + ": Decomposing "s + task->Name() + " failed."s,
                 ConsoleColor::Red);
         }
         result = _Plan;
@@ -209,7 +209,7 @@ DecompositionStatus Selector::OnDecomposeCompoundTask(
         if (ctx.LogDecomposition())
         {
             Log(ctx,
-                "Selector.OnDecomposeCompoundTask:Return partial plan at index "s + std::to_string(taskIndex) + "!"s,
+                "Selector.OnDecomposeCompoundTask:Return partial plan at index "s + ToString(taskIndex) + "!"s,
                 ConsoleColor::DarkBlue);
         }
         result = _Plan;
@@ -221,14 +221,14 @@ DecompositionStatus Selector::OnDecomposeCompoundTask(
     if (ctx.LogDecomposition())
     {
         Log(ctx,
-            "Selector.OnDecomposeCompoundTask:"s + std::to_string((int)s),
+            "Selector.OnDecomposeCompoundTask:"s + ToString((int)s),
             s == DecompositionStatus::Succeeded ? ConsoleColor::Green : ConsoleColor::Red);
     }
     return s;
 }
 
 DecompositionStatus Selector::OnDecomposeSlot(
-    IContext& ctx, std::shared_ptr<Slot>& task, int taskIndex, std::vector<int> oldStackDepth, TaskQueueType& result)
+    IContext& ctx, SharedPtr<Slot>& task, int taskIndex, ArrayType<int> oldStackDepth, TaskQueueType& result)
 {
     // We need to record the task index before we decompose the task,
     // so that the traversal record is set up in the right order.
@@ -246,7 +246,7 @@ DecompositionStatus Selector::OnDecomposeSlot(
     {
         if (ctx.LogDecomposition())
         {
-            Log(ctx,"Selector.OnDecomposeSlot:"s + std::to_string((int)status) + ": Decomposing "s + task->Name() + " was rejected."s, ConsoleColor::Red);
+            Log(ctx,"Selector.OnDecomposeSlot:"s + ToString((int)status) + ": Decomposing "s + task->Name() + " was rejected."s, ConsoleColor::Red);
         }
         result = TaskQueueType();
         return DecompositionStatus::Rejected;
@@ -263,7 +263,7 @@ DecompositionStatus Selector::OnDecomposeSlot(
         }
         if (ctx.LogDecomposition())
         {
-            Log(ctx, "Selector.OnDecomposeSlot:"s + std::to_string((int)status) + ": Decomposing "s + task->Name() + " failed."s, ConsoleColor::Red);
+            Log(ctx, "Selector.OnDecomposeSlot:"s + ToString((int)status) + ": Decomposing "s + task->Name() + " failed."s, ConsoleColor::Red);
         }
         result = _Plan;
         return DecompositionStatus::Failed;
@@ -294,7 +294,7 @@ DecompositionStatus Selector::OnDecomposeSlot(
     auto s = (result.size() == 0 ? DecompositionStatus::Failed : DecompositionStatus::Succeeded);
     if (ctx.LogDecomposition())
     {
-        Log(ctx, "Selector.OnDecomposeSlot:"s + std::to_string((int)s) + "!"s, s == DecompositionStatus::Succeeded ? ConsoleColor::Green : ConsoleColor::Red);
+        Log(ctx, "Selector.OnDecomposeSlot:"s + ToString((int)s) + "!"s, s == DecompositionStatus::Succeeded ? ConsoleColor::Green : ConsoleColor::Red);
     }
     return s;
 }

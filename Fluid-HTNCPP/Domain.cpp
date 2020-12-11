@@ -10,13 +10,13 @@
 namespace FluidHTN
 {
 
-Domain::Domain(const std::string& name)
+Domain::Domain(const StringType& name)
 {
-    _Root = std::make_shared<TaskRoot>();
+    _Root = MakeSharedPtr<TaskRoot>();
     _Root->Name() = name;
 }
 
-bool Domain::Add(std::shared_ptr<CompoundTask>& parent, std::shared_ptr<ITask>& subtask)
+bool Domain::Add(SharedPtr<CompoundTask>& parent, SharedPtr<ITask>& subtask)
 {
     FHTN_FATAL_EXCEPTION(subtask != parent,"parent and subtask cannot be the same");
     parent->AddSubTask(subtask);
@@ -24,41 +24,38 @@ bool Domain::Add(std::shared_ptr<CompoundTask>& parent, std::shared_ptr<ITask>& 
     return true;
 }
 
-bool Domain::Add(std::shared_ptr<CompoundTask>& parent, std::shared_ptr<Slot>& slot)
+bool Domain::Add(SharedPtr<CompoundTask>& parent, SharedPtr<Slot>& slot)
 {
-    FHTN_FATAL_EXCEPTION(std::static_pointer_cast<ITask>(parent) != std::static_pointer_cast<ITask>(slot),
+    FHTN_FATAL_EXCEPTION(StaticCastPtr<ITask>(parent) != StaticCastPtr<ITask>(slot),
                          "Parent and slot cannot be the same");
 
-    if (_slots.find(slot->SlotId()) != _slots.end())
-    {
-        throw std::invalid_argument("slot already exists in domain definition");
-    }
-    parent->AddSubTask(std::static_pointer_cast<ITask>(slot));
+    FHTN_FATAL_EXCEPTION(_slots.Find(slot->SlotId()) == _slots.End(), "slot already exists in domain definition");
+    parent->AddSubTask(StaticCastPtr<ITask>(slot));
     slot->Parent() = parent;
-    _slots.insert(std::make_pair(slot->SlotId(), slot));
+    _slots.Insert(MakePair(slot->SlotId(), slot));
     return true;
 }
 
-bool Domain::Add(std::shared_ptr<TaskRoot>& root, std::shared_ptr<CompoundTask>& subtask)
+bool Domain::Add(SharedPtr<TaskRoot>& root, SharedPtr<CompoundTask>& subtask)
 {
-    auto compound = std::static_pointer_cast<CompoundTask>(root);
+    auto compound = StaticCastPtr<CompoundTask>(root);
     return Add(compound, subtask);
 }
 
-bool Domain::Add(std::shared_ptr<CompoundTask>& parent, std::shared_ptr<CompoundTask>& subtask)
+bool Domain::Add(SharedPtr<CompoundTask>& parent, SharedPtr<CompoundTask>& subtask)
 {
-    auto s = std::static_pointer_cast<ITask>(subtask);
+    auto s = StaticCastPtr<ITask>(subtask);
     return Add(parent, s);
 }
-bool Domain::Add(std::shared_ptr<CompoundTask>& parent, std::shared_ptr<PrimitiveTask>& pt)
+bool Domain::Add(SharedPtr<CompoundTask>& parent, SharedPtr<PrimitiveTask>& pt)
 {
-    auto s = std::static_pointer_cast<ITask>(pt);
+    auto s = StaticCastPtr<ITask>(pt);
     return Add(parent, s);
 }
 
-bool Domain::Add(std::shared_ptr<CompoundTask>& parent, std::shared_ptr<TaskRoot>& root)
+bool Domain::Add(SharedPtr<CompoundTask>& parent, SharedPtr<TaskRoot>& root)
 {
-    auto s = std::static_pointer_cast<CompoundTask>(root);
+    auto s = StaticCastPtr<CompoundTask>(root);
     return Add(parent, s);
 }
 
@@ -68,7 +65,7 @@ DecompositionStatus Domain::FindPlan(IContext& ctx, TaskQueueType& plan)
 
     ctx.SetContextState(ContextState::Planning);
 
-    TaskQueueType().swap(plan);
+    plan.clear();
 
     auto status = DecompositionStatus::Rejected;
 
@@ -92,7 +89,7 @@ DecompositionStatus Domain::FindPlan(IContext& ctx, TaskQueueType& plan)
             FHTN_FATAL_EXCEPTION(pair.Task->IsTypeOf(ITaskDerivedClassName::CompoundTask),
                                  "PartialPlanEntry task must be a compound task");
 
-            auto compoundTask = std::static_pointer_cast<CompoundTask>(pair.Task);
+            auto compoundTask = StaticCastPtr<CompoundTask>(pair.Task);
             if (plan.size() == 0)
             {
                 status = compoundTask->Decompose(ctx, pair.TaskIndex, plan);
@@ -132,7 +129,7 @@ DecompositionStatus Domain::FindPlan(IContext& ctx, TaskQueueType& plan)
     }
     else
     {
-        std::queue<PartialPlanEntry> lastPartialPlanQueue;
+        Queue<PartialPlanEntry> lastPartialPlanQueue;
         if (ctx.HasPausedPartialPlan())
         {
             ctx.HasPausedPartialPlan() = false;
@@ -158,7 +155,7 @@ DecompositionStatus Domain::FindPlan(IContext& ctx, TaskQueueType& plan)
             if (status == DecompositionStatus::Rejected || status == DecompositionStatus::Failed)
             {
                 ctx.HasPausedPartialPlan() = true;
-                std::queue<PartialPlanEntry>().swap(ctx.PartialPlanQueue());
+                ctx.PartialPlanQueue().clear();
                 while (lastPartialPlanQueue.size() > 0)
                 {
                     ctx.PartialPlanQueue().push(lastPartialPlanQueue.front());
@@ -197,7 +194,7 @@ DecompositionStatus Domain::FindPlan(IContext& ctx, TaskQueueType& plan)
                 auto& stack = ctx.GetWorldStateChangeStack()[i];
                 if (stack.size() != 0)
                 {
-                    ctx.GetWorldState().SetState(static_cast<WORLDSTATEPROPERTY_ID_TYPE>(i), stack.top().second);
+                    ctx.GetWorldState().SetState(static_cast<WORLDSTATEPROPERTY_ID_TYPE>(i), stack.top().Second());
                     stack = WorldStateStackType();
                 }
             }
@@ -223,8 +220,8 @@ DecompositionStatus Domain::FindPlan(IContext& ctx, TaskQueueType& plan)
 
 bool Domain::TrySetSlotDomain(int slotId, Domain& subDomain)
 {
-    auto slot = _slots.find(slotId);
-    if(slot != _slots.end())
+    auto slot = _slots.Find(slotId);
+    if(slot != _slots.End())
         {
         return slot->second->Set(subDomain.Root());
     }
@@ -232,8 +229,8 @@ bool Domain::TrySetSlotDomain(int slotId, Domain& subDomain)
 }
 void Domain::ClearSlot(int slotId)
 {
-    auto iter = _slots.find(slotId);
-    if(iter != _slots.end())
+    auto iter = _slots.Find(slotId);
+    if(iter != _slots.End())
     {
         iter->second->Clear();
     }

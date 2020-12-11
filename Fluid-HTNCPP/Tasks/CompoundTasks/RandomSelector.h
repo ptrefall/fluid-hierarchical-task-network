@@ -35,7 +35,7 @@ protected:
         int taskIndex = startIndex + std::rand() %(Subtasks().size()  - startIndex);
         auto task = Subtasks()[taskIndex];
 
-        std::vector<int> td;
+        ArrayType<int> td;
         return OnDecomposeTask(ctx, task, taskIndex, td, result);
     }
 
@@ -45,7 +45,7 @@ public:
     {
 		std::srand((unsigned int)std::time(nullptr));
     }
-    RandomSelector(const std::string& name)
+    RandomSelector(const StringType& name)
         : Selector(ITaskDerivedClassName::RandomSelector)
     {
         _Name = name;

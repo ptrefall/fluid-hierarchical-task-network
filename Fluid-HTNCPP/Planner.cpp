@@ -18,7 +18,7 @@ void Planner::Tick(class Domain& domain, IContext& ctx, bool allowImmediateRepla
     // and if so, try to find a new plan.
     if (((_currentTask == nullptr) && (_plan.size() == 0)) || ctx.IsDirty())
     {
-        std::queue<PartialPlanEntry> lastPartialPlanQueue;
+        Queue<PartialPlanEntry> lastPartialPlanQueue;
         bool                         worldStateDirtyReplan = ctx.IsDirty();
 
         if (worldStateDirtyReplan)
@@ -72,7 +72,7 @@ void Planner::Tick(class Domain& domain, IContext& ctx, bool allowImmediateRepla
 
             if (_currentTask != nullptr && _currentTask->IsTypeOf(ITaskDerivedClassName::PrimitiveTask) )
             {
-                auto tPrimitive = std::static_pointer_cast<PrimitiveTask>(_currentTask);
+                auto tPrimitive = StaticCastPtr<PrimitiveTask>(_currentTask);
                 if (OnStopCurrentTask != nullptr)
                 {
                     OnStopCurrentTask(tPrimitive);
@@ -169,7 +169,7 @@ void Planner::Tick(class Domain& domain, IContext& ctx, bool allowImmediateRepla
     {
         if (_currentTask->IsTypeOf(ITaskDerivedClassName::PrimitiveTask))
         {
-			auto task = std::static_pointer_cast<PrimitiveTask>(_currentTask);
+			auto task = StaticCastPtr<PrimitiveTask>(_currentTask);
             if (task->Operator() != nullptr)
             {
                 for (auto condition : task->ExecutingConditions())

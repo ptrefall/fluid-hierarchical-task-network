@@ -35,7 +35,7 @@ public:
         {
             return _WorldState->GetState(state);
         }
-        return _WorldStateChangeStackArray[state].top().second;
+        return _WorldStateChangeStackArray[state].top().Second();
     }
     virtual void SetState(WORLDSTATEPROPERTY_ID_TYPE    state,
                           WORLDSTATEPROPERTY_VALUE_TYPE value,
@@ -57,13 +57,14 @@ public:
         }
         else
         {
-            _WorldStateChangeStackArray[state].push(std::make_pair(e, value));
+            Pair p(e, value);
+            _WorldStateChangeStackArray[state].push(p);
         }
     }
-    virtual std::vector<int> GetWorldStateChangeDepth() override
+    virtual ArrayType<int> GetWorldStateChangeDepth() override
     {
         throw_if_not_intialized();
-        std::vector<int> stackDepth(_WorldStateChangeStackArray.size());
+        ArrayType<int> stackDepth(_WorldStateChangeStackArray.size());
         for (size_t i = 0; i < _WorldStateChangeStackArray.size(); i++)
         {
             stackDepth[i] = (int)_WorldStateChangeStackArray[i].size();
@@ -76,14 +77,14 @@ public:
 
         for (auto& stack : _WorldStateChangeStackArray)
         {
-            while (stack.size() != 0 && stack.top().first != EffectType::Permanent)
+            while (stack.size() != 0 && stack.top().First() != EffectType::Permanent)
             {
                 stack.pop();
             }
         }
     }
 
-    virtual void TrimToStackDepth(std::vector<int>& stackDepth) override
+    virtual void TrimToStackDepth(ArrayType<int>& stackDepth) override
     {
         FHTN_FATAL_EXCEPTION(_ContextState != ContextState::Executing, "Can not trim a context when in execution mode");
 
@@ -105,20 +106,20 @@ public:
     }
     // ========================================================= DECOMPOSITION LOGGING
     void Log(
-        std::string name, std::string description, int depth, std::shared_ptr<ITask> task, ConsoleColor color = ConsoleColor::White)
+        StringType name, StringType description, int depth, SharedPtr<ITask> task, ConsoleColor color = ConsoleColor::White)
     {
         if (_LogDecomposition == false)
             return;
 
         _DecompositionLog.push(DecomposedCompoundTaskEntry{
             {name, description, depth, color},
-            std::static_pointer_cast<CompoundTask>(task),
+            StaticCastPtr<CompoundTask>(task),
         });
     }
-    void Log(std::string                 name,
-             std::string                 description,
+    void Log(StringType                 name,
+             StringType                 description,
              int                         depth,
-             std::shared_ptr<ICondition> condition,
+             SharedPtr<ICondition> condition,
              ConsoleColor                color = ConsoleColor::DarkGreen)
     {
         if (_LogDecomposition == false)
@@ -126,10 +127,10 @@ public:
 
         _DecompositionLog.push(DecomposedConditionEntry{{name, description, depth, color}, condition});
     }
-    void Log(std::string              name,
-             std::string              description,
+    void Log(StringType              name,
+             StringType              description,
              int                      depth,
-             std::shared_ptr<IEffect> effect,
+             SharedPtr<IEffect> effect,
              ConsoleColor             color = ConsoleColor::DarkYellow)
     {
         if (_LogDecomposition == false)

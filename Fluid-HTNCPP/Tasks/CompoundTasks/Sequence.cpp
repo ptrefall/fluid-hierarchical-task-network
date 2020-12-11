@@ -45,7 +45,7 @@ DecompositionStatus Sequence::OnDecompose(IContext& ctx, int startIndex, TaskQue
 
         if (ctx.LogDecomposition())
         {
-            Log(ctx, "Selection::OnDecompose task index "s + std::to_string(taskIndex));
+            Log(ctx, "Selection::OnDecompose task index "s + ToString(taskIndex));
         }
 
         auto status = OnDecomposeTask(ctx, task, taskIndex, oldStackDepth, result);
@@ -65,7 +65,7 @@ DecompositionStatus Sequence::OnDecompose(IContext& ctx, int startIndex, TaskQue
 }
 
 DecompositionStatus Sequence::OnDecomposeTask(
-    IContext& ctx, std::shared_ptr<ITask>& task, int taskIndex, std::vector<int> oldStackDepth, TaskQueueType& result)
+    IContext& ctx, SharedPtr<ITask>& task, int taskIndex, ArrayType<int> oldStackDepth, TaskQueueType& result)
 {
     if (task->IsValid(ctx) == false)
     {
@@ -82,12 +82,12 @@ DecompositionStatus Sequence::OnDecomposeTask(
 
     if (task->IsTypeOf(ITaskDerivedClassName::CompoundTask))
     {
-        auto compoundTask = std::static_pointer_cast<CompoundTask>(task);
+        auto compoundTask = StaticCastPtr<CompoundTask>(task);
         return OnDecomposeCompoundTask(ctx, compoundTask, taskIndex, oldStackDepth, result);
     }
     else if (task->IsTypeOf(ITaskDerivedClassName::PrimitiveTask))
     {
-        auto primitiveTask = std::static_pointer_cast<PrimitiveTask>(task);
+        auto primitiveTask = StaticCastPtr<PrimitiveTask>(task);
 
         if (ctx.LogDecomposition())
         {
@@ -98,17 +98,17 @@ DecompositionStatus Sequence::OnDecomposeTask(
     }
     else if (task->IsTypeOf(ITaskDerivedClassName::PausePlanTask))
     {
-        auto pausePlanTask = std::static_pointer_cast<PausePlanTask>(task);
+        auto pausePlanTask = StaticCastPtr<PausePlanTask>(task);
 
         if (ctx.LogDecomposition())
         {
             Log(ctx,
-                "Sequence.OnDecomposeTask:Return partial plan at index "s + std::to_string(taskIndex) + "!"s,
+                "Sequence.OnDecomposeTask:Return partial plan at index "s + ToString(taskIndex) + "!"s,
                 ConsoleColor::DarkBlue);
         }
 
         PartialPlanEntry pentry;
-        pentry.Task = shared_from_this();
+        pentry.Task = SharedFromThis();
         pentry.TaskIndex = taskIndex + 1;
         ctx.HasPausedPartialPlan() = true;
         ctx.PartialPlanQueue().push(pentry);
@@ -118,7 +118,7 @@ DecompositionStatus Sequence::OnDecomposeTask(
     }
     else if (task->IsTypeOf(ITaskDerivedClassName::Slot))
     {
-        auto slot = std::static_pointer_cast<Slot>(task);
+        auto slot = StaticCastPtr<Slot>(task);
         return OnDecomposeSlot(ctx, slot, taskIndex, oldStackDepth, result);
     }
 
@@ -128,14 +128,14 @@ DecompositionStatus Sequence::OnDecomposeTask(
     if (ctx.LogDecomposition())
     {
         Log(ctx,
-            "Sequence.OnDecomposeTask:"s + std::to_string((int)s),
+            "Sequence.OnDecomposeTask:"s + ToString((int)s),
             s == DecompositionStatus::Succeeded ? ConsoleColor::Green : ConsoleColor::Red);
     }
     return s;
 }
 
 DecompositionStatus Sequence::OnDecomposeCompoundTask(
-    IContext& ctx, std::shared_ptr<CompoundTask>& task, int taskIndex, std::vector<int> oldStackDepth, TaskQueueType& result)
+    IContext& ctx, SharedPtr<CompoundTask>& task, int taskIndex, ArrayType<int> oldStackDepth, TaskQueueType& result)
 {
     TaskQueueType subPlan;
     auto          status = task->Decompose(ctx, 0, subPlan);
@@ -146,7 +146,7 @@ DecompositionStatus Sequence::OnDecomposeCompoundTask(
 
 		if (ctx.LogDecomposition())
         {
-			Log(ctx, "Sequence.OnDecomposeCompoundTask:"s + std::to_string((int)status) + ": Decomposing "s + task->Name() + " was rejected."s, ConsoleColor::Red);
+			Log(ctx, "Sequence.OnDecomposeCompoundTask:"s + ToString((int)status) + ": Decomposing "s + task->Name() + " was rejected."s, ConsoleColor::Red);
         }
         _Plan = TaskQueueType();
         ctx.TrimToStackDepth(oldStackDepth);
@@ -161,7 +161,7 @@ DecompositionStatus Sequence::OnDecomposeCompoundTask(
         if (ctx.LogDecomposition())
         {
             Log(ctx,
-                "Sequence.OnDecomposeCompoundTask:"s + std::to_string((int)status) + ": Decomposing "s + task->Name() + " failed.",
+                "Sequence.OnDecomposeCompoundTask:"s + ToString((int)status) + ": Decomposing "s + task->Name() + " failed.",
                 ConsoleColor::Red);
         }
         _Plan = TaskQueueType();
@@ -186,12 +186,12 @@ DecompositionStatus Sequence::OnDecomposeCompoundTask(
     {
         if (ctx.LogDecomposition())
         {
-            Log(ctx, "Sequence.OnDecomposeCompoundTask:Return partial plan at index "s + std::to_string(taskIndex) + "!"s, ConsoleColor::DarkBlue);
+            Log(ctx, "Sequence.OnDecomposeCompoundTask:Return partial plan at index "s + ToString(taskIndex) + "!"s, ConsoleColor::DarkBlue);
         }
         if (taskIndex < Subtasks().size() - 1)
         {
             PartialPlanEntry pentry;
-            pentry.Task = shared_from_this();
+            pentry.Task = SharedFromThis();
             pentry.TaskIndex = taskIndex + 1;
             ctx.PartialPlanQueue().push(pentry);
         }
@@ -209,7 +209,7 @@ DecompositionStatus Sequence::OnDecomposeCompoundTask(
 }
 
 DecompositionStatus Sequence::OnDecomposeSlot(
-    IContext& ctx, std::shared_ptr<Slot>& task, int taskIndex, std::vector<int> oldStackDepth, TaskQueueType& result)
+    IContext& ctx, SharedPtr<Slot>& task, int taskIndex, ArrayType<int> oldStackDepth, TaskQueueType& result)
 {
     TaskQueueType subPlan;
     auto          status = task->Decompose(ctx, 0, subPlan);
@@ -220,7 +220,7 @@ DecompositionStatus Sequence::OnDecomposeSlot(
 
 		if (ctx.LogDecomposition())
         {
-            Log(ctx, "Sequence.OnDecomposeSlot: "s + std::to_string((int)status) + ": Decomposing "s + task->Name() + " was rejected."s, ConsoleColor::Red);
+            Log(ctx, "Sequence.OnDecomposeSlot: "s + ToString((int)status) + ": Decomposing "s + task->Name() + " was rejected."s, ConsoleColor::Red);
         }
         _Plan = TaskQueueType();
         ctx.TrimToStackDepth(oldStackDepth);
@@ -234,7 +234,7 @@ DecompositionStatus Sequence::OnDecomposeSlot(
     {
 		if (ctx.LogDecomposition())
         {
-            Log(ctx, "Sequence.OnDecomposeSlot: "s + std::to_string((int)status) + ": Decomposing "s + task->Name() + " was failed."s, ConsoleColor::Red);
+            Log(ctx, "Sequence.OnDecomposeSlot: "s + ToString((int)status) + ": Decomposing "s + task->Name() + " was failed."s, ConsoleColor::Red);
         }
         _Plan = TaskQueueType();
         ctx.TrimToStackDepth(oldStackDepth);
@@ -248,7 +248,7 @@ DecompositionStatus Sequence::OnDecomposeSlot(
         if (ctx.LogDecomposition())
         {
             Log(ctx,
-                "Sequence.OnDecomposeSlot:Return partial plan at index "s + std::to_string(taskIndex) + "!"s,
+                "Sequence.OnDecomposeSlot:Return partial plan at index "s + ToString(taskIndex) + "!"s,
                 ConsoleColor::Blue);
         }
         _Plan.push(p);
@@ -259,12 +259,12 @@ DecompositionStatus Sequence::OnDecomposeSlot(
     {
         if (ctx.LogDecomposition())
         {
-            Log(ctx, "Sequence.OnDecomposeSlot:Return partial plan at index "s + std::to_string(taskIndex) + "!"s, ConsoleColor::DarkBlue);
+            Log(ctx, "Sequence.OnDecomposeSlot:Return partial plan at index "s + ToString(taskIndex) + "!"s, ConsoleColor::DarkBlue);
         }
         if (taskIndex < Subtasks().size() - 1)
         {
             PartialPlanEntry pentry;
-            pentry.Task = shared_from_this();
+            pentry.Task = SharedFromThis();
             pentry.TaskIndex = taskIndex + 1;
             ctx.PartialPlanQueue().push(pentry);
         }

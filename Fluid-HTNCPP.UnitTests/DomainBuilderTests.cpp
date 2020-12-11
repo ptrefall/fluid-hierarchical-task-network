@@ -10,7 +10,7 @@ using namespace FluidHTN;
 class DomainBuilder final : public BaseDomainBuilder 
     {
 public:
-    DomainBuilder(std::string n): BaseDomainBuilder(n){}
+    DomainBuilder(StringType n): BaseDomainBuilder(n){}
 };
 namespace FluidHTNCPPUnitTests
 {
@@ -85,7 +85,7 @@ namespace FluidHTNCPPUnitTests
             DomainBuilder builder("Test"s);
 
             // Act
-            std::shared_ptr<CompoundTask> ctask = std::make_shared<Selector>("compound task");
+            SharedPtr<CompoundTask> ctask = MakeSharedPtr<Selector>("compound task");
             builder.AddCompoundTask("compound task",ctask);
 
             // Assert
@@ -123,7 +123,7 @@ namespace FluidHTNCPPUnitTests
             DomainBuilder builder("Test"s);
 
             // Act
-            std::shared_ptr<CompoundTask> ctask = std::make_shared<Sequence>("sequence task");
+            SharedPtr<CompoundTask> ctask = MakeSharedPtr<Sequence>("sequence task");
             builder.AddCompoundTask("compound task",ctask);
 
             // Assert
@@ -389,7 +389,7 @@ namespace FluidHTNCPPUnitTests
             Assert::IsTrue(domain.Root()->Subtasks().size() == 1);
             Assert::IsTrue(domain.Root()->Subtasks()[0]->IsTypeOf(ITaskDerivedClassName::Slot));
 
-            auto slot = std::static_pointer_cast<Slot>(domain.Root()->Subtasks()[0]);
+            auto slot = StaticCastPtr<Slot>(domain.Root()->Subtasks()[0]);
             Assert::IsTrue(slot->Subtask() != nullptr);
             Assert::IsTrue(slot->Subtask()->IsTypeOf(ITaskDerivedClassName::TaskRoot));
             Assert::IsTrue(slot->Subtask()->Name() == "sub-domain"s);

@@ -30,7 +30,7 @@ class DomainTestContext : public BaseContext
     bool _done = false;
 
 public:
-    DomainTestContext() { _WorldState = std::make_shared<DomainTestWorldState>(); }
+    DomainTestContext() { _WorldState = MakeSharedPtr<DomainTestWorldState>(); }
 
     bool& Done() { return _done; }
 

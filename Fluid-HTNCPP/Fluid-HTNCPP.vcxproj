@@ -186,6 +186,7 @@
     <ClInclude Include="Operators\Operator.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Planners\Planner.h" />
+    <ClInclude Include="STLTypes.h" />
     <ClInclude Include="Tasks\CompoundTasks\CompoundTask.h" />
     <ClInclude Include="Tasks\CompoundTasks\DecompositionStatus.h" />
     <ClInclude Include="Tasks\CompoundTasks\PausePlanTask.h" />

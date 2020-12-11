@@ -3,13 +3,13 @@
 
 namespace FluidHTN
 {
-class ICondition : public std::enable_shared_from_this<ICondition>
+class ICondition : public EnableSharedFromThis<ICondition>
 {
 protected:
-    std::string _Name;
+    StringType _Name;
 
 public:
-    std::string& Name() { return _Name; }
+    StringType& Name() { return _Name; }
     virtual bool IsValid(class IContext&) = 0;
 };
 
@@ -21,7 +21,7 @@ class FuncCondition : public ICondition
     FunctionConditionType _func;
 
 public:
-    FuncCondition(const std::string& name, FunctionConditionType func)
+    FuncCondition(const StringType& name, FunctionConditionType func)
         : _func(func)
     {
         _Name = name;
@@ -36,9 +36,9 @@ public:
         if (ctx.LogDecomposition())
         {
             ctx.Log(_Name,
-                    "FuncCondition.IsValid:"s + std::to_string(result),
+                    "FuncCondition.IsValid:"s + ToString(result),
                     ctx.CurrentDecompositionDepth() + 1,
-                    shared_from_this());
+                    SharedFromThis());
         }
 
         return result;

@@ -51,8 +51,8 @@ namespace FluidHTNCPPUnitTests
             Domain      domain("Test"s);
             Planner     planner;
             ctx.Init();
-            std::shared_ptr<CompoundTask> task1 = std::make_shared<Selector>("Test"s);
-            std::shared_ptr<ITask> task2 = std::make_shared<PrimitiveTask>("Sub-task");
+            SharedPtr<CompoundTask> task1 = MakeSharedPtr<Selector>("Test"s);
+            SharedPtr<ITask> task2 = MakeSharedPtr<PrimitiveTask>("Sub-task");
 
             domain.Add(domain.Root(), task1);
             domain.Add(task1, task2);
@@ -71,9 +71,9 @@ namespace FluidHTNCPPUnitTests
             Planner     planner;
             ctx.Init();
 
-            std::shared_ptr<CompoundTask>  task1 = std::make_shared<Selector>("Test"s);
-            std::shared_ptr<PrimitiveTask> task2 = std::make_shared<PrimitiveTask>("Sub-task");
-            std::shared_ptr<IOperator>    f = std::make_shared<FuncOperator>(nullptr);
+            SharedPtr<CompoundTask>  task1 = MakeSharedPtr<Selector>("Test"s);
+            SharedPtr<PrimitiveTask> task2 = MakeSharedPtr<PrimitiveTask>("Sub-task");
+            SharedPtr<IOperator>    f = MakeSharedPtr<FuncOperator>(nullptr);
 
             task2->SetOperator(f);
             domain.Add(domain.Root(), task1);
@@ -91,9 +91,9 @@ namespace FluidHTNCPPUnitTests
             Domain      domain("Test"s);
             Planner     planner;
             ctx.Init();
-            std::shared_ptr<CompoundTask>  task1 = std::make_shared<Selector>("Test"s);
-            std::shared_ptr<PrimitiveTask> task2 = std::make_shared<PrimitiveTask>("Sub-task");
-            std::shared_ptr<IOperator>     f = std::make_shared<FuncOperator>([](IContext& ) { return TaskStatus::Success; });
+            SharedPtr<CompoundTask>  task1 = MakeSharedPtr<Selector>("Test"s);
+            SharedPtr<PrimitiveTask> task2 = MakeSharedPtr<PrimitiveTask>("Sub-task");
+            SharedPtr<IOperator>     f = MakeSharedPtr<FuncOperator>([](IContext& ) { return TaskStatus::Success; });
             task2->SetOperator(f);
             domain.Add(domain.Root(), task1);
             domain.Add(task1, task2);
@@ -111,9 +111,9 @@ namespace FluidHTNCPPUnitTests
             Domain      domain("Test"s);
             Planner     planner;
             ctx.Init();
-            std::shared_ptr<CompoundTask>  task1 = std::make_shared<Selector>("Test"s);
-            std::shared_ptr<PrimitiveTask> task2 = std::make_shared<PrimitiveTask>("Sub-task");
-            std::shared_ptr<IOperator>     f = std::make_shared<FuncOperator>([](IContext& ) { return TaskStatus::Continue; });
+            SharedPtr<CompoundTask>  task1 = MakeSharedPtr<Selector>("Test"s);
+            SharedPtr<PrimitiveTask> task2 = MakeSharedPtr<PrimitiveTask>("Sub-task");
+            SharedPtr<IOperator>     f = MakeSharedPtr<FuncOperator>([](IContext& ) { return TaskStatus::Continue; });
 
             task2->SetOperator(f);
             domain.Add(domain.Root(), task1);
@@ -134,9 +134,9 @@ namespace FluidHTNCPPUnitTests
             bool        test = false;
             ctx.Init();
             planner.OnNewPlan = [&](TaskQueueType p) { test = (p.size() == 1); };
-            std::shared_ptr<CompoundTask>  task1 = std::make_shared<Selector>("Test"s);
-            std::shared_ptr<PrimitiveTask> task2 = std::make_shared<PrimitiveTask>("Sub-task");
-            std::shared_ptr<IOperator>     f = std::make_shared<FuncOperator>([](IContext&) { return TaskStatus::Continue; });
+            SharedPtr<CompoundTask>  task1 = MakeSharedPtr<Selector>("Test"s);
+            SharedPtr<PrimitiveTask> task2 = MakeSharedPtr<PrimitiveTask>("Sub-task");
+            SharedPtr<IOperator>     f = MakeSharedPtr<FuncOperator>([](IContext&) { return TaskStatus::Continue; });
             task2->SetOperator(f);
             domain.Add(domain.Root(), task1);
             domain.Add(task1, task2);
@@ -152,21 +152,21 @@ namespace FluidHTNCPPUnitTests
             DomainTestContext ctx;
             Planner     planner;
             ctx.Init();
-            planner.OnReplacePlan = [&](TaskQueueType op, std::shared_ptr<ITask> ct, TaskQueueType p) {
+            planner.OnReplacePlan = [&](TaskQueueType op, SharedPtr<ITask> ct, TaskQueueType p) {
                 test = ((op.size() == 0) && (ct != nullptr) && (p.size() == 1));
             };
-            std::shared_ptr<CompoundTask>  task1 = std::make_shared<Selector>("Test1"s);
-            std::shared_ptr<CompoundTask>  task2 = std::make_shared<Selector>("Test2"s);
-            std::shared_ptr<PrimitiveTask> task3 = std::make_shared<PrimitiveTask>("Sub-task1");
+            SharedPtr<CompoundTask>  task1 = MakeSharedPtr<Selector>("Test1"s);
+            SharedPtr<CompoundTask>  task2 = MakeSharedPtr<Selector>("Test2"s);
+            SharedPtr<PrimitiveTask> task3 = MakeSharedPtr<PrimitiveTask>("Sub-task1");
 
-            std::shared_ptr<ICondition> c = std::make_shared<FuncCondition>("TestCondition"s, [](IContext& ctx) {
+            SharedPtr<ICondition> c = MakeSharedPtr<FuncCondition>("TestCondition"s, [](IContext& ctx) {
                 return (static_cast<DomainTestContext&>(ctx).Done() == false);
             });
             task3->AddCondition(c);
-            std::shared_ptr<PrimitiveTask> task4 = std::make_shared<PrimitiveTask>("Sub-task2");
+            SharedPtr<PrimitiveTask> task4 = MakeSharedPtr<PrimitiveTask>("Sub-task2");
 
-            std::shared_ptr<IOperator> f1 = std::make_shared<FuncOperator>([](IContext&) { return TaskStatus::Continue; });
-            std::shared_ptr<IOperator> f2 = std::make_shared<FuncOperator>([](IContext&) { return TaskStatus::Continue; });
+            SharedPtr<IOperator> f1 = MakeSharedPtr<FuncOperator>([](IContext&) { return TaskStatus::Continue; });
+            SharedPtr<IOperator> f2 = MakeSharedPtr<FuncOperator>([](IContext&) { return TaskStatus::Continue; });
 
             task3->SetOperator(f1);
             task4->SetOperator(f2);
@@ -191,10 +191,10 @@ namespace FluidHTNCPPUnitTests
             DomainTestContext ctx;
             Planner     planner;
             ctx.Init();
-            planner.OnNewTask = [&](std::shared_ptr<ITask>&t) { test = (t->Name() == "Sub-task"); };
-            std::shared_ptr<CompoundTask>  task1 = std::make_shared<Selector>("Test1"s);
-            std::shared_ptr<PrimitiveTask> task2 = std::make_shared<PrimitiveTask>("Sub-task");
-            std::shared_ptr<IOperator> f = std::make_shared<FuncOperator>([](IContext&) { return TaskStatus::Continue; });
+            planner.OnNewTask = [&](SharedPtr<ITask>&t) { test = (t->Name() == "Sub-task"); };
+            SharedPtr<CompoundTask>  task1 = MakeSharedPtr<Selector>("Test1"s);
+            SharedPtr<PrimitiveTask> task2 = MakeSharedPtr<PrimitiveTask>("Sub-task");
+            SharedPtr<IOperator> f = MakeSharedPtr<FuncOperator>([](IContext&) { return TaskStatus::Continue; });
 
             task2->SetOperator(f);
             domain.Add(domain.Root(), task1);
@@ -210,32 +210,32 @@ namespace FluidHTNCPPUnitTests
             DomainTestContext ctx;
             Planner     planner;
             ctx.Init();
-            planner.OnNewTaskConditionFailed = [&](std::shared_ptr<ITask>& t, std::shared_ptr<ICondition>&) {
+            planner.OnNewTaskConditionFailed = [&](SharedPtr<ITask>& t, SharedPtr<ICondition>&) {
                 test = (t->Name() == "Sub-task1"s);
             };
-            std::shared_ptr<CompoundTask>  task1 = std::make_shared<Selector>("Test1"s);
-            std::shared_ptr<CompoundTask>  task2 = std::make_shared<Selector>("Test2"s);
-            std::shared_ptr<PrimitiveTask> task3 = std::make_shared<PrimitiveTask>("Sub-task1");
-            std::shared_ptr<ICondition>    c = std::make_shared<FuncCondition>("TestCondition"s, [](IContext& ctx) {
+            SharedPtr<CompoundTask>  task1 = MakeSharedPtr<Selector>("Test1"s);
+            SharedPtr<CompoundTask>  task2 = MakeSharedPtr<Selector>("Test2"s);
+            SharedPtr<PrimitiveTask> task3 = MakeSharedPtr<PrimitiveTask>("Sub-task1");
+            SharedPtr<ICondition>    c = MakeSharedPtr<FuncCondition>("TestCondition"s, [](IContext& ctx) {
                 return (static_cast<DomainTestContext&>(ctx).Done() == false);
             });
             task3->AddCondition(c);
 
-            std::shared_ptr<PrimitiveTask> task4 = std::make_shared<PrimitiveTask>("Sub-task2");
+            SharedPtr<PrimitiveTask> task4 = MakeSharedPtr<PrimitiveTask>("Sub-task2");
 
-            std::shared_ptr<IOperator> f = std::make_shared<FuncOperator>([](IContext&) { return TaskStatus::Success; });
+            SharedPtr<IOperator> f = MakeSharedPtr<FuncOperator>([](IContext&) { return TaskStatus::Success; });
             task3->SetOperator(f);
             // Note that one should not use AddEffect on types that's not part of WorldState unless you
             // know what you're doing. Outside of the WorldState, we don't get automatic trimming of
             // state change. This method is used here only to invoke the desired callback, not because
             // its correct practice.
-            std::shared_ptr<IEffect> effect =
-                std::make_shared<ActionEffect>("TestEffect"s, EffectType::PlanAndExecute, [](IContext& context, EffectType ) {
+            SharedPtr<IEffect> effect =
+                MakeSharedPtr<ActionEffect>("TestEffect"s, EffectType::PlanAndExecute, [](IContext& context, EffectType ) {
                     static_cast<DomainTestContext&>(context).Done() = true;
                 });
             task3->AddEffect(effect);
 
-            std::shared_ptr<IOperator> f2 = std::make_shared<FuncOperator>([](IContext&) { return TaskStatus::Continue; });
+            SharedPtr<IOperator> f2 = MakeSharedPtr<FuncOperator>([](IContext&) { return TaskStatus::Continue; });
             task4->SetOperator(f2);
             domain.Add(domain.Root(), task1);
             domain.Add(domain.Root(), task2);
@@ -258,22 +258,22 @@ namespace FluidHTNCPPUnitTests
             DomainTestContext ctx;
             Planner     planner;
             ctx.Init();
-            planner.OnStopCurrentTask = [&](std::shared_ptr<PrimitiveTask>& t) { test = (t->Name() == "Sub-task2"); };
+            planner.OnStopCurrentTask = [&](SharedPtr<PrimitiveTask>& t) { test = (t->Name() == "Sub-task2"); };
 
-            std::shared_ptr<CompoundTask> task1 = std::make_shared<Selector>("Test1"s);
-            std::shared_ptr<CompoundTask> task2 = std::make_shared<Selector>("Test2"s);
+            SharedPtr<CompoundTask> task1 = MakeSharedPtr<Selector>("Test1"s);
+            SharedPtr<CompoundTask> task2 = MakeSharedPtr<Selector>("Test2"s);
 
-            std::shared_ptr<PrimitiveTask> task3 = std::make_shared<PrimitiveTask>("Sub-task1");
-            std::shared_ptr<ICondition>    c = std::make_shared<FuncCondition>("TestCondition"s, [](IContext& ctx) {
+            SharedPtr<PrimitiveTask> task3 = MakeSharedPtr<PrimitiveTask>("Sub-task1");
+            SharedPtr<ICondition>    c = MakeSharedPtr<FuncCondition>("TestCondition"s, [](IContext& ctx) {
                 return (static_cast<DomainTestContext&>(ctx).Done() == false);
             });
             task3->AddCondition(c);
 
-            std::shared_ptr<PrimitiveTask> task4 = std::make_shared<PrimitiveTask>("Sub-task2");
+            SharedPtr<PrimitiveTask> task4 = MakeSharedPtr<PrimitiveTask>("Sub-task2");
 
-            std::shared_ptr<IOperator> f1 = std::make_shared<FuncOperator>([](IContext&) { return TaskStatus::Continue; });
+            SharedPtr<IOperator> f1 = MakeSharedPtr<FuncOperator>([](IContext&) { return TaskStatus::Continue; });
             task3->SetOperator(f1);
-            std::shared_ptr<IOperator> f2 = std::make_shared<FuncOperator>([](IContext&) { return TaskStatus::Continue; });
+            SharedPtr<IOperator> f2 = MakeSharedPtr<FuncOperator>([](IContext&) { return TaskStatus::Continue; });
             task4->SetOperator(f2);
 
             domain.Add(domain.Root(), task1);
@@ -297,22 +297,22 @@ namespace FluidHTNCPPUnitTests
             DomainTestContext ctx;
             Planner     planner;
             ctx.Init();
-            planner.OnCurrentTaskCompletedSuccessfully = [&](std::shared_ptr<PrimitiveTask>& t) {
+            planner.OnCurrentTaskCompletedSuccessfully = [&](SharedPtr<PrimitiveTask>& t) {
                 test = (t->Name() == "Sub-task1"s);
             };
-            std::shared_ptr<CompoundTask> task1 = std::make_shared<Selector>("Test1"s);
-            std::shared_ptr<CompoundTask> task2 = std::make_shared<Selector>("Test2"s);
+            SharedPtr<CompoundTask> task1 = MakeSharedPtr<Selector>("Test1"s);
+            SharedPtr<CompoundTask> task2 = MakeSharedPtr<Selector>("Test2"s);
 
-            std::shared_ptr<PrimitiveTask> task3 = std::make_shared<PrimitiveTask>("Sub-task1");
-            std::shared_ptr<ICondition>    c = std::make_shared<FuncCondition>("TestCondition"s, [](IContext& ctx) {
+            SharedPtr<PrimitiveTask> task3 = MakeSharedPtr<PrimitiveTask>("Sub-task1");
+            SharedPtr<ICondition>    c = MakeSharedPtr<FuncCondition>("TestCondition"s, [](IContext& ctx) {
                 return (static_cast<DomainTestContext&>(ctx).Done() == false);
             });
             task3->AddCondition(c);
-            std::shared_ptr<PrimitiveTask> task4 = std::make_shared<PrimitiveTask>("Sub-task2");
+            SharedPtr<PrimitiveTask> task4 = MakeSharedPtr<PrimitiveTask>("Sub-task2");
 
-            std::shared_ptr<IOperator> f1 = std::make_shared<FuncOperator>([](IContext&) { return TaskStatus::Success; });
+            SharedPtr<IOperator> f1 = MakeSharedPtr<FuncOperator>([](IContext&) { return TaskStatus::Success; });
             task3->SetOperator(f1);
-            std::shared_ptr<IOperator> f2 = std::make_shared<FuncOperator>([](IContext&) { return TaskStatus::Continue; });
+            SharedPtr<IOperator> f2 = MakeSharedPtr<FuncOperator>([](IContext&) { return TaskStatus::Continue; });
             task4->SetOperator(f2);
 
             domain.Add(domain.Root(), task1);
@@ -337,13 +337,13 @@ namespace FluidHTNCPPUnitTests
             DomainTestContext ctx;
             Planner           planner;
             ctx.Init();
-            planner.OnApplyEffect = [&](std::shared_ptr<IEffect>& e) { test = (e->Name() == "TestEffect"s); };
+            planner.OnApplyEffect = [&](SharedPtr<IEffect>& e) { test = (e->Name() == "TestEffect"s); };
 
-            std::shared_ptr<CompoundTask> task1 = std::make_shared<Selector>("Test1"s);
-            std::shared_ptr<CompoundTask> task2 = std::make_shared<Selector>("Test2"s);
+            SharedPtr<CompoundTask> task1 = MakeSharedPtr<Selector>("Test1"s);
+            SharedPtr<CompoundTask> task2 = MakeSharedPtr<Selector>("Test2"s);
 
-            std::shared_ptr<PrimitiveTask> task3 = std::make_shared<PrimitiveTask>("Sub-task1");
-            std::shared_ptr<ICondition>    c = std::make_shared<FuncCondition>("TestCondition"s, [](IContext& context) {
+            SharedPtr<PrimitiveTask> task3 = MakeSharedPtr<PrimitiveTask>("Sub-task1");
+            SharedPtr<ICondition>    c = MakeSharedPtr<FuncCondition>("TestCondition"s, [](IContext& context) {
                 WORLDSTATEPROPERTY_VALUE_TYPE trudat = 1;
                 return static_cast<DomainTestContext&>(context).HasState(
                     static_cast<WORLDSTATEPROPERTY_ID_TYPE>(DomainTestState::HasA),
@@ -352,19 +352,19 @@ namespace FluidHTNCPPUnitTests
 
             task3->AddCondition(c);
 
-            std::shared_ptr<PrimitiveTask> task4 = std::make_shared<PrimitiveTask>("Sub-task2");
+            SharedPtr<PrimitiveTask> task4 = MakeSharedPtr<PrimitiveTask>("Sub-task2");
 
-            std::shared_ptr<IOperator> f1 = std::make_shared<FuncOperator>([](IContext&) { return TaskStatus::Success; });
+            SharedPtr<IOperator> f1 = MakeSharedPtr<FuncOperator>([](IContext&) { return TaskStatus::Success; });
             task3->SetOperator(f1);
 
-            std::shared_ptr<IEffect> eff =
-                std::make_shared<ActionEffect>("TestEffect"s, EffectType::PlanAndExecute, [](IContext& context, EffectType type) {
+            SharedPtr<IEffect> eff =
+                MakeSharedPtr<ActionEffect>("TestEffect"s, EffectType::PlanAndExecute, [](IContext& context, EffectType type) {
                     context.SetState(static_cast<WORLDSTATEPROPERTY_ID_TYPE>(DomainTestState::HasA), true, true, type);
                 });
 
             task3->AddEffect(eff);
 
-            std::shared_ptr<IOperator> f2 = std::make_shared<FuncOperator>([](IContext&) { return TaskStatus::Continue; });
+            SharedPtr<IOperator> f2 = MakeSharedPtr<FuncOperator>([](IContext&) { return TaskStatus::Continue; });
             task4->SetOperator(f2);
 
             domain.Add(domain.Root(), task1);
@@ -390,11 +390,11 @@ namespace FluidHTNCPPUnitTests
             DomainTestContext ctx;
             Planner           planner;
             ctx.Init();
-            planner.OnCurrentTaskFailed = [&](std::shared_ptr<PrimitiveTask>& t) { test = (t->Name() == "Sub-task"s); };
-            std::shared_ptr<CompoundTask> task1 = std::make_shared<Selector>("Test1"s);
+            planner.OnCurrentTaskFailed = [&](SharedPtr<PrimitiveTask>& t) { test = (t->Name() == "Sub-task"s); };
+            SharedPtr<CompoundTask> task1 = MakeSharedPtr<Selector>("Test1"s);
 
-            std::shared_ptr<PrimitiveTask> task2 = std::make_shared<PrimitiveTask>("Sub-task");
-            std::shared_ptr<IOperator>     f2 = std::make_shared<FuncOperator>([](IContext&) { return TaskStatus::Failure; });
+            SharedPtr<PrimitiveTask> task2 = MakeSharedPtr<PrimitiveTask>("Sub-task");
+            SharedPtr<IOperator>     f2 = MakeSharedPtr<FuncOperator>([](IContext&) { return TaskStatus::Failure; });
 
             task2->SetOperator(f2);
 
@@ -413,11 +413,11 @@ namespace FluidHTNCPPUnitTests
             DomainTestContext ctx;
             Planner           planner;
             ctx.Init();
-            planner.OnCurrentTaskContinues = [&](std::shared_ptr<PrimitiveTask>& t) { test = (t->Name() == "Sub-task"s); };
-            std::shared_ptr<CompoundTask> task1 = std::make_shared<Selector>("Test1"s);
+            planner.OnCurrentTaskContinues = [&](SharedPtr<PrimitiveTask>& t) { test = (t->Name() == "Sub-task"s); };
+            SharedPtr<CompoundTask> task1 = MakeSharedPtr<Selector>("Test1"s);
 
-            std::shared_ptr<PrimitiveTask> task2 = std::make_shared<PrimitiveTask>("Sub-task");
-            std::shared_ptr<IOperator>     f2 = std::make_shared<FuncOperator>([](IContext&) { return TaskStatus::Continue; });
+            SharedPtr<PrimitiveTask> task2 = MakeSharedPtr<PrimitiveTask>("Sub-task");
+            SharedPtr<IOperator>     f2 = MakeSharedPtr<FuncOperator>([](IContext&) { return TaskStatus::Continue; });
 
             task2->SetOperator(f2);
 
@@ -436,16 +436,16 @@ namespace FluidHTNCPPUnitTests
             DomainTestContext ctx;
             Planner           planner;
             ctx.Init();
-            planner.OnCurrentTaskExecutingConditionFailed = [&](std::shared_ptr<PrimitiveTask>& t, std::shared_ptr<ICondition>& c) {
+            planner.OnCurrentTaskExecutingConditionFailed = [&](SharedPtr<PrimitiveTask>& t, SharedPtr<ICondition>& c) {
                 test = ((t->Name() == "Sub-task"s) && (c->Name() == "TestCondition"s));
             };
-            std::shared_ptr<CompoundTask> task1 = std::make_shared<Selector>("Test1"s);
+            SharedPtr<CompoundTask> task1 = MakeSharedPtr<Selector>("Test1"s);
 
-            std::shared_ptr<PrimitiveTask> task2 = std::make_shared<PrimitiveTask>("Sub-task");
-            std::shared_ptr<IOperator>     f2 = std::make_shared<FuncOperator>([](IContext&) { return TaskStatus::Continue; });
+            SharedPtr<PrimitiveTask> task2 = MakeSharedPtr<PrimitiveTask>("Sub-task");
+            SharedPtr<IOperator>     f2 = MakeSharedPtr<FuncOperator>([](IContext&) { return TaskStatus::Continue; });
             task2->SetOperator(f2);
 
-            std::shared_ptr<ICondition> c = std::make_shared<FuncCondition>("TestCondition"s, [](IContext& context) {
+            SharedPtr<ICondition> c = MakeSharedPtr<FuncCondition>("TestCondition"s, [](IContext& context) {
                 return static_cast<DomainTestContext&>(context).Done();
             });
 

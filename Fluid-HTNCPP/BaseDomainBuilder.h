@@ -16,22 +16,19 @@ namespace FluidHTN
 class BaseDomainBuilder
 {
 protected:
-    std::shared_ptr<Domain>             _domain;
-    std::vector<std::shared_ptr<ITask>> _pointers;
+    SharedPtr<Domain>             _domain;
+    ArrayType<SharedPtr<ITask>> _pointers;
     bool                                _PointersValid = true;
 
 public:
-    BaseDomainBuilder(const std::string& domainName)
+    BaseDomainBuilder(const StringType& domainName)
     {
-        _domain = std::make_shared<Domain>(domainName);
+        _domain = MakeSharedPtr<Domain>(domainName);
         _pointers.push_back(_domain->Root());
     }
-    const std::shared_ptr<ITask> Pointer()
+    const SharedPtr<ITask> Pointer()
     {
-        if (!_PointersValid)
-        {
-            throw std::exception("Pointers are null");
-        }
+        FHTN_FATAL_EXCEPTION(_PointersValid, "Pointers are null");
         if (_pointers.size() == 0)
         {
             return nullptr;
@@ -53,14 +50,14 @@ public:
     /// <typeparam name="P">The type of compound task</typeparam>
     /// <param name="name">The name given to the task, mainly for debug/display purposes</param>
     /// <returns></returns>
-    bool AddCompoundTask(std::string name, std::shared_ptr<CompoundTask> task)
+    bool AddCompoundTask(StringType name, SharedPtr<CompoundTask> task)
     {
         task->Name() = name;
 
         FHTN_FATAL_EXCEPTION(Pointer()->IsTypeOf(ITaskDerivedClassName::CompoundTask), "Pointer() is not compound task");
 
-        auto baseTask = std::static_pointer_cast<ITask>(task);
-        auto compoundTask = std::static_pointer_cast<CompoundTask>(Pointer());
+        auto baseTask = StaticCastPtr<ITask>(task);
+        auto compoundTask = StaticCastPtr<CompoundTask>(Pointer());
 
         if (_domain->Add(compoundTask, baseTask))
         {
@@ -71,9 +68,9 @@ public:
         return false;
     }
     template<typename T>
-    bool AddCompoundTask(std::string name)
+    bool AddCompoundTask(StringType name)
 	{
-        std::shared_ptr<CompoundTask> ptr = std::make_shared<T>(name);
+        SharedPtr<CompoundTask> ptr = MakeSharedPtr<T>(name);
         return AddCompoundTask(name, ptr);
     };
     /// <summary>
@@ -85,15 +82,15 @@ public:
     /// <typeparam name="P">The type of primitive task</typeparam>
     /// <param name="name">The name given to the task, mainly for debug/display purposes</param>
     /// <returns></returns>
-    bool AddPrimitiveTask(const std::string& name)
+    bool AddPrimitiveTask(const StringType& name)
     {
         FHTN_FATAL_EXCEPTION(Pointer()->IsTypeOf( ITaskDerivedClassName::CompoundTask), "Pointer() is not compound task");
 
-        auto parent = std::make_shared<PrimitiveTask>();
+        auto parent = MakeSharedPtr<PrimitiveTask>();
         parent->Name() = name;
 
-        auto baseTask = std::static_pointer_cast<ITask>(parent);
-        auto compoundTask = std::static_pointer_cast<CompoundTask>(Pointer());
+        auto baseTask = StaticCastPtr<ITask>(parent);
+        auto compoundTask = StaticCastPtr<CompoundTask>(Pointer());
 
         if (_domain->Add(compoundTask, baseTask))
         {
@@ -109,77 +106,77 @@ public:
                              "Pointer is not a Sequence. Maybe you tried to Pause Plan a "
                              "Selector, or forget an End() after a Primitive Task Action was defined?");
 
-        auto parent = std::make_shared<PausePlanTask>();
+        auto parent = MakeSharedPtr<PausePlanTask>();
         parent->Name() = "Pause Plan"s;
-        auto baseTask = std::static_pointer_cast<ITask>(parent);
-        auto compoundTask = std::static_pointer_cast<CompoundTask>(Pointer());
+        auto baseTask = StaticCastPtr<ITask>(parent);
+        auto compoundTask = StaticCastPtr<CompoundTask>(Pointer());
         return _domain->Add(compoundTask, baseTask);
     }
-    bool AddSequence(const std::string& name)
+    bool AddSequence(const StringType& name)
     {
         return AddCompoundTask<Sequence>(name);
     }
-    bool AddAction(const std::string& name) { return AddPrimitiveTask(name); }
-    bool AddSelector(const std::string& name)
+    bool AddAction(const StringType& name) { return AddPrimitiveTask(name); }
+    bool AddSelector(const StringType& name)
     {
         return AddCompoundTask<Selector>(name);
     }
-    bool AddCondition(const std::string& name, FunctionConditionType func)
+    bool AddCondition(const StringType& name, FunctionConditionType func)
     {
-        auto condition = std::make_shared<FuncCondition>(name, func);
-        auto base = std::static_pointer_cast<ICondition>(condition);
+        auto condition = MakeSharedPtr<FuncCondition>(name, func);
+        auto base = StaticCastPtr<ICondition>(condition);
         return Pointer()->AddCondition(base);
     }
-    bool AddExecutingCondition(const std::string& name, FunctionConditionType func)
+    bool AddExecutingCondition(const StringType& name, FunctionConditionType func)
     {
         FHTN_FATAL_EXCEPTION(Pointer()->IsTypeOf(ITaskDerivedClassName::PrimitiveTask),
                              "Tried to add an Executing Condition, but the Pointer is not a Primitive Task!");
-        auto condition = std::make_shared<FuncCondition>(name, func);
-        auto base = std::static_pointer_cast<ICondition>(condition);
-        auto task = std::static_pointer_cast<PrimitiveTask>(Pointer());
+        auto condition = MakeSharedPtr<FuncCondition>(name, func);
+        auto base = StaticCastPtr<ICondition>(condition);
+        auto task = StaticCastPtr<PrimitiveTask>(Pointer());
         return task->AddExecutingCondition(base);
     }
     bool AddOperator(FuncOperatorType action, StopOperatorType stopAction= nullptr)
     {
         FHTN_FATAL_EXCEPTION(Pointer()->IsTypeOf(ITaskDerivedClassName::PrimitiveTask),
                              "Tried to add Operator, but the Pointer is not a Primitive Task!");
-        auto op = std::make_shared<FuncOperator>(action, stopAction);
-        auto base = std::static_pointer_cast<IOperator>(op);
-        auto task = std::static_pointer_cast<PrimitiveTask>(Pointer());
+        auto op = MakeSharedPtr<FuncOperator>(action, stopAction);
+        auto base = StaticCastPtr<IOperator>(op);
+        auto task = StaticCastPtr<PrimitiveTask>(Pointer());
         return task->SetOperator(base);
     }
-    bool AddEffect(const std::string& name, EffectType effectType, ActionType action)
+    bool AddEffect(const StringType& name, EffectType effectType, ActionType action)
     {
         FHTN_FATAL_EXCEPTION(Pointer()->IsTypeOf(ITaskDerivedClassName::PrimitiveTask),
                              "Tried to add an Effect, but the Pointer is not a Primitive Task!");
-        auto effect = std::make_shared<ActionEffect>(name, effectType, action);
-        auto base = std::static_pointer_cast<IEffect>(effect);
-        auto task = std::static_pointer_cast<PrimitiveTask>(Pointer());
+        auto effect = MakeSharedPtr<ActionEffect>(name, effectType, action);
+        auto base = StaticCastPtr<IEffect>(effect);
+        auto task = StaticCastPtr<PrimitiveTask>(Pointer());
         return task->AddEffect(base);
     }
 
     bool AddSlot(int slotId)
     {
         FHTN_FATAL_EXCEPTION(Pointer()->IsTypeOf(ITaskDerivedClassName::CompoundTask), "Pointer() is not compound task");
-        auto slot = std::make_shared<Slot>();
-        auto compoundTask = std::static_pointer_cast<CompoundTask>(Pointer());
+        auto slot = MakeSharedPtr<Slot>();
+        auto compoundTask = StaticCastPtr<CompoundTask>(Pointer());
         slot->SlotId(slotId);
         return _domain->Add(compoundTask, slot);
     }
-    bool AddRandomSelector(const std::string& name) { return AddCompoundTask<RandomSelector>(name); }
+    bool AddRandomSelector(const StringType& name) { return AddCompoundTask<RandomSelector>(name); }
     void End() { _pointers.pop_back(); }
     bool Splice(Domain& domain)
     {
         FHTN_FATAL_EXCEPTION(Pointer()->IsTypeOf(ITaskDerivedClassName::CompoundTask),
                              "Pointer is not a compound task type. Did you forget an End()?");
 
-        auto compoundTask = std::static_pointer_cast<CompoundTask>(Pointer());
+        auto compoundTask = StaticCastPtr<CompoundTask>(Pointer());
         _domain->Add(compoundTask, domain.Root());
 
         return true;
     }
     bool    PausePlan() { return AddPausePlanTask(); }
-    std::shared_ptr<Domain> Build()
+    SharedPtr<Domain> Build()
     {
         FHTN_FATAL_EXCEPTION(Pointer() == _domain->Root(), "Domain definition lacks one or more End() statements");
         _pointers.clear();

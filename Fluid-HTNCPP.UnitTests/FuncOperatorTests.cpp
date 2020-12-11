@@ -22,21 +22,21 @@ TEST_CLASS(FuncOperatorTests)
     TEST_METHOD(UpdateDoesNothingWithoutFunctionPtr_ExpectedBehavior)
     {
         TestContext ctx;
-		auto e = std::make_shared<FuncOperator>(nullptr, nullptr);
+		auto e = MakeSharedPtr<FuncOperator>(nullptr, nullptr);
 		e->Update(ctx);
 	} 
 
 TEST_METHOD(StopDoesNothingWithoutFunctionPtr_ExpectedBehavior)
 {
     TestContext ctx;
-    auto        e = std::make_shared<FuncOperator>(nullptr, nullptr);
+    auto        e = MakeSharedPtr<FuncOperator>(nullptr, nullptr);
 
     e->Stop(ctx);
 }
 TEST_METHOD(UpdateReturnsStatusInternalFunctionPtr_ExpectedBehavior)
 {
     TestContext ctx;
-    auto        e = std::make_shared<FuncOperator>([=](IContext&) { return TaskStatus::Success; }, nullptr);
+    auto        e = MakeSharedPtr<FuncOperator>([=](IContext&) { return TaskStatus::Success; }, nullptr);
 
     auto status = e->Update(ctx);
 
@@ -46,7 +46,7 @@ TEST_METHOD(UpdateReturnsStatusInternalFunctionPtr_ExpectedBehavior)
 TEST_METHOD(StopCallsInternalFunctionPtr_ExpectedBehavior)
 {
     TestContext ctx;
-    auto e = std::make_shared<FuncOperator>(nullptr, [](IContext&ctx ) { static_cast<TestContext&>(ctx).Done() = true; });
+    auto e = MakeSharedPtr<FuncOperator>(nullptr, [](IContext&ctx ) { static_cast<TestContext&>(ctx).Done() = true; });
 
     e->Stop(ctx);
 

@@ -9,9 +9,9 @@ namespace FluidHTN
 class PausePlanTask : public ITask
 {
 protected:
-    virtual void Log(IContext& ctx, std::string description)
+    virtual void Log(IContext& ctx, StringType description)
     {
-        ctx.Log(_Name, description, ctx.CurrentDecompositionDepth(), shared_from_this(), ConsoleColor::Green);
+        ctx.Log(_Name, description, ctx.CurrentDecompositionDepth(), SharedFromThis(), ConsoleColor::Green);
     }
 
 public:
@@ -21,12 +21,12 @@ public:
     }
     virtual DecompositionStatus OnIsValidFailed(IContext&) { return DecompositionStatus::Failed; }
 
-    virtual bool AddCondition(std::shared_ptr<ICondition>&) override
+    virtual bool AddCondition(SharedPtr<ICondition>&) override
     {
         FHTN_FATAL_EXCEPTION(false, "PausePlan Tasks do not support conditions");
     }
 
-    bool AddEffect(std::shared_ptr<class IEffect>&) { FHTN_FATAL_EXCEPTION(false, "Pause Plan tasks do not support effects"); }
+    bool AddEffect(SharedPtr<class IEffect>&) { FHTN_FATAL_EXCEPTION(false, "Pause Plan tasks do not support effects"); }
 
     void ApplyEffects(IContext&) {}
 

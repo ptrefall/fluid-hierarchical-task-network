@@ -60,16 +60,16 @@ TEST_CLASS(DomainTests)
     TEST_METHOD(AddSubtaskToParent_ExpectedBehavior)
     {
         Domain                        domain("Test");
-        std::shared_ptr<CompoundTask> task1 = std::make_shared<Selector>("Test");
-        std::shared_ptr<ITask> task2 = std::make_shared<Selector>("Test2");
+        SharedPtr<CompoundTask> task1 = MakeSharedPtr<Selector>("Test");
+        SharedPtr<ITask> task2 = MakeSharedPtr<Selector>("Test2");
         domain.Add(task1, task2);
         Assert::IsTrue(std::find(task1->Subtasks().begin(), task1->Subtasks().end(), task2) != task1->Subtasks().end());
         Assert::IsTrue(task2->Parent().get() == task1.get());
     }
     TEST_METHOD(FindPlanUninitializedContextThrowsException_ExpectedBehavior)
     {
-        auto                      domain = std::make_shared<Domain>("Test");
-        std::shared_ptr<IContext> ctx = std::make_shared<DomainTestContext>();
+        auto                      domain = MakeSharedPtr<Domain>("Test");
+        SharedPtr<IContext> ctx = MakeSharedPtr<DomainTestContext>();
 
         Assert::ExpectException<std::exception>([=]() -> DecompositionStatus {
             TaskQueueType plan;
@@ -78,8 +78,8 @@ TEST_CLASS(DomainTests)
     }
     TEST_METHOD(FindPlanNoTasksThenNullPlan_ExpectedBehavior)
     {
-        auto                      bctx = std::make_shared<DomainTestContext>();
-        std::shared_ptr<IContext> ctx = std::static_pointer_cast<IContext>(bctx);
+        auto                      bctx = MakeSharedPtr<DomainTestContext>();
+        SharedPtr<IContext> ctx = StaticCastPtr<IContext>(bctx);
         Domain                    domain("Test");
         TaskQueueType             plan;
         bctx->Init();
@@ -89,8 +89,8 @@ TEST_CLASS(DomainTests)
     }
     TEST_METHOD(AfterFindPlanContextStateIsExecuting_ExpectedBehavior)
     {
-        auto                      bctx = std::make_shared<DomainTestContext>();
-        std::shared_ptr<IContext> ctx = std::static_pointer_cast<IContext>(bctx);
+        auto                      bctx = MakeSharedPtr<DomainTestContext>();
+        SharedPtr<IContext> ctx = StaticCastPtr<IContext>(bctx);
         Domain                    domain("Test");
         TaskQueueType             plan;
         bctx->Init();
@@ -99,16 +99,16 @@ TEST_CLASS(DomainTests)
     }
     TEST_METHOD(FindPlan_ExpectedBehavior)
     {
-        auto                      bctx = std::make_shared<DomainTestContext>();
-        std::shared_ptr<IContext> ctx = std::static_pointer_cast<IContext>(bctx);
+        auto                      bctx = MakeSharedPtr<DomainTestContext>();
+        SharedPtr<IContext> ctx = StaticCastPtr<IContext>(bctx);
         Domain                    domain("Test");
         TaskQueueType             plan;
 
         bctx->Init();
 
-        std::shared_ptr<CompoundTask> task1 = std::make_shared<Selector>("Test");
+        SharedPtr<CompoundTask> task1 = MakeSharedPtr<Selector>("Test");
 
-        std::shared_ptr<ITask> task2 = std::make_shared<PrimitiveTask>("Sub-task");
+        SharedPtr<ITask> task2 = MakeSharedPtr<PrimitiveTask>("Sub-task");
 
         domain.Add(domain.Root(), task1);
         domain.Add(task1, task2);
@@ -121,30 +121,30 @@ TEST_CLASS(DomainTests)
     }
     TEST_METHOD(FindPlanTrimsNonPermanentStateChange_ExpectedBehavior)
     {
-        auto                      bctx = std::make_shared<DomainTestContext>();
-        std::shared_ptr<IContext> ctx = std::static_pointer_cast<IContext>(bctx);
+        auto                      bctx = MakeSharedPtr<DomainTestContext>();
+        SharedPtr<IContext> ctx = StaticCastPtr<IContext>(bctx);
         Domain                    domain("Test");
         TaskQueueType             plan;
         bctx->Init();
-        std::shared_ptr<CompoundTask> task1 = std::make_shared<Sequence>("Test");
+        SharedPtr<CompoundTask> task1 = MakeSharedPtr<Sequence>("Test");
 
-        std::shared_ptr<PrimitiveTask> task2 = std::make_shared<PrimitiveTask>("Sub-task1");
-        std::shared_ptr<IEffect>       effect1 =
-            std::make_shared<ActionEffect>("TestEffect1"s, EffectType::PlanOnly, [=](IContext& ctx, EffectType t) {
+        SharedPtr<PrimitiveTask> task2 = MakeSharedPtr<PrimitiveTask>("Sub-task1");
+        SharedPtr<IEffect>       effect1 =
+            MakeSharedPtr<ActionEffect>("TestEffect1"s, EffectType::PlanOnly, [=](IContext& ctx, EffectType t) {
                 ctx.SetState((int)DomainTestState::HasA, true, true, t);
             });
         task2->AddEffect(effect1);
 
-        std::shared_ptr<PrimitiveTask> task3 = std::make_shared<PrimitiveTask>("Sub-task2");
-        std::shared_ptr<IEffect> effect2 = std::make_shared<ActionEffect>(
+        SharedPtr<PrimitiveTask> task3 = MakeSharedPtr<PrimitiveTask>("Sub-task2");
+        SharedPtr<IEffect> effect2 = MakeSharedPtr<ActionEffect>(
             "TestEffect2"s,
             EffectType::PlanAndExecute,
             [=](IContext& ctx, EffectType t) { ctx.SetState((int)DomainTestState::HasB, true, true, t); });
         task3->AddEffect(effect2);
 
-        std::shared_ptr<PrimitiveTask> task4 = std::make_shared<PrimitiveTask>("Sub-task3");
-        std::shared_ptr<IEffect> effect3 =
-            std::make_shared<ActionEffect>("TestEffect3"s, EffectType::Permanent, [=](IContext& ctx, EffectType t) {
+        SharedPtr<PrimitiveTask> task4 = MakeSharedPtr<PrimitiveTask>("Sub-task3");
+        SharedPtr<IEffect> effect3 =
+            MakeSharedPtr<ActionEffect>("TestEffect3"s, EffectType::Permanent, [=](IContext& ctx, EffectType t) {
                 ctx.SetState((int)DomainTestState::HasC, true, true, t);
             });
         task4->AddEffect(effect3);
@@ -166,35 +166,35 @@ TEST_CLASS(DomainTests)
 
     TEST_METHOD(FindPlanClearsStateChangeWhenPlanIsNull_ExpectedBehavior)
     {
-        auto                      bctx = std::make_shared<DomainTestContext>();
-        std::shared_ptr<IContext> ctx = std::static_pointer_cast<IContext>(bctx);
+        auto                      bctx = MakeSharedPtr<DomainTestContext>();
+        SharedPtr<IContext> ctx = StaticCastPtr<IContext>(bctx);
         Domain                    domain("Test");
         TaskQueueType             plan;
         bctx->Init();
-        std::shared_ptr<CompoundTask> task1 = std::make_shared<Sequence>("Test");
-        std::shared_ptr<PrimitiveTask> task2 = std::make_shared<PrimitiveTask>("Sub-task1");
-        std::shared_ptr<IEffect> effect1 =
-            std::make_shared<ActionEffect>("TestEffect1"s, EffectType::PlanOnly, [=](IContext& ctx, EffectType t) {
+        SharedPtr<CompoundTask> task1 = MakeSharedPtr<Sequence>("Test");
+        SharedPtr<PrimitiveTask> task2 = MakeSharedPtr<PrimitiveTask>("Sub-task1");
+        SharedPtr<IEffect> effect1 =
+            MakeSharedPtr<ActionEffect>("TestEffect1"s, EffectType::PlanOnly, [=](IContext& ctx, EffectType t) {
                 ctx.SetState((int)DomainTestState::HasA, true, true, t);
             });
         task2->AddEffect(effect1);
 
-        std::shared_ptr<PrimitiveTask> task3 = std::make_shared<PrimitiveTask>("Sub-task2");
-        std::shared_ptr<IEffect> effect2 = std::make_shared<ActionEffect>(
+        SharedPtr<PrimitiveTask> task3 = MakeSharedPtr<PrimitiveTask>("Sub-task2");
+        SharedPtr<IEffect> effect2 = MakeSharedPtr<ActionEffect>(
             "TestEffect2"s,
             EffectType::PlanAndExecute,
             [=](IContext& ctx, EffectType t) { ctx.SetState((int)DomainTestState::HasB, true, true, t); });
         task3->AddEffect(effect2);
 
-        std::shared_ptr<PrimitiveTask> task4 = std::make_shared<PrimitiveTask>("Sub-task3");
-        std::shared_ptr<IEffect> effect3 =
-            std::make_shared<ActionEffect>("TestEffect3"s, EffectType::Permanent, [=](IContext& ctx, EffectType t) {
+        SharedPtr<PrimitiveTask> task4 = MakeSharedPtr<PrimitiveTask>("Sub-task3");
+        SharedPtr<IEffect> effect3 =
+            MakeSharedPtr<ActionEffect>("TestEffect3"s, EffectType::Permanent, [=](IContext& ctx, EffectType t) {
                 ctx.SetState((int)DomainTestState::HasC, true, true, t);
             });
         task4->AddEffect(effect3);
 
-        std::shared_ptr<PrimitiveTask> task5 = std::make_shared<PrimitiveTask>("Sub-task4");
-        std::shared_ptr<ICondition> condition = std::make_shared<FuncCondition>("TestCondition"s, [=](IContext& ctx) {
+        SharedPtr<PrimitiveTask> task5 = MakeSharedPtr<PrimitiveTask>("Sub-task4");
+        SharedPtr<ICondition> condition = MakeSharedPtr<FuncCondition>("TestCondition"s, [=](IContext& ctx) {
             DomainTestContext& d = (DomainTestContext&)ctx;
             return (d.Done() == true);
         });
@@ -217,8 +217,8 @@ TEST_CLASS(DomainTests)
     }
     TEST_METHOD(FindPlanIfMTRsAreEqualThenReturnNullPlan_ExpectedBehavior)
     {
-        auto                      bctx = std::make_shared<DomainTestContext>();
-        std::shared_ptr<IContext> ctx = std::static_pointer_cast<IContext>(bctx);
+        auto                      bctx = MakeSharedPtr<DomainTestContext>();
+        SharedPtr<IContext> ctx = StaticCastPtr<IContext>(bctx);
         Domain                    domain("Test");
         TaskQueueType             plan;
         bctx->Init();
@@ -227,20 +227,20 @@ TEST_CLASS(DomainTests)
         // Root is a Selector that branch off into task1 selector or task2 sequence.
         // MTR only tracks decomposition of compound tasks, so our MTR is only 1 layer deep here,
         // Since both compound tasks decompose into primitive tasks.
-        std::shared_ptr<CompoundTask> task1 = std::make_shared<Sequence>("Test1");
-        std::shared_ptr<CompoundTask> task2 = std::make_shared<Selector>("Test2");
+        SharedPtr<CompoundTask> task1 = MakeSharedPtr<Sequence>("Test1");
+        SharedPtr<CompoundTask> task2 = MakeSharedPtr<Selector>("Test2");
 
-        std::shared_ptr<PrimitiveTask> task3 = std::make_shared<PrimitiveTask>("Sub-task1");
-        std::shared_ptr<ICondition> condition = std::make_shared<FuncCondition>("TestCondition"s, [=](IContext& ctx) {
+        SharedPtr<PrimitiveTask> task3 = MakeSharedPtr<PrimitiveTask>("Sub-task1");
+        SharedPtr<ICondition> condition = MakeSharedPtr<FuncCondition>("TestCondition"s, [=](IContext& ctx) {
             DomainTestContext& d = (DomainTestContext&)ctx;
             return (d.Done() == true);
         });
         task3->AddCondition(condition);
 
-        std::shared_ptr<PrimitiveTask> task4 = std::make_shared<PrimitiveTask>("Sub-task1");
+        SharedPtr<PrimitiveTask> task4 = MakeSharedPtr<PrimitiveTask>("Sub-task1");
 
-        std::shared_ptr<PrimitiveTask> task5 = std::make_shared<PrimitiveTask>("Sub-task2");
-        std::shared_ptr<ICondition> condition2 = std::make_shared<FuncCondition>("TestCondition"s, [=](IContext& ctx) {
+        SharedPtr<PrimitiveTask> task5 = MakeSharedPtr<PrimitiveTask>("Sub-task2");
+        SharedPtr<ICondition> condition2 = MakeSharedPtr<FuncCondition>("TestCondition"s, [=](IContext& ctx) {
             DomainTestContext& d = (DomainTestContext&)ctx;
             return (d.Done() == true);
         });
@@ -261,17 +261,17 @@ TEST_CLASS(DomainTests)
 
     TEST_METHOD(PausePlan_ExpectedBehavior)
     {
-        auto                      bctx = std::make_shared<DomainTestContext>();
-        std::shared_ptr<IContext> ctx = std::static_pointer_cast<IContext>(bctx);
+        auto                      bctx = MakeSharedPtr<DomainTestContext>();
+        SharedPtr<IContext> ctx = StaticCastPtr<IContext>(bctx);
         Domain                    domain("Test");
         TaskQueueType             plan;
         bctx->Init();
 
-        std::shared_ptr<CompoundTask> task1 = std::make_shared<Sequence>("Test1");
-        std::shared_ptr<PrimitiveTask> task2 = std::make_shared<PrimitiveTask>("Sub-task1");
-        std::shared_ptr<PrimitiveTask> task3 = std::make_shared<PrimitiveTask>("Sub-task2");
+        SharedPtr<CompoundTask> task1 = MakeSharedPtr<Sequence>("Test1");
+        SharedPtr<PrimitiveTask> task2 = MakeSharedPtr<PrimitiveTask>("Sub-task1");
+        SharedPtr<PrimitiveTask> task3 = MakeSharedPtr<PrimitiveTask>("Sub-task2");
 
-        std::shared_ptr<ITask> task4 = std::make_shared<PausePlanTask>();
+        SharedPtr<ITask> task4 = MakeSharedPtr<PausePlanTask>();
 
         domain.Add(domain.Root(), task1);
         domain.Add(task1, task2);
@@ -285,7 +285,7 @@ TEST_CLASS(DomainTests)
         Assert::AreEqual("Sub-task1"s, plan.front()->Name());
         Assert::IsTrue(ctx->HasPausedPartialPlan());
         Assert::IsTrue(ctx->PartialPlanQueue().size() == 1);
-        auto   tx = std::static_pointer_cast<ITask>(task1);
+        auto   tx = StaticCastPtr<ITask>(task1);
         ITask* t1ptr = tx.get();
         ITask* t2ptr = ctx->PartialPlanQueue().front().Task.get();
         Assert::AreEqual(t1ptr, t2ptr);
@@ -294,17 +294,17 @@ TEST_CLASS(DomainTests)
 
     TEST_METHOD(ContinuePausedPlan_ExpectedBehavior)
     {
-        auto                      bctx = std::make_shared<DomainTestContext>();
-        std::shared_ptr<IContext> ctx = std::static_pointer_cast<IContext>(bctx);
+        auto                      bctx = MakeSharedPtr<DomainTestContext>();
+        SharedPtr<IContext> ctx = StaticCastPtr<IContext>(bctx);
         Domain                    domain("Test");
         TaskQueueType             plan;
         bctx->Init();
 
-        std::shared_ptr<CompoundTask> task1 = std::make_shared<Sequence>("Test1");
-        std::shared_ptr<PrimitiveTask> task2 = std::make_shared<PrimitiveTask>("Sub-task1");
-        std::shared_ptr<PrimitiveTask> task3 = std::make_shared<PrimitiveTask>("Sub-task2");
+        SharedPtr<CompoundTask> task1 = MakeSharedPtr<Sequence>("Test1");
+        SharedPtr<PrimitiveTask> task2 = MakeSharedPtr<PrimitiveTask>("Sub-task1");
+        SharedPtr<PrimitiveTask> task3 = MakeSharedPtr<PrimitiveTask>("Sub-task2");
 
-        std::shared_ptr<ITask> task4 = std::make_shared<PausePlanTask>();
+        SharedPtr<ITask> task4 = MakeSharedPtr<PausePlanTask>();
 
         domain.Add(domain.Root(), task1);
         domain.Add(task1, task2);
@@ -318,7 +318,7 @@ TEST_CLASS(DomainTests)
         Assert::AreEqual("Sub-task1"s, plan.front()->Name());
         Assert::IsTrue(ctx->HasPausedPartialPlan());
         Assert::IsTrue(ctx->PartialPlanQueue().size() == 1);
-        auto   tx = std::static_pointer_cast<ITask>(task1);
+        auto   tx = StaticCastPtr<ITask>(task1);
         ITask* t1ptr = tx.get();
         ITask* t2ptr = ctx->PartialPlanQueue().front().Task.get();
         Assert::AreEqual(t1ptr, t2ptr);
@@ -333,20 +333,20 @@ TEST_CLASS(DomainTests)
 
     TEST_METHOD(NestedPausePlan_ExpectedBehavior)
     {
-        auto                      bctx = std::make_shared<DomainTestContext>();
-        std::shared_ptr<IContext> ctx = std::static_pointer_cast<IContext>(bctx);
+        auto                      bctx = MakeSharedPtr<DomainTestContext>();
+        SharedPtr<IContext> ctx = StaticCastPtr<IContext>(bctx);
         Domain                    domain("Test");
         TaskQueueType             plan;
         bctx->Init();
-        std::shared_ptr<CompoundTask> task = std::make_shared<Sequence>("Test1");
-        std::shared_ptr<CompoundTask> task2 = std::make_shared<Selector>("Test2");
-        std::shared_ptr<CompoundTask> task3 = std::make_shared<Sequence>("Test3");
+        SharedPtr<CompoundTask> task = MakeSharedPtr<Sequence>("Test1");
+        SharedPtr<CompoundTask> task2 = MakeSharedPtr<Selector>("Test2");
+        SharedPtr<CompoundTask> task3 = MakeSharedPtr<Sequence>("Test3");
 
-        std::shared_ptr<PrimitiveTask> subtask4 = std::make_shared<PrimitiveTask>("Sub-task4");
-        std::shared_ptr<PrimitiveTask> subtask3 = std::make_shared<PrimitiveTask>("Sub-task3");
-        std::shared_ptr<PrimitiveTask> subtask2 = std::make_shared<PrimitiveTask>("Sub-task2");
-        std::shared_ptr<PrimitiveTask> subtask1 = std::make_shared<PrimitiveTask>("Sub-task1");
-        std::shared_ptr<ITask> pausePlan = std::make_shared<PausePlanTask>();
+        SharedPtr<PrimitiveTask> subtask4 = MakeSharedPtr<PrimitiveTask>("Sub-task4");
+        SharedPtr<PrimitiveTask> subtask3 = MakeSharedPtr<PrimitiveTask>("Sub-task3");
+        SharedPtr<PrimitiveTask> subtask2 = MakeSharedPtr<PrimitiveTask>("Sub-task2");
+        SharedPtr<PrimitiveTask> subtask1 = MakeSharedPtr<PrimitiveTask>("Sub-task1");
+        SharedPtr<ITask> pausePlan = MakeSharedPtr<PausePlanTask>();
 
         domain.Add(domain.Root(), task);
         domain.Add(task, task2);
@@ -382,21 +382,21 @@ TEST_CLASS(DomainTests)
     }
     TEST_METHOD(ContinueNestedPausePlan_ExpectedBehavior)
     {
-        auto                      bctx = std::make_shared<DomainTestContext>();
-        std::shared_ptr<IContext> ctx = std::static_pointer_cast<IContext>(bctx);
+        auto                      bctx = MakeSharedPtr<DomainTestContext>();
+        SharedPtr<IContext> ctx = StaticCastPtr<IContext>(bctx);
         Domain                    domain("Test");
         TaskQueueType             plan;
         bctx->Init();
 
-        std::shared_ptr<CompoundTask> task = std::make_shared<Sequence>("Test1");
-        std::shared_ptr<CompoundTask> task2 = std::make_shared<Selector>("Test2");
-        std::shared_ptr<CompoundTask> task3 = std::make_shared<Sequence>("Test3");
+        SharedPtr<CompoundTask> task = MakeSharedPtr<Sequence>("Test1");
+        SharedPtr<CompoundTask> task2 = MakeSharedPtr<Selector>("Test2");
+        SharedPtr<CompoundTask> task3 = MakeSharedPtr<Sequence>("Test3");
 
-        std::shared_ptr<PrimitiveTask> subtask4 = std::make_shared<PrimitiveTask>("Sub-task4");
-        std::shared_ptr<PrimitiveTask> subtask3 = std::make_shared<PrimitiveTask>("Sub-task3");
-        std::shared_ptr<PrimitiveTask> subtask2 = std::make_shared<PrimitiveTask>("Sub-task2");
-        std::shared_ptr<PrimitiveTask> subtask1 = std::make_shared<PrimitiveTask>("Sub-task1");
-        std::shared_ptr<ITask>         pausePlan = std::make_shared<PausePlanTask>();
+        SharedPtr<PrimitiveTask> subtask4 = MakeSharedPtr<PrimitiveTask>("Sub-task4");
+        SharedPtr<PrimitiveTask> subtask3 = MakeSharedPtr<PrimitiveTask>("Sub-task3");
+        SharedPtr<PrimitiveTask> subtask2 = MakeSharedPtr<PrimitiveTask>("Sub-task2");
+        SharedPtr<PrimitiveTask> subtask1 = MakeSharedPtr<PrimitiveTask>("Sub-task1");
+        SharedPtr<ITask>         pausePlan = MakeSharedPtr<PausePlanTask>();
 
         domain.Add(domain.Root(), task);
         domain.Add(task, task2);
@@ -439,41 +439,41 @@ TEST_CLASS(DomainTests)
     }
     TEST_METHOD(ContinueMultipleNestedPausePlan_ExpectedBehavior)
     {
-        auto                      bctx = std::make_shared<DomainTestContext>();
-        std::shared_ptr<IContext> ctx = std::static_pointer_cast<IContext>(bctx);
+        auto                      bctx = MakeSharedPtr<DomainTestContext>();
+        SharedPtr<IContext> ctx = StaticCastPtr<IContext>(bctx);
         Domain                    domain("Test");
         TaskQueueType             plan;
         bctx->Init();
 
-        std::shared_ptr<CompoundTask> task = std::make_shared<Sequence>("Test1");
-        std::shared_ptr<CompoundTask> task2 = std::make_shared<Selector>("Test2");
-        std::shared_ptr<CompoundTask> task3 = std::make_shared<Sequence>("Test3");
-        std::shared_ptr<CompoundTask> task4 = std::make_shared<Sequence>("Test4");
+        SharedPtr<CompoundTask> task = MakeSharedPtr<Sequence>("Test1");
+        SharedPtr<CompoundTask> task2 = MakeSharedPtr<Selector>("Test2");
+        SharedPtr<CompoundTask> task3 = MakeSharedPtr<Sequence>("Test3");
+        SharedPtr<CompoundTask> task4 = MakeSharedPtr<Sequence>("Test4");
 
         domain.Add(domain.Root(), task);
-        std::shared_ptr<PrimitiveTask> subtask1 = std::make_shared<PrimitiveTask>("Sub-task1");
-        std::shared_ptr<ITask>         pausePlan1 = std::make_shared<PausePlanTask>();
-        std::shared_ptr<PrimitiveTask> subtask2 = std::make_shared<PrimitiveTask>("Sub-task2");
+        SharedPtr<PrimitiveTask> subtask1 = MakeSharedPtr<PrimitiveTask>("Sub-task1");
+        SharedPtr<ITask>         pausePlan1 = MakeSharedPtr<PausePlanTask>();
+        SharedPtr<PrimitiveTask> subtask2 = MakeSharedPtr<PrimitiveTask>("Sub-task2");
         domain.Add(task3, subtask1);
         domain.Add(task3, pausePlan1);
         domain.Add(task3, subtask2);
 
-        std::shared_ptr<PrimitiveTask> subtask3 = std::make_shared<PrimitiveTask>("Sub-task3");
+        SharedPtr<PrimitiveTask> subtask3 = MakeSharedPtr<PrimitiveTask>("Sub-task3");
         domain.Add(task2, task3);
         domain.Add(task2, subtask3);
 
-        std::shared_ptr<PrimitiveTask> subtask5 = std::make_shared<PrimitiveTask>("Sub-task5");
-        std::shared_ptr<ITask>         pausePlan2 = std::make_shared<PausePlanTask>();
-        std::shared_ptr<PrimitiveTask> subtask6 = std::make_shared<PrimitiveTask>("Sub-task6");
+        SharedPtr<PrimitiveTask> subtask5 = MakeSharedPtr<PrimitiveTask>("Sub-task5");
+        SharedPtr<ITask>         pausePlan2 = MakeSharedPtr<PausePlanTask>();
+        SharedPtr<PrimitiveTask> subtask6 = MakeSharedPtr<PrimitiveTask>("Sub-task6");
         domain.Add(task4, subtask5);
         domain.Add(task4, pausePlan2);
         domain.Add(task4, subtask6);
 
         domain.Add(task, task2);
-        std::shared_ptr<PrimitiveTask> subtask4 = std::make_shared<PrimitiveTask>("Sub-task4");
+        SharedPtr<PrimitiveTask> subtask4 = MakeSharedPtr<PrimitiveTask>("Sub-task4");
         domain.Add(task, subtask4);
         domain.Add(task, task4);
-        std::shared_ptr<PrimitiveTask> subtask7 = std::make_shared<PrimitiveTask>("Sub-task7");
+        SharedPtr<PrimitiveTask> subtask7 = MakeSharedPtr<PrimitiveTask>("Sub-task7");
         domain.Add(task, subtask7);
 
         auto status = domain.FindPlan(*ctx, plan);

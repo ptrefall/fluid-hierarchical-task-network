@@ -120,6 +120,9 @@
     <ClInclude Include="Tasks\CompoundTasks\RandomSelector.h">
       <Filter>Header Files\Tasks\CompoundTasks</Filter>
     </ClInclude>
+    <ClInclude Include="STLTypes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">

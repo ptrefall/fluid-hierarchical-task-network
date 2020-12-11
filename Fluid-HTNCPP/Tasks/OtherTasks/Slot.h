@@ -10,21 +10,21 @@ class Slot : public ITask
 {
     int _SlotId;
 
-    std::shared_ptr<class CompoundTask> _Subtask;
+    SharedPtr<class CompoundTask> _Subtask;
 
 public:
     Slot():ITask(ITaskDerivedClassName::Slot){}
     int                  SlotId() { return _SlotId; }
     void                 SlotId(int s) { _SlotId = s; }
-    const std::shared_ptr<CompoundTask> Subtask() { return _Subtask; }
+    const SharedPtr<CompoundTask> Subtask() { return _Subtask; }
 
     virtual DecompositionStatus OnIsValidFailed(IContext& ) override { return DecompositionStatus::Failed; }
 
-    virtual bool AddCondition(std::shared_ptr<ICondition>&) override
+    virtual bool AddCondition(SharedPtr<ICondition>&) override
     {
         FHTN_FATAL_EXCEPTION(false,"Slot Tasks do not support conditions");
     }
-    bool Set(std::shared_ptr<CompoundTask> subtask)
+    bool Set(SharedPtr<CompoundTask> subtask)
     {
         if (_Subtask != nullptr)
         {
@@ -51,14 +51,14 @@ public:
         bool result =   (_Subtask != nullptr);
         if (ctx.LogDecomposition())
         {
-            Log(ctx, "Slot.IsValid:"s + std::to_string(result) + "!"s, result ? ConsoleColor::Green : ConsoleColor::Red);
+            Log(ctx, "Slot.IsValid:"s + ToString(result) + "!"s, result ? ConsoleColor::Green : ConsoleColor::Red);
         }
             return result;
     }
 protected:
-    virtual void Log(IContext& ctx, std::string description, ConsoleColor color = ConsoleColor::White)
+    virtual void Log(IContext& ctx, StringType description, ConsoleColor color = ConsoleColor::White)
     {
-        ctx.Log(_Name, description, ctx.CurrentDecompositionDepth(), shared_from_this(), color);
+        ctx.Log(_Name, description, ctx.CurrentDecompositionDepth(), SharedFromThis(), color);
     }
 };
 

@@ -19,6 +19,8 @@
 #include <cstdlib>
 #include <ctime>
 
+#include "STLTypes.h"
+
 #ifndef FHTN_FATAL_EXCEPTION
 #define FHTN_FATAL_EXCEPTION(condition, msg)                                                                                          \
     if (!(condition))                                                                                                              \

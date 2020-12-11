@@ -59,8 +59,8 @@ namespace FluidHTNCPPUnitTests
             Assert::AreEqual(true, (bool)ctx.GetStateDTS(DomainTestState::HasB));
             Assert::IsTrue(ctx.GetWorldStateChangeStack()[(int) DomainTestState::HasA].size() == 0);
             Assert::IsTrue(ctx.GetWorldStateChangeStack()[(int) DomainTestState::HasB].size() == 1);
-            Assert::IsTrue(ctx.GetWorldStateChangeStack()[(int) DomainTestState::HasB].top().first == EffectType::Permanent);
-            Assert::IsTrue(ctx.GetWorldStateChangeStack()[(int) DomainTestState::HasB].top().second == 1);
+            Assert::IsTrue(ctx.GetWorldStateChangeStack()[(int) DomainTestState::HasB].top().First() == EffectType::Permanent);
+            Assert::IsTrue(ctx.GetWorldStateChangeStack()[(int) DomainTestState::HasB].top().Second() == 1);
             Assert::IsTrue(ctx.GetWorldState().GetState((int) DomainTestState::HasB) == 0);
         }
         TEST_METHOD(SetStateExecutingContext_ExpectedBehavior)

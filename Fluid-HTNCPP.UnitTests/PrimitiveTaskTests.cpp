@@ -24,8 +24,8 @@ namespace FluidHTNCPPUnitTests
     {
         TEST_METHOD(AddCondition_ExpectedBehavior)
         {
-            auto                        task = std::make_shared<PrimitiveTask>("Test"s);
-            std::shared_ptr<ICondition> c = std::make_shared<FuncCondition>("Name"s, [](IContext& ctx) {
+            auto                        task = MakeSharedPtr<PrimitiveTask>("Test"s);
+            SharedPtr<ICondition> c = MakeSharedPtr<FuncCondition>("Name"s, [](IContext& ctx) {
                 return (static_cast<TestContext&>(ctx).Done() == false);
             });
             bool bRet = task->AddCondition(c);
@@ -35,8 +35,8 @@ namespace FluidHTNCPPUnitTests
         }
         TEST_METHOD(AddExecutingCondition_ExpectedBehavior)
         {
-            auto                        task = std::make_shared<PrimitiveTask>("Test"s);
-            std::shared_ptr<ICondition> c = std::make_shared<FuncCondition>("Name"s, [](IContext& ctx) {
+            auto                        task = MakeSharedPtr<PrimitiveTask>("Test"s);
+            SharedPtr<ICondition> c = MakeSharedPtr<FuncCondition>("Name"s, [](IContext& ctx) {
                 return (static_cast<TestContext&>(ctx).Done() == false);
             });
 
@@ -47,8 +47,8 @@ namespace FluidHTNCPPUnitTests
 
         TEST_METHOD(AddEffect_ExpectedBehavior)
         {
-            auto                     task = std::make_shared<PrimitiveTask>("Test"s);
-            std::shared_ptr<IEffect> e = std::make_shared<ActionEffect>("Name"s, EffectType::Permanent , [](IContext& ctx, EffectType eff) {
+            auto                     task = MakeSharedPtr<PrimitiveTask>("Test"s);
+            SharedPtr<IEffect> e = MakeSharedPtr<ActionEffect>("Name"s, EffectType::Permanent , [](IContext& ctx, EffectType eff) {
                 (void)eff;
                 static_cast<TestContext&>(ctx).Done() = true;
             });
@@ -59,8 +59,8 @@ namespace FluidHTNCPPUnitTests
         }
         TEST_METHOD(SetOperator_ExpectedBehavior)
         {
-            auto                       task = std::make_shared<PrimitiveTask>("Test"s);
-            std::shared_ptr<IOperator> o = std::make_shared<FuncOperator>(nullptr, nullptr);
+            auto                       task = MakeSharedPtr<PrimitiveTask>("Test"s);
+            SharedPtr<IOperator> o = MakeSharedPtr<FuncOperator>(nullptr, nullptr);
 
             task->SetOperator(o);
 
@@ -69,14 +69,14 @@ namespace FluidHTNCPPUnitTests
 
         TEST_METHOD(SetOperatorThrowsExceptionIfAlreadySet_ExpectedBehavior)
         {
-            auto                       task = std::make_shared<PrimitiveTask>("Test"s);
+            auto                       task = MakeSharedPtr<PrimitiveTask>("Test"s);
 
-            std::shared_ptr<IOperator> o = std::make_shared<FuncOperator>(nullptr, nullptr);
+            SharedPtr<IOperator> o = MakeSharedPtr<FuncOperator>(nullptr, nullptr);
 
             task->SetOperator(o);
 
             Assert::ExpectException<std::exception>([=]() {
-                std::shared_ptr<IOperator> o2 = std::make_shared<FuncOperator>(nullptr, nullptr);
+                SharedPtr<IOperator> o2 = MakeSharedPtr<FuncOperator>(nullptr, nullptr);
                 task->SetOperator(o2);
             });
         }
@@ -84,8 +84,8 @@ namespace FluidHTNCPPUnitTests
         TEST_METHOD(ApplyEffects_ExpectedBehavior)
         {
             TestContext              ctx;
-            auto                     task = std::make_shared<PrimitiveTask>("Test"s);
-            std::shared_ptr<IEffect> e = std::make_shared<ActionEffect>("Name"s, EffectType::Permanent, [](IContext& ctx, EffectType e) {
+            auto                     task = MakeSharedPtr<PrimitiveTask>("Test"s);
+            SharedPtr<IEffect> e = MakeSharedPtr<ActionEffect>("Name"s, EffectType::Permanent, [](IContext& ctx, EffectType e) {
                 (void)e;
                 static_cast<TestContext&>(ctx).Done() = true;
             });
@@ -98,9 +98,9 @@ namespace FluidHTNCPPUnitTests
         TEST_METHOD(StopWithValidOperator_ExpectedBehavior)
         {
             TestContext                ctx;
-            auto                       task = std::make_shared<PrimitiveTask>("Test"s);
-            std::shared_ptr<IOperator> o =
-                std::make_shared<FuncOperator>(nullptr, [](IContext& ctx) { static_cast<TestContext&>(ctx).Done() = true; });
+            auto                       task = MakeSharedPtr<PrimitiveTask>("Test"s);
+            SharedPtr<IOperator> o =
+                MakeSharedPtr<FuncOperator>(nullptr, [](IContext& ctx) { static_cast<TestContext&>(ctx).Done() = true; });
 
             task->SetOperator(o);
             task->Stop(ctx);
@@ -112,17 +112,17 @@ namespace FluidHTNCPPUnitTests
         TEST_METHOD(StopWithNullOperator_ExpectedBehavior)
         {
             TestContext                ctx;
-            auto                       task = std::make_shared<PrimitiveTask>("Test"s);
+            auto                       task = MakeSharedPtr<PrimitiveTask>("Test"s);
             task->Stop(ctx);
         }
         TEST_METHOD( IsValid_ExpectedBehavior)
         {
             TestContext                ctx;
-            auto                       task = std::make_shared<PrimitiveTask>("Test"s);
-            std::shared_ptr<ICondition> c = std::make_shared<FuncCondition>("Name"s, [](IContext& ctx) {
+            auto                       task = MakeSharedPtr<PrimitiveTask>("Test"s);
+            SharedPtr<ICondition> c = MakeSharedPtr<FuncCondition>("Name"s, [](IContext& ctx) {
                 return (static_cast<TestContext&>(ctx).Done() == false);
             });
-            std::shared_ptr<ICondition> c2 = std::make_shared<FuncCondition>("Name"s, [](IContext& ctx) {
+            SharedPtr<ICondition> c2 = MakeSharedPtr<FuncCondition>("Name"s, [](IContext& ctx) {
                 return (static_cast<TestContext&>(ctx).Done() == true);
             });
 

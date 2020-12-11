@@ -9,7 +9,7 @@ void ActionEffect::Apply(IContext& ctx)
 {
     if (ctx.LogDecomposition())
     {
-        ctx.Log(_Name, "ActionEffect"s + std::to_string((int)_Type), ctx.CurrentDecompositionDepth() + 1, shared_from_this());
+        ctx.Log(_Name, "ActionEffect"s + ToString((int)_Type), ctx.CurrentDecompositionDepth() + 1, SharedFromThis());
     }
     if (_action)
     {
