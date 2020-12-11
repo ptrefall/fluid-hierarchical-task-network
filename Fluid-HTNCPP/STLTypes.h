@@ -82,7 +82,7 @@ public:
 
     auto Find(T x) -> decltype(s.find(std::forward<T>(x))) { return s.find(std::forward<T>(x)); }
 
-    auto End() { return s.end(); }
+    auto Contains(T x) { return (s.find(x) !=  s.end()); }
 };
 
 template<typename T, typename U>

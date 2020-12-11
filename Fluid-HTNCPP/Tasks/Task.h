@@ -55,7 +55,7 @@ public:
     bool                  IsTypeOf(ITaskDerivedClassName thetype)
     {
         return ((thetype == _Type) || (thetype == ITaskDerivedClassName::ITaskType) ||
-                (_SubTypes.Find(thetype) != _SubTypes.End()));
+                (_SubTypes.Contains(thetype)));
     }
 
     virtual StringType& Name() { return _Name; }
