@@ -55,7 +55,7 @@ public:
     T&     top() { return s.top(); }
     size_t size() { return s.size(); }
     bool   empty() { return s.empty(); }
-    void   clear() { s = std::queue<T>(); }
+    void   clear() { s = std::stack<T>(); }
 };
 
 template<typename T,typename U>
