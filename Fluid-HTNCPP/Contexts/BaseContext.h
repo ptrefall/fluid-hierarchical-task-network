@@ -38,22 +38,22 @@ protected:
     WorldStateStackArrayType _WorldStateChangeStackArray;
 
 public:
-    virtual bool                               IsInitialized() const override { return _IsInitialized; }
-    virtual bool&                              IsDirty() override { return _IsDirty; }
-    virtual ContextState                       GetContextState() const override { return _ContextState; }
-    virtual void                               SetContextState(ContextState s) override { _ContextState = s; }
-    virtual int&                               CurrentDecompositionDepth() override { return _CurrentDecompositionDepth; }
-    virtual ArrayType<int>&                    MethodTraversalRecord() override { return _MethodTraversalRecord; }
-    virtual ArrayType<StringType>&             MTRDebug() override { return _MTRDebug; }
-    virtual ArrayType<int>&                    LastMTR() override { return _LastMTR; }
-    virtual ArrayType<StringType>&             LastMTRDebug() override { return _LastMTRDebug; }
-    virtual bool&                              DebugMTR() override { return _DebugMTR; }
-    virtual Queue<IBaseDecompositionLogEntry>& DecompositionLog() override { return _DecompositionLog; }
-    virtual bool                               LogDecomposition() override { return _LogDecomposition; }
-    virtual PartialPlanQueueType&              PartialPlanQueue() override { return _PartialPlanQueue; }
-    virtual void                               PartialPlanQueue(PartialPlanQueueType p) override { _PartialPlanQueue = p; }
-    virtual void                               ClearPartialPlanQueue() override { _PartialPlanQueue = PartialPlanQueueType(); }
-    virtual bool&                              HasPausedPartialPlan() override { return _HasPausedPartialPlan; }
+    virtual bool                               IsInitialized() const override final { return _IsInitialized; }
+    virtual bool&                              IsDirty() override final { return _IsDirty; }
+    virtual ContextState                       GetContextState() const override final { return _ContextState; }
+    virtual void                               SetContextState(ContextState s) override final { _ContextState = s; }
+    virtual int&                               CurrentDecompositionDepth() override final { return _CurrentDecompositionDepth; }
+    virtual ArrayType<int>&                    MethodTraversalRecord() override final { return _MethodTraversalRecord; }
+    virtual ArrayType<StringType>&             MTRDebug() override final { return _MTRDebug; }
+    virtual ArrayType<int>&                    LastMTR() override final { return _LastMTR; }
+    virtual ArrayType<StringType>&             LastMTRDebug() override final { return _LastMTRDebug; }
+    virtual bool&                              DebugMTR() override final { return _DebugMTR; }
+    virtual Queue<IBaseDecompositionLogEntry>& DecompositionLog() override final { return _DecompositionLog; }
+    virtual bool                               LogDecomposition() override final { return _LogDecomposition; }
+    virtual PartialPlanQueueType&              PartialPlanQueue() override final { return _PartialPlanQueue; }
+    virtual void                               PartialPlanQueue(PartialPlanQueueType p) override final { _PartialPlanQueue = p; }
+    virtual void                               ClearPartialPlanQueue() override final { _PartialPlanQueue = PartialPlanQueueType(); }
+    virtual bool&                              HasPausedPartialPlan() override final { return _HasPausedPartialPlan; }
 
     IWorldState<WSIDTYPE, WSVALTYPE, WSDERIVEDTYPE>& GetWorldState() { return *_WorldState; }
     /// <summary>
