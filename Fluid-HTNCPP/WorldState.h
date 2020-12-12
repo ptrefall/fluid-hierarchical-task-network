@@ -2,21 +2,28 @@
 
 namespace FluidHTN
 {
-// These should be template parameters to IContext, but that propagates templates everywhere and I hate it.
-// Just define your own types here
-//
-#if !USE_CUSTOM_WORLDSTATE_PROPERTIES
-typedef int WORLDSTATEPROPERTY_ID_TYPE ;
-typedef uint8_t WORLDSTATEPROPERTY_VALUE_TYPE;
-#endif
 
+template <typename IDTYPE, typename VALUETYPE, typename DerivedType>
 class IWorldState
 {
-public:
-    virtual bool HasState(WORLDSTATEPROPERTY_ID_TYPE state, WORLDSTATEPROPERTY_VALUE_TYPE value) = 0;
-    virtual WORLDSTATEPROPERTY_VALUE_TYPE& GetState(WORLDSTATEPROPERTY_ID_TYPE state) = 0;
-    virtual void                           SetState(WORLDSTATEPROPERTY_ID_TYPE state, WORLDSTATEPROPERTY_VALUE_TYPE value) = 0;
+    static_assert(std::is_enum<IDTYPE>::value, "WorldState Id must be an enum type");
 
-    virtual int GetMaxPropertyCount() = 0;
+public:
+    typedef IDTYPE IdType;
+    typedef VALUETYPE ValueType;
+
+    bool HasState(IdType state, ValueType value)
+    {
+        return static_cast<DerivedType*>(this)->HasState(state, value);
+    }
+    ValueType& GetState(IdType state)
+    {
+        return static_cast<DerivedType*>(this)->GetState(state);
+    }
+    void SetState(IdType state, ValueType value)
+    {
+        return static_cast<DerivedType*>(this)->SetState(state, value);
+    }
+    int GetMaxPropertyCount() { return static_cast<DerivedType*>(this)->GetMaxPropertyCount(); }
 };
 } // namespace FluidHTN

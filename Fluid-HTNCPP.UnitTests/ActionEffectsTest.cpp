@@ -2,12 +2,13 @@
 #include "CppUnitTest.h"
 #include "Contexts/BaseContext.h"
 #include "Effects/Effect.h"
+#include "DomainTestContext.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 using namespace FluidHTN;
 
-class TestContext : public BaseContext
+class TestContext : public BaseContext<DomainTestState, uint8_t,DomainTestWorldState>
 {
 	bool _Done = false;
 public:
@@ -52,7 +53,7 @@ namespace FluidHTNCPPUnitTests
 
 		TEST_METHOD(ApplyDoesNothingWithoutFunctionPtr_ExpectedBehavior)
 		{
-			BaseContext ctx;
+			TestContext ctx;
 			ActionEffect e("Name", EffectType::PlanOnly, nullptr);
 
 			e.Apply(ctx);

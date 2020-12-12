@@ -128,12 +128,6 @@
     <ClCompile Include="pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Domain.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Planner.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Tasks\CompoundTasks\CompoundTask.cpp">
       <Filter>Source Files\Tasks\CompoundTasks</Filter>
     </ClCompile>

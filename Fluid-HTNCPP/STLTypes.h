@@ -125,4 +125,6 @@ StringType ToString(const T& arg)
 #define FHTN_FATAL_EXCEPTION_V(condition, fmt, ...)  this is for UE4 checkf, verifymsg etc. do not t use elsewhere
 #endif
 
+#else
+#include "STLReplacementTypes.h"
 #endif !USING_CUSTOM_STL
