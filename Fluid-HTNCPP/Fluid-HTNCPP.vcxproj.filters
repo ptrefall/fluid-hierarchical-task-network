@@ -117,14 +117,14 @@
     <ClInclude Include="CoreIncludes\Domain.h">
       <Filter>Header Files\CoreIncludes</Filter>
     </ClInclude>
-    <ClInclude Include="CoreIncludes\pch.h">
-      <Filter>Header Files\CoreIncludes</Filter>
-    </ClInclude>
     <ClInclude Include="CoreIncludes\STLTypes.h">
       <Filter>Header Files\CoreIncludes</Filter>
     </ClInclude>
     <ClInclude Include="CoreIncludes\WorldState.h">
       <Filter>Header Files\CoreIncludes</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

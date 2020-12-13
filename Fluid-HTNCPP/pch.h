@@ -22,9 +22,6 @@
 #include <ctime>
 #endif //!USING_CUSTOM_STL
 
-#include "STLTypes.h"
-
-
 using namespace std::string_literals;
 
 #endif // PCH_H
