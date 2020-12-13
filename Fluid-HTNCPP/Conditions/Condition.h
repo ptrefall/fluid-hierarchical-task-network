@@ -9,6 +9,7 @@ protected:
     StringType _Name;
 
 public:
+    virtual ~ICondition(){}
     StringType& Name() { return _Name; }
     virtual bool IsValid(class IContext&) = 0;
 };

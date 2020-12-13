@@ -19,6 +19,7 @@ class FuncOperator : public IOperator
     StopOperatorType _funcStop;
 
 public:
+    virtual ~FuncOperator(){}
     FuncOperator(FuncOperatorType func, StopOperatorType stp = nullptr)
     {
         _func = func;

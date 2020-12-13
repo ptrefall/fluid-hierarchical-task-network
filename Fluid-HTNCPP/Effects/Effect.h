@@ -13,6 +13,7 @@ protected:
 
 
 public:
+    virtual ~IEffect(){}
     const StringType& Name() { return _Name; }
     EffectType         Type() { return _Type; }
     virtual void       Apply(class IContext& ctx) = 0;

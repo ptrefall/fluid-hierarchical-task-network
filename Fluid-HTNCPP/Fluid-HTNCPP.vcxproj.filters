@@ -55,14 +55,11 @@
     <Filter Include="Source Files\Effects">
       <UniqueIdentifier>{8aafd1b7-4119-49ba-b3db-ae086f31bc23}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\CoreIncludes">
+      <UniqueIdentifier>{68d5697f-c87f-416a-8e45-02e397cfa67b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="pch.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Domain.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Tasks\Task.h">
       <Filter>Header Files\Tasks</Filter>
     </ClInclude>
@@ -102,9 +99,6 @@
     <ClInclude Include="Planners\Planner.h">
       <Filter>Header Files\Planners</Filter>
     </ClInclude>
-    <ClInclude Include="WorldState.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Contexts\BaseContext.h">
       <Filter>Header Files\Contexts</Filter>
     </ClInclude>
@@ -114,20 +108,26 @@
     <ClInclude Include="Effects\EffectType.h">
       <Filter>Header Files\Effects</Filter>
     </ClInclude>
-    <ClInclude Include="BaseDomainBuilder.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Tasks\CompoundTasks\RandomSelector.h">
       <Filter>Header Files\Tasks\CompoundTasks</Filter>
     </ClInclude>
-    <ClInclude Include="STLTypes.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="CoreIncludes\BaseDomainBuilder.h">
+      <Filter>Header Files\CoreIncludes</Filter>
+    </ClInclude>
+    <ClInclude Include="CoreIncludes\Domain.h">
+      <Filter>Header Files\CoreIncludes</Filter>
+    </ClInclude>
+    <ClInclude Include="CoreIncludes\pch.h">
+      <Filter>Header Files\CoreIncludes</Filter>
+    </ClInclude>
+    <ClInclude Include="CoreIncludes\STLTypes.h">
+      <Filter>Header Files\CoreIncludes</Filter>
+    </ClInclude>
+    <ClInclude Include="CoreIncludes\WorldState.h">
+      <Filter>Header Files\CoreIncludes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="pch.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Tasks\CompoundTasks\CompoundTask.cpp">
       <Filter>Source Files\Tasks\CompoundTasks</Filter>
     </ClCompile>
@@ -142,6 +142,9 @@
     </ClCompile>
     <ClCompile Include="Effects\Effect.cpp">
       <Filter>Source Files\Effects</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

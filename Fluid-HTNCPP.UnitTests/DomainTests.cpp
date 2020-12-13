@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "CppUnitTest.h"
 #include "Contexts/BaseContext.h"
-#include "Domain.h"
+#include "CoreIncludes/Domain.h"
 #include "Tasks/Task.h"
 #include "Tasks/CompoundTasks/CompoundTask.h"
 #include "Tasks/PrimitiveTasks/PrimitiveTask.h"

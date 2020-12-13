@@ -1,6 +1,6 @@
 #pragma once
 #include "Effects/EffectType.h"
-#include "WorldState.h"
+#include "CoreIncludes/WorldState.h"
 #include "DebugInterfaces/DecompositionLogEntry.h"
 
 namespace FluidHTN
