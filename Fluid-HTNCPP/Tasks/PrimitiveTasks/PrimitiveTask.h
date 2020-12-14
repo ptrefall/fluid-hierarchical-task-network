@@ -1,8 +1,10 @@
 #pragma once
+#include "CoreIncludes/STLTypes.h"
 #include "Tasks/Task.h"
 #include "Effects/Effect.h"
 #include "Operators/Operator.h"
 #include "Conditions/Condition.h"
+#include "Contexts/Context.h"
 
 namespace FluidHTN
 {
@@ -42,9 +44,29 @@ public:
         return true;
     }
 
-    void ApplyEffects(class IContext& ctx);
-    
-    void Stop(IContext& ctx) 
+    void ApplyEffects(class IContext& ctx)
+    {
+        if (ctx.GetContextState() == ContextState::Planning)
+        {
+            if (ctx.LogDecomposition())
+            {
+                Log(ctx, "PrimitiveTask.ApplyEffects", ConsoleColor::Yellow);
+            }
+        }
+        if (ctx.LogDecomposition())
+        {
+            ctx.CurrentDecompositionDepth() += 1;
+        }
+        for (auto& effect : _Effects)
+        {
+            effect->Apply(ctx);
+        }
+        if (ctx.LogDecomposition())
+        {
+            ctx.CurrentDecompositionDepth() -= 1;
+        }
+    }
+    void Stop(IContext& ctx)
     {
         if (_Operator)
         {
@@ -52,10 +74,48 @@ public:
         }
     }
 
-    virtual bool IsValid(IContext& ctx) override;
-    
+    virtual bool IsValid(IContext& ctx) override
+    {
+        if (ctx.LogDecomposition())
+        {
+            Log(ctx, "PrimitiveTask.IsValid check");
+        }
+        for (auto& condition : _Conditions)
+        {
+            if (ctx.LogDecomposition())
+            {
+                ctx.CurrentDecompositionDepth() += 1;
+            }
+
+            bool result = condition->IsValid(ctx);
+
+            if (ctx.LogDecomposition())
+            {
+                ctx.CurrentDecompositionDepth() -= 1;
+            }
+
+            if (ctx.LogDecomposition())
+            {
+                Log(ctx,
+                    "PrimitiveTask.IsValid:"s + ToString(result) + " for condition "s + condition->Name(),
+                    result ? ConsoleColor::DarkGreen : ConsoleColor::DarkRed);
+            }
+            if (!result)
+            {
+                return false;
+            }
+        }
+        if (ctx.LogDecomposition())
+        {
+            Log(ctx, "PrimitiveTask.IsValid:Success!"s, ConsoleColor::Green);
+        }
+        return true;
+    }
 
 protected:
-    virtual void Log(IContext& ctx, StringType description, ConsoleColor color = ConsoleColor::White);
+    virtual void Log(IContext& ctx, StringType description, ConsoleColor color = ConsoleColor::White)
+    {
+        ctx.Log(_Name, description, ctx.CurrentDecompositionDepth() + 1, SharedFromThis(), color);
+    }
 };
 } // namespace FluidHTN

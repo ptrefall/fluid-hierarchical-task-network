@@ -1,7 +1,7 @@
 #pragma once
-
 #include "Effects/EffectType.h"
 #include "DebugInterfaces/DecompositionLogEntry.h"
+#include "Contexts/Context.h"
 
 namespace FluidHTN
 {
@@ -34,7 +34,16 @@ public:
         _Type = type;
         _action = action;
     }
-    void Apply(IContext& ctx);
-    
+    void Apply(IContext& ctx)
+    {
+        if (ctx.LogDecomposition())
+        {
+            ctx.Log(_Name, "ActionEffect"s + ToString((int)_Type), ctx.CurrentDecompositionDepth() + 1, SharedFromThis());
+        }
+        if (_action)
+        {
+            _action(ctx, _Type);
+        }
+    }
 };
 } // namespace FluidHTN

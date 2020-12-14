@@ -1,17 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
     <Filter Include="Header Files">
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
-    </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
     <Filter Include="Header Files\Tasks">
       <UniqueIdentifier>{e5af4f3f-467c-4bae-a275-1a6734468ddb}</UniqueIdentifier>
@@ -42,18 +34,6 @@
     </Filter>
     <Filter Include="Header Files\DebugInterfaces">
       <UniqueIdentifier>{c0e3a0ae-50db-4b97-b5a4-330aedacdbbe}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Tasks">
-      <UniqueIdentifier>{b0c2f15c-5763-41a6-b3b7-fd820ab82e95}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Tasks\CompoundTasks">
-      <UniqueIdentifier>{69c172ac-bac4-41f2-92dc-ed386543b4e9}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Tasks\PrimitiveTasks">
-      <UniqueIdentifier>{78f35034-c62f-4110-a789-ff1ed1bab3f4}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Effects">
-      <UniqueIdentifier>{8aafd1b7-4119-49ba-b3db-ae086f31bc23}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files\CoreIncludes">
       <UniqueIdentifier>{68d5697f-c87f-416a-8e45-02e397cfa67b}</UniqueIdentifier>
@@ -126,25 +106,5 @@
     <ClInclude Include="pch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="Tasks\CompoundTasks\CompoundTask.cpp">
-      <Filter>Source Files\Tasks\CompoundTasks</Filter>
-    </ClCompile>
-    <ClCompile Include="Tasks\CompoundTasks\Selector.cpp">
-      <Filter>Source Files\Tasks\CompoundTasks</Filter>
-    </ClCompile>
-    <ClCompile Include="Tasks\CompoundTasks\Sequence.cpp">
-      <Filter>Source Files\Tasks\CompoundTasks</Filter>
-    </ClCompile>
-    <ClCompile Include="Tasks\PrimitiveTasks\PrimitiveTask.cpp">
-      <Filter>Source Files\Tasks\PrimitiveTasks</Filter>
-    </ClCompile>
-    <ClCompile Include="Effects\Effect.cpp">
-      <Filter>Source Files\Effects</Filter>
-    </ClCompile>
-    <ClCompile Include="pch.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
 </Project>
