@@ -7,12 +7,62 @@
 
 namespace FluidHTN
 {
+
+template <typename WSIDTYPE, typename WSVALTYPE, typename WSDERIVEDTYPE>
 class BaseContext : public IContext
 {
     void throw_if_not_intialized() { FHTN_FATAL_EXCEPTION(_IsInitialized, "Context is not initialized"); }
 
+protected:
+    bool                              _IsInitialized = false;
+    bool                              _IsDirty = false;
+    ContextState                      _ContextState = ContextState::Executing;
+    int                               _CurrentDecompositionDepth = 0;
+    bool                              _DebugMTR = false;
+    Queue<IBaseDecompositionLogEntry> _DecompositionLog;
+    bool                              _LogDecomposition = false;
+    ArrayType<int>                    _MethodTraversalRecord;
+    ArrayType<StringType>             _MTRDebug;
+
+    ArrayType<int>        _LastMTR;
+    ArrayType<StringType> _LastMTRDebug;
+
+    PartialPlanQueueType                                       _PartialPlanQueue;
+    bool                                                       _HasPausedPartialPlan = false;
+    SharedPtr<IWorldState<WSIDTYPE, WSVALTYPE, WSDERIVEDTYPE>> _WorldState;
+
+    // An array of stacks per property of the world state.
+    typedef Stack<Pair<EffectType, WSVALTYPE>> WorldStateStackType;
+    typedef ArrayType<WorldStateStackType>     WorldStateStackArrayType;
+
+    WorldStateStackArrayType _WorldStateChangeStackArray;
+
 public:
-    virtual void Init()
+    virtual bool                               IsInitialized() const override final { return _IsInitialized; }
+    virtual bool&                              IsDirty() override final { return _IsDirty; }
+    virtual ContextState                       GetContextState() const override final { return _ContextState; }
+    virtual void                               SetContextState(ContextState s) override final { _ContextState = s; }
+    virtual int&                               CurrentDecompositionDepth() override final { return _CurrentDecompositionDepth; }
+    virtual ArrayType<int>&                    MethodTraversalRecord() override final { return _MethodTraversalRecord; }
+    virtual ArrayType<StringType>&             MTRDebug() override final { return _MTRDebug; }
+    virtual ArrayType<int>&                    LastMTR() override final { return _LastMTR; }
+    virtual ArrayType<StringType>&             LastMTRDebug() override final { return _LastMTRDebug; }
+    virtual bool&                              DebugMTR() override final { return _DebugMTR; }
+    virtual Queue<IBaseDecompositionLogEntry>& DecompositionLog() override final { return _DecompositionLog; }
+    virtual bool                               LogDecomposition() override final { return _LogDecomposition; }
+    virtual PartialPlanQueueType&              PartialPlanQueue() override final { return _PartialPlanQueue; }
+    virtual void                               PartialPlanQueue(PartialPlanQueueType p) override final { _PartialPlanQueue = p; }
+    virtual void                               ClearPartialPlanQueue() override final { _PartialPlanQueue = PartialPlanQueueType(); }
+    virtual bool&                              HasPausedPartialPlan() override final { return _HasPausedPartialPlan; }
+
+    IWorldState<WSIDTYPE, WSVALTYPE, WSDERIVEDTYPE>& GetWorldState() { return *_WorldState; }
+    /// <summary>
+    ///     A stack of changes applied to each world state entry during planning.
+    ///     This is necessary if one wants to support planner-only and plan&execute effects.
+    /// </summary>
+    WorldStateStackArrayType& GetWorldStateChangeStack() { return _WorldStateChangeStackArray; }
+
+    virtual void Init() override
     {
         if (_WorldState != nullptr)
         {
@@ -21,26 +71,23 @@ public:
         _IsInitialized = true;
     }
 
-    virtual bool HasState(WORLDSTATEPROPERTY_ID_TYPE state, WORLDSTATEPROPERTY_VALUE_TYPE& value) override
-    {
-        return (GetState(state) == value);
-    }
-    virtual WORLDSTATEPROPERTY_VALUE_TYPE& GetState(WORLDSTATEPROPERTY_ID_TYPE state) override
+    virtual bool       HasState(WSIDTYPE state, WSVALTYPE value) { return (GetState(state) == value); }
+    virtual WSVALTYPE  GetState(WSIDTYPE state) 
     {
         if (_ContextState == ContextState::Executing)
         {
             return _WorldState->GetState(state);
         }
-        if (_WorldStateChangeStackArray[state].size() == 0)
+        if (_WorldStateChangeStackArray[(int)state].size() == 0)
         {
             return _WorldState->GetState(state);
         }
-        return _WorldStateChangeStackArray[state].top().Second();
+        return _WorldStateChangeStackArray[(int)state].top().Second();
     }
-    virtual void SetState(WORLDSTATEPROPERTY_ID_TYPE    state,
-                          WORLDSTATEPROPERTY_VALUE_TYPE value,
-                          bool                          setAsDirty /* = true */,
-                          EffectType                    e /* = EffectType::Permanent */) override
+    virtual void SetState(WSIDTYPE   state,
+                          WSVALTYPE  value,
+                          bool       setAsDirty /* = true */,
+                          EffectType e /* = EffectType::Permanent */) 
     {
         if (_ContextState == ContextState::Executing)
         {
@@ -58,7 +105,7 @@ public:
         else
         {
             Pair p(e, value);
-            _WorldStateChangeStackArray[state].push(p);
+            _WorldStateChangeStackArray[(int)state].push(p);
         }
     }
     virtual ArrayType<int> GetWorldStateChangeDepth() override
@@ -105,8 +152,7 @@ public:
         _IsInitialized = false;
     }
     // ========================================================= DECOMPOSITION LOGGING
-    void Log(
-        StringType name, StringType description, int depth, SharedPtr<ITask> task, ConsoleColor color = ConsoleColor::White)
+    void Log(StringType name, StringType description, int depth, SharedPtr<ITask> task, ConsoleColor color = ConsoleColor::White)
     {
         if (_LogDecomposition == false)
             return;
@@ -116,22 +162,22 @@ public:
             StaticCastPtr<CompoundTask>(task),
         });
     }
-    void Log(StringType                 name,
-             StringType                 description,
-             int                         depth,
+    void Log(StringType            name,
+             StringType            description,
+             int                   depth,
              SharedPtr<ICondition> condition,
-             ConsoleColor                color = ConsoleColor::DarkGreen)
+             ConsoleColor          color = ConsoleColor::DarkGreen)
     {
         if (_LogDecomposition == false)
             return;
 
         _DecompositionLog.push(DecomposedConditionEntry{{name, description, depth, color}, condition});
     }
-    void Log(StringType              name,
-             StringType              description,
-             int                      depth,
+    void Log(StringType         name,
+             StringType         description,
+             int                depth,
              SharedPtr<IEffect> effect,
-             ConsoleColor             color = ConsoleColor::DarkYellow)
+             ConsoleColor       color = ConsoleColor::DarkYellow)
     {
         if (_LogDecomposition == false)
             return;

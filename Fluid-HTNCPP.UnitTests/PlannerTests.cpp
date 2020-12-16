@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "CppUnitTest.h"
 #include "Contexts/BaseContext.h"
-#include "Domain.h"
+#include "CoreIncludes/Domain.h"
 #include "Planners/Planner.h"
 #include "Tasks/CompoundTasks/Selector.h"
 #include "Tasks/PrimitiveTasks/PrimitiveTask.h"
@@ -34,7 +34,7 @@ namespace FluidHTNCPPUnitTests
             DomainTestContext ctx;
             Domain      domain("Test"s);
             Planner     planner;
-            Assert::ExpectException<std::exception>([&]() { planner.Tick(domain, ctx); });
+            Assert::ExpectException<std::exception>([&]() { planner.Tick<DomainTestState,uint8_t,DomainTestWorldState>(domain, ctx); });
         }
         TEST_METHOD(TickWithEmptyDomain_ExpectedBehavior)
         {
@@ -42,7 +42,7 @@ namespace FluidHTNCPPUnitTests
             Domain      domain("Test"s);
             Planner     planner;
             ctx.Init();
-            planner.Tick(domain, ctx);
+            planner.Tick<DomainTestState,uint8_t,DomainTestWorldState>(domain, ctx);
         }
 
         TEST_METHOD(TickWithPrimitiveTaskWithoutOperator_ExpectedBehavior)
@@ -57,7 +57,7 @@ namespace FluidHTNCPPUnitTests
             domain.Add(domain.Root(), task1);
             domain.Add(task1, task2);
 
-            planner.Tick(domain, ctx);
+            planner.Tick<DomainTestState,uint8_t,DomainTestWorldState>(domain, ctx);
             auto currentTask = planner.GetCurrentTask();
 
             Assert::IsTrue(currentTask == nullptr);
@@ -79,7 +79,7 @@ namespace FluidHTNCPPUnitTests
             domain.Add(domain.Root(), task1);
             domain.Add(task1, task2);
 
-            planner.Tick(domain, ctx);
+            planner.Tick<DomainTestState,uint8_t,DomainTestWorldState>(domain, ctx);
             auto currentTask = planner.GetCurrentTask();
 
             Assert::IsTrue(currentTask == nullptr);
@@ -98,7 +98,7 @@ namespace FluidHTNCPPUnitTests
             domain.Add(domain.Root(), task1);
             domain.Add(task1, task2);
 
-            planner.Tick(domain, ctx);
+            planner.Tick<DomainTestState,uint8_t,DomainTestWorldState>(domain, ctx);
             auto currentTask = planner.GetCurrentTask();
 
             Assert::IsTrue(currentTask == nullptr);
@@ -119,7 +119,7 @@ namespace FluidHTNCPPUnitTests
             domain.Add(domain.Root(), task1);
             domain.Add(task1, task2);
 
-            planner.Tick(domain, ctx);
+            planner.Tick<DomainTestState,uint8_t,DomainTestWorldState>(domain, ctx);
             auto currentTask = planner.GetCurrentTask();
 
             Assert::IsTrue(currentTask != nullptr);
@@ -141,7 +141,7 @@ namespace FluidHTNCPPUnitTests
             domain.Add(domain.Root(), task1);
             domain.Add(task1, task2);
 
-            planner.Tick(domain, ctx);
+            planner.Tick<DomainTestState,uint8_t,DomainTestWorldState>(domain, ctx);
 
             Assert::IsTrue(test);
         }
@@ -176,11 +176,11 @@ namespace FluidHTNCPPUnitTests
             domain.Add(task2, task4);
 
             ctx.Done() = true;
-            planner.Tick(domain, ctx);
+            planner.Tick<DomainTestState,uint8_t,DomainTestWorldState>(domain, ctx);
 
             ctx.Done() = false;
             ctx.IsDirty() = true;
-            planner.Tick(domain, ctx);
+            planner.Tick<DomainTestState,uint8_t,DomainTestWorldState>(domain, ctx);
 
             Assert::IsTrue(test);
         }
@@ -200,7 +200,7 @@ namespace FluidHTNCPPUnitTests
             domain.Add(domain.Root(), task1);
             domain.Add(task1, task2);
 
-            planner.Tick(domain, ctx);
+            planner.Tick<DomainTestState,uint8_t,DomainTestWorldState>(domain, ctx);
             Assert::IsTrue(test);
         }
         TEST_METHOD(OnNewTaskConditionFailed_ExpectedBehavior)
@@ -243,11 +243,11 @@ namespace FluidHTNCPPUnitTests
             domain.Add(task2, task4);
 
             ctx.Done() = true;
-            planner.Tick(domain, ctx);
+            planner.Tick<DomainTestState,uint8_t,DomainTestWorldState>(domain, ctx);
 
             ctx.Done() = false;
             ctx.IsDirty() = true;
-            planner.Tick(domain, ctx);
+            planner.Tick<DomainTestState,uint8_t,DomainTestWorldState>(domain, ctx);
 
             Assert::IsTrue(test);
         }
@@ -282,11 +282,11 @@ namespace FluidHTNCPPUnitTests
             domain.Add(task2, task4);
 
             ctx.Done() = true;
-            planner.Tick(domain, ctx);
+            planner.Tick<DomainTestState,uint8_t,DomainTestWorldState>(domain, ctx);
 
             ctx.Done() = false;
             ctx.IsDirty() = true;
-            planner.Tick(domain, ctx);
+            planner.Tick<DomainTestState,uint8_t,DomainTestWorldState>(domain, ctx);
 
             Assert::IsTrue(test);
         }
@@ -321,11 +321,11 @@ namespace FluidHTNCPPUnitTests
             domain.Add(task2, task4);
 
             ctx.Done() = true;
-            planner.Tick(domain, ctx);
+            planner.Tick<DomainTestState,uint8_t,DomainTestWorldState>(domain, ctx);
 
             ctx.Done() = false;
             ctx.IsDirty() = true;
-            planner.Tick(domain, ctx);
+            planner.Tick<DomainTestState,uint8_t,DomainTestWorldState>(domain, ctx);
 
             Assert::IsTrue(test);
         }
@@ -344,9 +344,9 @@ namespace FluidHTNCPPUnitTests
 
             SharedPtr<PrimitiveTask> task3 = MakeSharedPtr<PrimitiveTask>("Sub-task1");
             SharedPtr<ICondition>    c = MakeSharedPtr<FuncCondition>("TestCondition"s, [](IContext& context) {
-                WORLDSTATEPROPERTY_VALUE_TYPE trudat = 1;
+                uint8_t trudat = 1;
                 return static_cast<DomainTestContext&>(context).HasState(
-                    static_cast<WORLDSTATEPROPERTY_ID_TYPE>(DomainTestState::HasA),
+                    DomainTestState::HasA,
                     trudat);
             });
 
@@ -359,7 +359,7 @@ namespace FluidHTNCPPUnitTests
 
             SharedPtr<IEffect> eff =
                 MakeSharedPtr<ActionEffect>("TestEffect"s, EffectType::PlanAndExecute, [](IContext& context, EffectType type) {
-                    context.SetState(static_cast<WORLDSTATEPROPERTY_ID_TYPE>(DomainTestState::HasA), true, true, type);
+                    static_cast<DomainTestContext&>(context).SetState(DomainTestState::HasA, true, true, type);
                 });
 
             task3->AddEffect(eff);
@@ -373,12 +373,12 @@ namespace FluidHTNCPPUnitTests
             domain.Add(task2, task4);
 
             ctx.SetContextState(ContextState::Executing);
-            ctx.SetState(static_cast<WORLDSTATEPROPERTY_ID_TYPE>(DomainTestState::HasA), true, true, EffectType::Permanent);
-            planner.Tick(domain, ctx);
+            ctx.SetState(DomainTestState::HasA, true, true, EffectType::Permanent);
+            planner.Tick<DomainTestState,uint8_t,DomainTestWorldState>(domain, ctx);
 
             ctx.SetContextState(ContextState::Executing);
-            ctx.SetState(static_cast<WORLDSTATEPROPERTY_ID_TYPE>(DomainTestState::HasA), false, true, EffectType::Permanent);
-            planner.Tick(domain, ctx);
+            ctx.SetState(DomainTestState::HasA, false, true, EffectType::Permanent);
+            planner.Tick<DomainTestState,uint8_t,DomainTestWorldState>(domain, ctx);
 
             Assert::IsTrue(test);
         }
@@ -401,7 +401,7 @@ namespace FluidHTNCPPUnitTests
             domain.Add(domain.Root(), task1);
             domain.Add(task1, task2);
 
-            planner.Tick(domain, ctx);
+            planner.Tick<DomainTestState,uint8_t,DomainTestWorldState>(domain, ctx);
 
             Assert::IsTrue(test);
         }
@@ -424,7 +424,7 @@ namespace FluidHTNCPPUnitTests
             domain.Add(domain.Root(), task1);
             domain.Add(task1, task2);
 
-            planner.Tick(domain, ctx);
+            planner.Tick<DomainTestState,uint8_t,DomainTestWorldState>(domain, ctx);
 
             Assert::IsTrue(test);
         }
@@ -453,7 +453,7 @@ namespace FluidHTNCPPUnitTests
             domain.Add(domain.Root(), task1);
             domain.Add(task1, task2);
 
-            planner.Tick(domain, ctx);
+            planner.Tick<DomainTestState,uint8_t,DomainTestWorldState>(domain, ctx);
 
             Assert::IsTrue(test);
         }

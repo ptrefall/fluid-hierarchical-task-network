@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "CppUnitTest.h"
-#include "BaseDomainBuilder.h"
+#include "CoreIncludes/BaseDomainBuilder.h"
 #include "DomainTestContext.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;

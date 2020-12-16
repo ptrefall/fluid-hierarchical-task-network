@@ -61,7 +61,7 @@ namespace FluidHTNCPPUnitTests
             Assert::IsTrue(ctx.GetWorldStateChangeStack()[(int) DomainTestState::HasB].size() == 1);
             Assert::IsTrue(ctx.GetWorldStateChangeStack()[(int) DomainTestState::HasB].top().First() == EffectType::Permanent);
             Assert::IsTrue(ctx.GetWorldStateChangeStack()[(int) DomainTestState::HasB].top().Second() == 1);
-            Assert::IsTrue(ctx.GetWorldState().GetState((int) DomainTestState::HasB) == 0);
+            Assert::IsTrue(ctx.GetWorldState().GetState(DomainTestState::HasB) == 0);
         }
         TEST_METHOD(SetStateExecutingContext_ExpectedBehavior)
         {
@@ -73,7 +73,7 @@ namespace FluidHTNCPPUnitTests
 
             Assert::AreEqual(true, ctx.HasStateOneParam(DomainTestState::HasB));
             Assert::IsTrue(ctx.GetWorldStateChangeStack()[(int) DomainTestState::HasB].size() == 0);
-            Assert::IsTrue(ctx.GetWorldState().GetState((int) DomainTestState::HasB) == 1);
+            Assert::IsTrue(ctx.GetWorldState().GetState( DomainTestState::HasB) == 1);
         }
 
         TEST_METHOD(GetStatePlanningContext_ExpectedBehavior)

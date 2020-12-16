@@ -2,7 +2,7 @@
 #include "pch.h"
 #include "CppUnitTest.h"
 #include "Contexts/BaseContext.h"
-#include "Domain.h"
+#include "CoreIncludes/Domain.h"
 #include "Planners/Planner.h"
 #include "Tasks/CompoundTasks/Sequence.h"
 #include "Tasks/CompoundTasks/Selector.h"
@@ -210,15 +210,15 @@ namespace FluidHTNCPPUnitTests
             TaskQueueType                 plan;
             ctx.Init();
             ctx.SetContextState(ContextState::Planning);
-            ctx.SetState(static_cast<WORLDSTATEPROPERTY_ID_TYPE>(DomainTestState::HasA), true,true, EffectType::PlanAndExecute);
-            ctx.SetState(static_cast<WORLDSTATEPROPERTY_ID_TYPE>(DomainTestState::HasB), true,true, EffectType::Permanent);
-            ctx.SetState(static_cast<WORLDSTATEPROPERTY_ID_TYPE>(DomainTestState::HasC), true,true, EffectType::PlanOnly);
+            ctx.SetState(DomainTestState::HasA, true,true, EffectType::PlanAndExecute);
+            ctx.SetState(DomainTestState::HasB, true,true, EffectType::Permanent);
+            ctx.SetState(DomainTestState::HasC, true,true, EffectType::PlanOnly);
 
             SharedPtr<CompoundTask>  task = MakeSharedPtr<Sequence>("Test"s);
             SharedPtr<PrimitiveTask> task2 = MakeSharedPtr<PrimitiveTask>("Sub-task1");
             SharedPtr<IEffect>       eff =
                 MakeSharedPtr<ActionEffect>("TestEffect"s, EffectType::Permanent, [](IContext& context, EffectType ) {
-                    context.SetState(static_cast<WORLDSTATEPROPERTY_ID_TYPE>(DomainTestState::HasA),
+                    static_cast<DomainTestContext&>(context).SetState(DomainTestState::HasA,
                                      false,
                                      true,
                                      EffectType::PlanOnly);
@@ -364,9 +364,9 @@ namespace FluidHTNCPPUnitTests
             TaskQueueType     plan;
             ctx.Init();
             ctx.SetContextState(ContextState::Planning);
-            ctx.SetState(static_cast<WORLDSTATEPROPERTY_ID_TYPE>(DomainTestState::HasA), true,true, EffectType::PlanAndExecute);
-            ctx.SetState(static_cast<WORLDSTATEPROPERTY_ID_TYPE>(DomainTestState::HasB), true,true, EffectType::Permanent);
-            ctx.SetState(static_cast<WORLDSTATEPROPERTY_ID_TYPE>(DomainTestState::HasC), true,true, EffectType::PlanOnly);
+            ctx.SetState(DomainTestState::HasA, true,true, EffectType::PlanAndExecute);
+            ctx.SetState(DomainTestState::HasB, true,true, EffectType::Permanent);
+            ctx.SetState(DomainTestState::HasC, true,true, EffectType::PlanOnly);
 
             SharedPtr<CompoundTask>  task = MakeSharedPtr<Sequence>("Test"s);
             SharedPtr<CompoundTask>  task2 = MakeSharedPtr<Selector>("Test2"s);
@@ -380,7 +380,7 @@ namespace FluidHTNCPPUnitTests
             SharedPtr<PrimitiveTask> subtask3 = MakeSharedPtr<PrimitiveTask>("Sub-task3");
             SharedPtr<IEffect>       eff =
                 MakeSharedPtr<ActionEffect>("TestEffect"s, EffectType::Permanent, [](IContext& ctx, EffectType ) {
-                    ctx.SetState(static_cast<WORLDSTATEPROPERTY_ID_TYPE>(DomainTestState::HasA), false, true, EffectType::PlanOnly);
+                    static_cast<DomainTestContext&>(ctx).SetState(DomainTestState::HasA, false, true, EffectType::PlanOnly);
                 });
             subtask3->AddEffect(eff);
             task3->AddSubTask(subtask3);
@@ -389,7 +389,7 @@ namespace FluidHTNCPPUnitTests
             SharedPtr<PrimitiveTask> subtask4 = MakeSharedPtr<PrimitiveTask>("Sub-task4");
             SharedPtr<IEffect>       eff2 =
                 MakeSharedPtr<ActionEffect>("TestEffect2"s, EffectType::Permanent, [](IContext& ctx, EffectType ) {
-                    ctx.SetState(static_cast<WORLDSTATEPROPERTY_ID_TYPE>(DomainTestState::HasB), false, true, EffectType::PlanOnly);
+                    static_cast<DomainTestContext&>(ctx).SetState(DomainTestState::HasB, false, true, EffectType::PlanOnly);
                 });
             subtask4->AddEffect(eff2);
             task2->AddSubTask(subtask4);
@@ -402,7 +402,7 @@ namespace FluidHTNCPPUnitTests
             SharedPtr<PrimitiveTask> subtask5 = MakeSharedPtr<PrimitiveTask>("Sub-task5");
             SharedPtr<IEffect>       eff3 =
                 MakeSharedPtr<ActionEffect>("TestEffect3"s, EffectType::Permanent, [](IContext& ctx, EffectType ) {
-                    ctx.SetState(static_cast<WORLDSTATEPROPERTY_ID_TYPE>(DomainTestState::HasC), false, true, EffectType::PlanOnly);
+                    static_cast<DomainTestContext&>(ctx).SetState(DomainTestState::HasC, false, true, EffectType::PlanOnly);
                 });
             subtask5->AddEffect(eff3);
             task->AddSubTask(subtask5);
@@ -419,9 +419,9 @@ namespace FluidHTNCPPUnitTests
             Assert::IsTrue(ctx.GetWorldStateChangeStack()[(int) DomainTestState::HasA].size() == 1);
             Assert::IsTrue(ctx.GetWorldStateChangeStack()[(int) DomainTestState::HasB].size() == 1);
             Assert::IsTrue(ctx.GetWorldStateChangeStack()[(int) DomainTestState::HasC].size() == 1);
-            Assert::AreEqual(1, (int)ctx.GetState(static_cast<WORLDSTATEPROPERTY_ID_TYPE>(DomainTestState::HasA) ));
-            Assert::AreEqual(1, (int)ctx.GetState(static_cast<WORLDSTATEPROPERTY_ID_TYPE>(DomainTestState::HasB) ));
-            Assert::AreEqual(1, (int)ctx.GetState(static_cast<WORLDSTATEPROPERTY_ID_TYPE>(DomainTestState::HasC) ));
+            Assert::AreEqual(1, (int)ctx.GetState(DomainTestState::HasA));
+            Assert::AreEqual(1, (int)ctx.GetState(DomainTestState::HasB));
+            Assert::AreEqual(1, (int)ctx.GetState(DomainTestState::HasC));
         }
 
         TEST_METHOD(DecomposeNestedCompoundSubtaskFailReturnToPreviousWorldState_ExpectedBehavior)
@@ -430,9 +430,9 @@ namespace FluidHTNCPPUnitTests
             TaskQueueType     plan;
             ctx.Init();
             ctx.SetContextState(ContextState::Planning);
-            ctx.SetState(static_cast<WORLDSTATEPROPERTY_ID_TYPE>(DomainTestState::HasA), true, true, EffectType::PlanAndExecute);
-            ctx.SetState(static_cast<WORLDSTATEPROPERTY_ID_TYPE>(DomainTestState::HasB), true, true, EffectType::Permanent);
-            ctx.SetState(static_cast<WORLDSTATEPROPERTY_ID_TYPE>(DomainTestState::HasC), true, true, EffectType::PlanOnly);
+            ctx.SetState(DomainTestState::HasA, true, true, EffectType::PlanAndExecute);
+            ctx.SetState(DomainTestState::HasB, true, true, EffectType::Permanent);
+            ctx.SetState(DomainTestState::HasC, true, true, EffectType::PlanOnly);
 
             SharedPtr<CompoundTask>  task = MakeSharedPtr<Sequence>("Test"s);
             SharedPtr<CompoundTask>  task2 = MakeSharedPtr<Sequence>("Test2"s);
@@ -446,7 +446,7 @@ namespace FluidHTNCPPUnitTests
             SharedPtr<PrimitiveTask> subtask3 = MakeSharedPtr<PrimitiveTask>("Sub-task3");
             SharedPtr<IEffect>       eff =
                 MakeSharedPtr<ActionEffect>("TestEffect"s, EffectType::Permanent, [](IContext& ctx, EffectType ) {
-                    ctx.SetState(static_cast<WORLDSTATEPROPERTY_ID_TYPE>(DomainTestState::HasA), false, true, EffectType::PlanOnly);
+                    static_cast<DomainTestContext&>(ctx).SetState(DomainTestState::HasA, false, true, EffectType::PlanOnly);
                 });
             subtask3->AddEffect(eff);
             task3->AddSubTask(subtask3);
@@ -455,7 +455,7 @@ namespace FluidHTNCPPUnitTests
             SharedPtr<PrimitiveTask> subtask4 = MakeSharedPtr<PrimitiveTask>("Sub-task4");
             SharedPtr<IEffect>       eff2 =
                 MakeSharedPtr<ActionEffect>("TestEffect2"s, EffectType::Permanent, [](IContext& ctx, EffectType ) {
-                    ctx.SetState(static_cast<WORLDSTATEPROPERTY_ID_TYPE>(DomainTestState::HasB), false, true, EffectType::PlanOnly);
+                    static_cast<DomainTestContext&>(ctx).SetState(DomainTestState::HasB, false, true, EffectType::PlanOnly);
                 });
             subtask4->AddEffect(eff2);
 
@@ -470,7 +470,7 @@ namespace FluidHTNCPPUnitTests
             SharedPtr<PrimitiveTask> subtask5 = MakeSharedPtr<PrimitiveTask>("Sub-task5");
             SharedPtr<IEffect>       eff3 =
                 MakeSharedPtr<ActionEffect>("TestEffect3"s, EffectType::Permanent, [](IContext& ctx, EffectType ) {
-                    ctx.SetState(static_cast<WORLDSTATEPROPERTY_ID_TYPE>(DomainTestState::HasC), false, true, EffectType::PlanOnly);
+                    static_cast<DomainTestContext&>(ctx).SetState(DomainTestState::HasC, false, true, EffectType::PlanOnly);
                 });
             subtask5->AddEffect(eff3);
             task->AddSubTask(subtask5);
@@ -482,9 +482,9 @@ namespace FluidHTNCPPUnitTests
             Assert::IsTrue(ctx.GetWorldStateChangeStack()[(int)DomainTestState::HasA].size() == 1);
             Assert::IsTrue(ctx.GetWorldStateChangeStack()[(int)DomainTestState::HasB].size() == 1);
             Assert::IsTrue(ctx.GetWorldStateChangeStack()[(int)DomainTestState::HasC].size() == 1);
-            Assert::AreEqual(1, (int)ctx.GetState(static_cast<WORLDSTATEPROPERTY_ID_TYPE>(DomainTestState::HasA)));
-            Assert::AreEqual(1, (int)ctx.GetState(static_cast<WORLDSTATEPROPERTY_ID_TYPE>(DomainTestState::HasB)));
-            Assert::AreEqual(1, (int)ctx.GetState(static_cast<WORLDSTATEPROPERTY_ID_TYPE>(DomainTestState::HasC)));
+            Assert::AreEqual(1, (int)ctx.GetState(DomainTestState::HasA));
+            Assert::AreEqual(1, (int)ctx.GetState(DomainTestState::HasB));
+            Assert::AreEqual(1, (int)ctx.GetState(DomainTestState::HasC));
         }
 
         TEST_METHOD(PausePlan_ExpectedBehavior)

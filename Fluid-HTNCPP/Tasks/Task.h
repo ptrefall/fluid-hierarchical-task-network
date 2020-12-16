@@ -51,6 +51,7 @@ protected:
     TaskStatus                               _LastStatus = TaskStatus::Failure;
 
 public:
+    virtual ~ITask(){}
     ITaskDerivedClassName GetType() const { return _Type; }
     bool                  IsTypeOf(ITaskDerivedClassName thetype)
     {

@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "CppUnitTest.h"
 #include "Contexts/BaseContext.h"
-#include "Domain.h"
+#include "CoreIncludes/Domain.h"
 #include "Tasks/Task.h"
 #include "Tasks/CompoundTasks/CompoundTask.h"
 #include "Tasks/PrimitiveTasks/PrimitiveTask.h"
@@ -69,7 +69,7 @@ TEST_CLASS(DomainTests)
     TEST_METHOD(FindPlanUninitializedContextThrowsException_ExpectedBehavior)
     {
         auto                      domain = MakeSharedPtr<Domain>("Test");
-        SharedPtr<IContext> ctx = MakeSharedPtr<DomainTestContext>();
+        SharedPtr<BaseContextType> ctx = MakeSharedPtr<DomainTestContext>();
 
         Assert::ExpectException<std::exception>([=]() -> DecompositionStatus {
             TaskQueueType plan;
@@ -78,29 +78,26 @@ TEST_CLASS(DomainTests)
     }
     TEST_METHOD(FindPlanNoTasksThenNullPlan_ExpectedBehavior)
     {
-        auto                      bctx = MakeSharedPtr<DomainTestContext>();
-        SharedPtr<IContext> ctx = StaticCastPtr<IContext>(bctx);
+        SharedPtr<BaseContextType> ctx = MakeSharedPtr<DomainTestContext>();
         Domain                    domain("Test");
         TaskQueueType             plan;
-        bctx->Init();
+        ctx->Init();
         auto status = domain.FindPlan(*ctx, plan);
         Assert::IsTrue(status == DecompositionStatus::Rejected);
         Assert::IsTrue(plan.size() == 0);
     }
     TEST_METHOD(AfterFindPlanContextStateIsExecuting_ExpectedBehavior)
     {
-        auto                      bctx = MakeSharedPtr<DomainTestContext>();
-        SharedPtr<IContext> ctx = StaticCastPtr<IContext>(bctx);
+        SharedPtr<BaseContextType> ctx = MakeSharedPtr<DomainTestContext>();
         Domain                    domain("Test");
         TaskQueueType             plan;
-        bctx->Init();
+        ctx->Init();
         domain.FindPlan(*ctx, plan);
         Assert::IsTrue(ctx->GetContextState() == ContextState::Executing);
     }
     TEST_METHOD(FindPlan_ExpectedBehavior)
     {
-        auto                      bctx = MakeSharedPtr<DomainTestContext>();
-        SharedPtr<IContext> ctx = StaticCastPtr<IContext>(bctx);
+        SharedPtr<BaseContextType> bctx = MakeSharedPtr<DomainTestContext>();
         Domain                    domain("Test");
         TaskQueueType             plan;
 
@@ -113,7 +110,7 @@ TEST_CLASS(DomainTests)
         domain.Add(domain.Root(), task1);
         domain.Add(task1, task2);
 
-        auto status = domain.FindPlan(*ctx, plan);
+        auto status = domain.FindPlan(*bctx, plan);
 
         Assert::IsTrue(status == DecompositionStatus::Succeeded);
         Assert::IsTrue(plan.size() == 1);
@@ -121,8 +118,7 @@ TEST_CLASS(DomainTests)
     }
     TEST_METHOD(FindPlanTrimsNonPermanentStateChange_ExpectedBehavior)
     {
-        auto                      bctx = MakeSharedPtr<DomainTestContext>();
-        SharedPtr<IContext> ctx = StaticCastPtr<IContext>(bctx);
+        SharedPtr<BaseContextType> bctx = MakeSharedPtr<DomainTestContext>();
         Domain                    domain("Test");
         TaskQueueType             plan;
         bctx->Init();
@@ -131,7 +127,7 @@ TEST_CLASS(DomainTests)
         SharedPtr<PrimitiveTask> task2 = MakeSharedPtr<PrimitiveTask>("Sub-task1");
         SharedPtr<IEffect>       effect1 =
             MakeSharedPtr<ActionEffect>("TestEffect1"s, EffectType::PlanOnly, [=](IContext& ctx, EffectType t) {
-                ctx.SetState((int)DomainTestState::HasA, true, true, t);
+                static_cast<BaseContextType&>(ctx).SetState(DomainTestState::HasA, true, true, t);
             });
         task2->AddEffect(effect1);
 
@@ -139,28 +135,28 @@ TEST_CLASS(DomainTests)
         SharedPtr<IEffect> effect2 = MakeSharedPtr<ActionEffect>(
             "TestEffect2"s,
             EffectType::PlanAndExecute,
-            [=](IContext& ctx, EffectType t) { ctx.SetState((int)DomainTestState::HasB, true, true, t); });
+            [=](IContext& ctx, EffectType t) {static_cast<BaseContextType&>(ctx).SetState(DomainTestState::HasB, true, true, t); });
         task3->AddEffect(effect2);
 
         SharedPtr<PrimitiveTask> task4 = MakeSharedPtr<PrimitiveTask>("Sub-task3");
         SharedPtr<IEffect> effect3 =
             MakeSharedPtr<ActionEffect>("TestEffect3"s, EffectType::Permanent, [=](IContext& ctx, EffectType t) {
-                ctx.SetState((int)DomainTestState::HasC, true, true, t);
+                static_cast<BaseContextType&>(ctx).SetState(DomainTestState::HasC, true, true, t);
             });
         task4->AddEffect(effect3);
         domain.Add(domain.Root(), task1);
         domain.Add(task1, task2);
         domain.Add(task1, task3);
         domain.Add(task1, task4);
-        auto status = domain.FindPlan(*ctx, plan);
+        auto status = domain.FindPlan(*bctx, plan);
 
         Assert::IsTrue(status == DecompositionStatus::Succeeded);
-        Assert::IsTrue(ctx->GetWorldStateChangeStack()[(int)DomainTestState::HasA].size() == 0);
-        Assert::IsTrue(ctx->GetWorldStateChangeStack()[(int)DomainTestState::HasB].size() == 0);
-        Assert::IsTrue(ctx->GetWorldStateChangeStack()[(int)DomainTestState::HasC].size() == 0);
-        Assert::IsTrue(ctx->GetWorldState().GetState((int)DomainTestState::HasA) == 0);
-        Assert::IsTrue(ctx->GetWorldState().GetState((int)DomainTestState::HasB) == 0);
-        Assert::IsTrue(ctx->GetWorldState().GetState((int)DomainTestState::HasC) == 1);
+        Assert::IsTrue(bctx->GetWorldStateChangeStack()[(int)DomainTestState::HasA].size() == 0);
+        Assert::IsTrue(bctx->GetWorldStateChangeStack()[(int)DomainTestState::HasB].size() == 0);
+        Assert::IsTrue(bctx->GetWorldStateChangeStack()[(int)DomainTestState::HasC].size() == 0);
+        Assert::IsTrue(bctx->GetWorldState().GetState(DomainTestState::HasA) == 0);
+        Assert::IsTrue(bctx->GetWorldState().GetState(DomainTestState::HasB) == 0);
+        Assert::IsTrue(bctx->GetWorldState().GetState(DomainTestState::HasC) == 1);
         Assert::IsTrue(plan.size() == 3);
     }
 
@@ -175,7 +171,7 @@ TEST_CLASS(DomainTests)
         SharedPtr<PrimitiveTask> task2 = MakeSharedPtr<PrimitiveTask>("Sub-task1");
         SharedPtr<IEffect> effect1 =
             MakeSharedPtr<ActionEffect>("TestEffect1"s, EffectType::PlanOnly, [=](IContext& ctx, EffectType t) {
-                ctx.SetState((int)DomainTestState::HasA, true, true, t);
+                static_cast<BaseContextType&>(ctx).SetState(DomainTestState::HasA, true, true, t);
             });
         task2->AddEffect(effect1);
 
@@ -183,13 +179,13 @@ TEST_CLASS(DomainTests)
         SharedPtr<IEffect> effect2 = MakeSharedPtr<ActionEffect>(
             "TestEffect2"s,
             EffectType::PlanAndExecute,
-            [=](IContext& ctx, EffectType t) { ctx.SetState((int)DomainTestState::HasB, true, true, t); });
+            [=](IContext& ctx, EffectType t) { static_cast<BaseContextType&>(ctx).SetState(DomainTestState::HasB, true, true, t); });
         task3->AddEffect(effect2);
 
         SharedPtr<PrimitiveTask> task4 = MakeSharedPtr<PrimitiveTask>("Sub-task3");
         SharedPtr<IEffect> effect3 =
             MakeSharedPtr<ActionEffect>("TestEffect3"s, EffectType::Permanent, [=](IContext& ctx, EffectType t) {
-                ctx.SetState((int)DomainTestState::HasC, true, true, t);
+                static_cast<BaseContextType&>(ctx).SetState(DomainTestState::HasC, true, true, t);
             });
         task4->AddEffect(effect3);
 
@@ -205,14 +201,14 @@ TEST_CLASS(DomainTests)
         domain.Add(task1, task3);
         domain.Add(task1, task4);
         domain.Add(task1, task5);
-        auto status = domain.FindPlan(*ctx, plan);
+        auto status = domain.FindPlan(*bctx, plan);
         Assert::IsTrue(status == DecompositionStatus::Rejected);
-        Assert::IsTrue(ctx->GetWorldStateChangeStack()[(int)DomainTestState::HasA].size() == 0);
-        Assert::IsTrue(ctx->GetWorldStateChangeStack()[(int)DomainTestState::HasB].size() == 0);
-        Assert::IsTrue(ctx->GetWorldStateChangeStack()[(int)DomainTestState::HasC].size() == 0);
-        Assert::IsTrue(ctx->GetWorldState().GetState((int)DomainTestState::HasA) == 0);
-        Assert::IsTrue(ctx->GetWorldState().GetState((int)DomainTestState::HasB) == 0);
-        Assert::IsTrue(ctx->GetWorldState().GetState((int)DomainTestState::HasC) == 0);
+        Assert::IsTrue(bctx->GetWorldStateChangeStack()[(int)DomainTestState::HasA].size() == 0);
+        Assert::IsTrue(bctx->GetWorldStateChangeStack()[(int)DomainTestState::HasB].size() == 0);
+        Assert::IsTrue(bctx->GetWorldStateChangeStack()[(int)DomainTestState::HasC].size() == 0);
+        Assert::IsTrue(bctx->GetWorldState().GetState(DomainTestState::HasA) == 0);
+        Assert::IsTrue(bctx->GetWorldState().GetState(DomainTestState::HasB) == 0);
+        Assert::IsTrue(bctx->GetWorldState().GetState(DomainTestState::HasC) == 0);
         Assert::IsTrue(plan.size() == 0);
     }
     TEST_METHOD(FindPlanIfMTRsAreEqualThenReturnNullPlan_ExpectedBehavior)
@@ -251,7 +247,7 @@ TEST_CLASS(DomainTests)
         domain.Add(task1, task3);
         domain.Add(task2, task4);
         domain.Add(task2, task5);
-        auto status = domain.FindPlan(*ctx, plan);
+        auto status = domain.FindPlan(*bctx, plan);
 
         Assert::IsTrue(status == DecompositionStatus::Rejected);
         Assert::IsTrue(plan.size() == 0);
@@ -278,7 +274,7 @@ TEST_CLASS(DomainTests)
         domain.Add(task1, task4);
         domain.Add(task1, task3);
 
-        auto status = domain.FindPlan(*ctx, plan);
+        auto status = domain.FindPlan(*bctx, plan);
 
         Assert::IsTrue(status == DecompositionStatus::Partial);
         Assert::IsTrue(plan.size() == 1);
@@ -311,7 +307,7 @@ TEST_CLASS(DomainTests)
         domain.Add(task1, task4);
         domain.Add(task1, task3);
 
-        auto status = domain.FindPlan(*ctx, plan);
+        auto status = domain.FindPlan(*bctx, plan);
 
         Assert::IsTrue(status == DecompositionStatus::Partial);
         Assert::IsTrue(plan.size() == 1);
@@ -324,7 +320,7 @@ TEST_CLASS(DomainTests)
         Assert::AreEqual(t1ptr, t2ptr);
         Assert::AreEqual(2, ctx->PartialPlanQueue().front().TaskIndex);
 
-        status = domain.FindPlan(*ctx, plan);
+        status = domain.FindPlan(*bctx, plan);
 
         Assert::IsTrue(status == DecompositionStatus::Succeeded);
         Assert::IsTrue(plan.size() == 1);
@@ -359,7 +355,7 @@ TEST_CLASS(DomainTests)
         domain.Add(task3, pausePlan);
         domain.Add(task3, subtask2);
 
-        auto status = domain.FindPlan(*ctx, plan);
+        auto status = domain.FindPlan(*bctx, plan);
 
         Assert::IsTrue(status == DecompositionStatus::Partial);
         Assert::IsTrue(plan.size() == 1);
@@ -409,7 +405,7 @@ TEST_CLASS(DomainTests)
         domain.Add(task3, pausePlan);
         domain.Add(task3, subtask2);
 
-        auto status = domain.FindPlan(*ctx, plan);
+        auto status = domain.FindPlan(*bctx, plan);
 
         Assert::IsTrue(status == DecompositionStatus::Partial);
         Assert::IsTrue(plan.size() == 1);
@@ -429,7 +425,7 @@ TEST_CLASS(DomainTests)
         Assert::AreEqual(t1ptr, t2ptr);
         Assert::AreEqual(1, queueCopy.front().TaskIndex);
 
-        status = domain.FindPlan(*ctx, plan);
+        status = domain.FindPlan(*bctx, plan);
 
         Assert::IsTrue(status == DecompositionStatus::Succeeded);
         Assert::IsTrue(plan.size() == 2);
@@ -476,7 +472,7 @@ TEST_CLASS(DomainTests)
         SharedPtr<PrimitiveTask> subtask7 = MakeSharedPtr<PrimitiveTask>("Sub-task7");
         domain.Add(task, subtask7);
 
-        auto status = domain.FindPlan(*ctx, plan);
+        auto status = domain.FindPlan(*bctx, plan);
 
         Assert::IsTrue(status == DecompositionStatus::Partial);
         Assert::IsTrue(plan.size() == 1);
@@ -495,7 +491,7 @@ TEST_CLASS(DomainTests)
         Assert::AreEqual(t1ptr, queueCopy.front().Task.get());
         Assert::AreEqual(1, queueCopy.front().TaskIndex);
 
-        status = domain.FindPlan(*ctx, plan);
+        status = domain.FindPlan(*bctx, plan);
 
         Assert::IsTrue(status == DecompositionStatus::Partial);
         Assert::IsTrue(plan.size() == 3);
@@ -505,7 +501,7 @@ TEST_CLASS(DomainTests)
         plan.pop();
         Assert::AreEqual("Sub-task5"s, plan.front()->Name());
 
-        status = domain.FindPlan(*ctx, plan);
+        status = domain.FindPlan(*bctx, plan);
 
         Assert::IsTrue(status == DecompositionStatus::Succeeded);
         Assert::IsTrue(plan.size() == 2);

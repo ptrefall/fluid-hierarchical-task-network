@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "CppUnitTest.h"
 #include "Contexts/BaseContext.h"
-#include "Domain.h"
+#include "CoreIncludes/Domain.h"
 #include "Planners/Planner.h"
 #include "Tasks/CompoundTasks/Selector.h"
 #include "Tasks/PrimitiveTasks/PrimitiveTask.h"

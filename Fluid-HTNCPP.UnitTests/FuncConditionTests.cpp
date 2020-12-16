@@ -2,18 +2,12 @@
 #include "CppUnitTest.h"
 #include "Contexts/BaseContext.h"
 #include "Conditions/Condition.h"
+#include "DomainTestContext.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 using namespace FluidHTN;
 
-
-class TestContext : public BaseContext
-{
-	bool _Done = false;
-public:
-	bool& Done() { return _Done; }
-};
 
 namespace FluidHTNCPPUnitTests
 {
@@ -28,7 +22,7 @@ TEST_CLASS(FuncConditionTests)
 
     TEST_METHOD(IsValidFailsWithoutFunctionPtr_ExpectedBehavior)
     {
-        auto ctx = MakeSharedPtr<BaseContext>();
+        auto ctx = MakeSharedPtr<DomainTestContext>();
         auto c = MakeSharedPtr<FuncCondition>("Name"s, nullptr);
 
         auto result = c->IsValid(*ctx);
@@ -38,9 +32,9 @@ TEST_CLASS(FuncConditionTests)
 
     TEST_METHOD(IsValidCallsInternalFunctionPtr_ExpectedBehavior)
     {
-        TestContext ctx;
+        DomainTestContext ctx;
         auto        c = MakeSharedPtr<FuncCondition>("Name"s,
-                                                 [](IContext& ctx) { return (static_cast<TestContext&>(ctx).Done() == false); });
+                                                 [](IContext& ctx) { return (static_cast<DomainTestContext&>(ctx).Done() == false); });
         auto        result = c->IsValid(ctx);
 
         Assert::AreEqual(true, result);

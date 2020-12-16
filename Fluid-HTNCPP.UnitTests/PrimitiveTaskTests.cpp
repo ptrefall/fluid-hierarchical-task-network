@@ -5,18 +5,11 @@
 #include "Conditions/Condition.h"
 #include "Operators/Operator.h"
 #include "Tasks/PrimitiveTasks/PrimitiveTask.h"
+#include "DomainTestContext.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 using namespace FluidHTN;
-
-
-class TestContext : public BaseContext
-{
-	bool _Done = false;
-public:
-	bool& Done() { return _Done; }
-};
 
 namespace FluidHTNCPPUnitTests
 {
@@ -26,7 +19,7 @@ namespace FluidHTNCPPUnitTests
         {
             auto                        task = MakeSharedPtr<PrimitiveTask>("Test"s);
             SharedPtr<ICondition> c = MakeSharedPtr<FuncCondition>("Name"s, [](IContext& ctx) {
-                return (static_cast<TestContext&>(ctx).Done() == false);
+                return (static_cast<DomainTestContext&>(ctx).Done() == false);
             });
             bool bRet = task->AddCondition(c);
 
@@ -37,7 +30,7 @@ namespace FluidHTNCPPUnitTests
         {
             auto                        task = MakeSharedPtr<PrimitiveTask>("Test"s);
             SharedPtr<ICondition> c = MakeSharedPtr<FuncCondition>("Name"s, [](IContext& ctx) {
-                return (static_cast<TestContext&>(ctx).Done() == false);
+                return (static_cast<DomainTestContext&>(ctx).Done() == false);
             });
 
             bool bRet = task->AddExecutingCondition(c);
@@ -50,7 +43,7 @@ namespace FluidHTNCPPUnitTests
             auto                     task = MakeSharedPtr<PrimitiveTask>("Test"s);
             SharedPtr<IEffect> e = MakeSharedPtr<ActionEffect>("Name"s, EffectType::Permanent , [](IContext& ctx, EffectType eff) {
                 (void)eff;
-                static_cast<TestContext&>(ctx).Done() = true;
+                static_cast<DomainTestContext&>(ctx).Done() = true;
             });
 
             bool bRet = task->AddEffect(e);
@@ -83,11 +76,11 @@ namespace FluidHTNCPPUnitTests
 
         TEST_METHOD(ApplyEffects_ExpectedBehavior)
         {
-            TestContext              ctx;
+            DomainTestContext              ctx;
             auto                     task = MakeSharedPtr<PrimitiveTask>("Test"s);
             SharedPtr<IEffect> e = MakeSharedPtr<ActionEffect>("Name"s, EffectType::Permanent, [](IContext& ctx, EffectType e) {
                 (void)e;
-                static_cast<TestContext&>(ctx).Done() = true;
+                static_cast<DomainTestContext&>(ctx).Done() = true;
             });
 
             task->AddEffect(e);
@@ -97,10 +90,10 @@ namespace FluidHTNCPPUnitTests
         }
         TEST_METHOD(StopWithValidOperator_ExpectedBehavior)
         {
-            TestContext                ctx;
+            DomainTestContext                ctx;
             auto                       task = MakeSharedPtr<PrimitiveTask>("Test"s);
             SharedPtr<IOperator> o =
-                MakeSharedPtr<FuncOperator>(nullptr, [](IContext& ctx) { static_cast<TestContext&>(ctx).Done() = true; });
+                MakeSharedPtr<FuncOperator>(nullptr, [](IContext& ctx) { static_cast<DomainTestContext&>(ctx).Done() = true; });
 
             task->SetOperator(o);
             task->Stop(ctx);
@@ -111,19 +104,19 @@ namespace FluidHTNCPPUnitTests
 
         TEST_METHOD(StopWithNullOperator_ExpectedBehavior)
         {
-            TestContext                ctx;
+            DomainTestContext                ctx;
             auto                       task = MakeSharedPtr<PrimitiveTask>("Test"s);
             task->Stop(ctx);
         }
         TEST_METHOD( IsValid_ExpectedBehavior)
         {
-            TestContext                ctx;
+            DomainTestContext                ctx;
             auto                       task = MakeSharedPtr<PrimitiveTask>("Test"s);
             SharedPtr<ICondition> c = MakeSharedPtr<FuncCondition>("Name"s, [](IContext& ctx) {
-                return (static_cast<TestContext&>(ctx).Done() == false);
+                return (static_cast<DomainTestContext&>(ctx).Done() == false);
             });
             SharedPtr<ICondition> c2 = MakeSharedPtr<FuncCondition>("Name"s, [](IContext& ctx) {
-                return (static_cast<TestContext&>(ctx).Done() == true);
+                return (static_cast<DomainTestContext&>(ctx).Done() == true);
             });
 
             task->AddCondition(c);
