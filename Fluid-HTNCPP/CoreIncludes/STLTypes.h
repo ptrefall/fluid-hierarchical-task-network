@@ -3,7 +3,7 @@
 //
 #pragma once
 
-#if !USING_CUSTOM_STL
+#if !FHTN_USING_CUSTOM_STL
 
 template<typename T>
 using SharedPtr = std::shared_ptr<T>;
@@ -25,7 +25,27 @@ SharedPtr<T> StaticCastPtr(const SharedPtr<U>& Other)
 }
 
 template<typename T>
-using ArrayType = std::vector<T>;
+class ArrayType 
+{
+private:
+    std::vector<T> vec;
+public:
+    ArrayType(){}
+    ArrayType(size_t s) : vec(s){}
+    void Add(const T& x) {vec.push_back(x);}
+    size_t size() const {return vec.size();}
+    void clear() {return vec.clear();}
+    void PopBack(){vec.pop_back();}
+    void resize(size_t n) {vec.resize(n);}
+
+    T& Back() {return vec.back();}
+
+    T* begin() {return vec.begin();}
+    auto end() {return vec.end();}
+
+    T& operator[](size_t index){return vec[index];}
+    const T& operator[](size_t index)const {return vec[index];}
+};
 
 template<typename T>
 class Queue
@@ -127,4 +147,4 @@ StringType ToString(const T& arg)
 
 #else
 #include "STLReplacementTypes.h"
-#endif !USING_CUSTOM_STL
+#endif !FHTN_USING_CUSTOM_STL

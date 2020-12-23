@@ -31,7 +31,7 @@ public:
 
     bool AddSubTask(SharedPtr<ITask> subtask)
     {
-        _Tasks.push_back(subtask);
+        _Tasks.Add(subtask);
         return true;
     }
 
@@ -54,8 +54,9 @@ public:
 
     virtual bool IsValid(IContext& ctx) override
     {
-        for (auto& condition : _Conditions)
+        for(size_t si = 0; si < _Conditions.size();si++)
         {
+            auto& condition = _Conditions[si];
             bool result = condition->IsValid(ctx);
             if (ctx.LogDecomposition())
             {

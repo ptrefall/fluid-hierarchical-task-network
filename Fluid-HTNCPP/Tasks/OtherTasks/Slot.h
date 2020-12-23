@@ -34,7 +34,7 @@ public:
         _Subtask = subtask;
         return true;
     }
-    void Clear() { _Subtask = nullptr; }
+    void clear() { _Subtask = nullptr; }
 
     DecompositionStatus Decompose(IContext& ctx, int startIndex, TaskQueueType& result)
     {

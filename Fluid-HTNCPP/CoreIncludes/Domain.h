@@ -102,7 +102,7 @@ public:
         auto iter = _slots.Find(slotId);
         if (iter != _slots.End())
         {
-            iter->second->Clear();
+            iter->second->clear();
         }
     }
     template <typename WSIDTYPE, typename WSVALTYPE, typename WSDERIVEDTYPE>

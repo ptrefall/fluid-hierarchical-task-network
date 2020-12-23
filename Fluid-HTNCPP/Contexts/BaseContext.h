@@ -122,8 +122,9 @@ public:
     {
         FHTN_FATAL_EXCEPTION(_ContextState != ContextState::Executing, "Can not trim a context when in execution mode");
 
-        for (auto& stack : _WorldStateChangeStackArray)
+        for (size_t si = 0; si < _WorldStateChangeStackArray.size();si++)
         {
+            auto& stack =  _WorldStateChangeStackArray[si];
             while (stack.size() != 0 && stack.top().First() != EffectType::Permanent)
             {
                 stack.pop();

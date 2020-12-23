@@ -42,10 +42,10 @@ protected:
                     auto currentDecompositionIndex = ctx.MethodTraversalRecord().size();
                     if (ctx.LastMTR()[currentDecompositionIndex] < taskIndex)
                     {
-                        ctx.MethodTraversalRecord().push_back(-1);
+                        ctx.MethodTraversalRecord().Add(-1);
                         if (ctx.DebugMTR())
                         {
-                            ctx.MTRDebug().push_back("REPLAN FAIL "s + Subtasks()[taskIndex]->Name());
+                            ctx.MTRDebug().Add("REPLAN FAIL "s + Subtasks()[taskIndex]->Name());
                         }
 
                         if (ctx.LogDecomposition())
@@ -132,10 +132,10 @@ protected:
     {
         // We need to record the task index before we decompose the task,
         // so that the traversal record is set up in the right order.
-        ctx.MethodTraversalRecord().push_back(taskIndex);
+        ctx.MethodTraversalRecord().Add(taskIndex);
         if (ctx.DebugMTR())
         {
-            ctx.MTRDebug().push_back(task->Name());
+            ctx.MTRDebug().Add(task->Name());
         }
 
         TaskQueueType subPlan;
@@ -159,10 +159,10 @@ protected:
         if (status == DecompositionStatus::Failed)
         {
             // Remove the taskIndex  (pushed at top of function) if it failed to decompose.
-            ctx.MethodTraversalRecord().pop_back();
+            ctx.MethodTraversalRecord().PopBack();
             if (ctx.DebugMTR())
             {
-                ctx.MTRDebug().pop_back();
+                ctx.MTRDebug().PopBack();
             }
             if (ctx.LogDecomposition())
             {
@@ -213,10 +213,10 @@ protected:
     {
         // We need to record the task index before we decompose the task,
         // so that the traversal record is set up in the right order.
-        ctx.MethodTraversalRecord().push_back(taskIndex);
+        ctx.MethodTraversalRecord().Add(taskIndex);
         if (ctx.DebugMTR())
         {
-            ctx.MTRDebug().push_back(task->Name());
+            ctx.MTRDebug().Add(task->Name());
         }
 
         TaskQueueType subPlan;
@@ -239,10 +239,10 @@ protected:
         if (status == DecompositionStatus::Failed)
         {
             // Remove the taskIndex if it failed to decompose.
-            ctx.MethodTraversalRecord().pop_back();
+            ctx.MethodTraversalRecord().PopBack();
             if (ctx.DebugMTR())
             {
-                ctx.MTRDebug().pop_back();
+                ctx.MTRDebug().PopBack();
             }
             if (ctx.LogDecomposition())
             {

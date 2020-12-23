@@ -123,16 +123,18 @@ public:
                     // so that any new potential plan that is decomposing from the domain root has to beat the currently
                     // running partial plan.
                     ctx.LastMTR().clear();
-                    for (auto record : ctx.MethodTraversalRecord())
+                    for (size_t si = 0; si < ctx.MethodTraversalRecord().size();si++)
                     {
-                        ctx.LastMTR().push_back(record);
+                        auto record = ctx.MethodTraversalRecord()[si];
+                        ctx.LastMTR().Add(record);
                     }
                     if (ctx.DebugMTR())
                     {
                         ctx.LastMTRDebug().clear();
-                        for (auto record : ctx.MTRDebug())
+                        for (size_t si =0 ; si < ctx.MTRDebug().size();si++)
                         {
-                            ctx.LastMTRDebug().push_back(record);
+                            auto record = ctx.MTRDebug()[si];
+                            ctx.LastMTRDebug().Add(record);
                         }
                     }
                 }
@@ -169,16 +171,18 @@ public:
                 if (ctx.MethodTraversalRecord().size() != 0)
                 {
                     ctx.LastMTR().clear();
-                    for (auto& record : ctx.MethodTraversalRecord())
+                    for (size_t si = 0; si < ctx.MethodTraversalRecord().size() ;si++)
                     {
-                        ctx.LastMTR().push_back(record);
+                        auto& record = ctx.MethodTraversalRecord()[si];
+                        ctx.LastMTR().Add(record);
                     }
                     if (ctx.DebugMTR())
                     {
                         ctx.LastMTRDebug().clear();
-                        for (auto record : ctx.MTRDebug())
+                        for (size_t si =0 ; si < ctx.MTRDebug().size();si++)
                         {
-                            ctx.LastMTRDebug().push_back(record);
+                            auto record = ctx.MTRDebug()[si];
+                            ctx.LastMTRDebug().Add(record);
                         }
                     }
                 }
@@ -195,17 +199,19 @@ public:
                 if (ctx.LastMTR().size() > 0)
                 {
                     ctx.MethodTraversalRecord().clear();
-                    for (auto& record : ctx.LastMTR())
+					for (size_t si =0 ; si < ctx.LastMTR().size();si++)
                     {
-                        ctx.MethodTraversalRecord().push_back(record);
+                        auto& record = ctx.LastMTR()[si];
+                        ctx.MethodTraversalRecord().Add(record);
                     }
                     ctx.LastMTR().clear();
                     if (ctx.DebugMTR())
                     {
                         ctx.LastMTRDebug().clear();
-                        for (auto record : ctx.MTRDebug())
+                        for (size_t si =0 ; si < ctx.MTRDebug().size();si++)
                         {
-                            ctx.LastMTRDebug().push_back(record);
+                            auto record = ctx.MTRDebug()[si];
+                            ctx.LastMTRDebug().Add(record);
                         }
                     }
                 }
@@ -222,7 +228,9 @@ public:
                 {
                     OnNewTask(_currentTask);
                 }
-                for (auto& condition : _currentTask->Conditions())
+                for (size_t si = 0; si < _currentTask->Conditions().size();si++)
+                {
+                    auto& condition = _currentTask->Conditions()[si];
                     // If a condition failed, then the plan failed to progress! A replan is required.
                     if (condition->IsValid(ctx) == false)
                     {
@@ -246,6 +254,7 @@ public:
 
                         return;
                     }
+                }
             }
         }
         if (_currentTask != nullptr)
@@ -255,7 +264,9 @@ public:
                 auto task = StaticCastPtr<PrimitiveTask>(_currentTask);
                 if (task->Operator() != nullptr)
                 {
-                    for (auto condition : task->ExecutingConditions())
+                    for (size_t si = 0; si < task->ExecutingConditions().size();si++) 
+                    {
+                        auto condition = task->ExecutingConditions()[si];
                         // If a condition failed, then the plan failed to progress! A replan is required.
                         if (condition->IsValid(ctx) == false)
                         {
@@ -279,6 +290,7 @@ public:
 
                             return;
                         }
+                    }
 
                     _LastStatus = task->Operator()->Update(ctx);
 
@@ -292,8 +304,9 @@ public:
                         }
 
                         // All effects that is a result of running this task should be applied when the task is a success.
-                        for (auto effect : task->Effects())
+                        for (size_t si = 0; si < task->Effects().size();si++)
                         {
+                            auto effect = task->Effects()[si];
                             if (effect->Type() == EffectType::PlanAndExecute)
                             {
                                 if (OnApplyEffect)

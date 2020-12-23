@@ -266,8 +266,8 @@ namespace FluidHTNCPPUnitTests
             SharedPtr<PrimitiveTask> subtask4 = MakeSharedPtr<PrimitiveTask>("Sub-task4");
             task->AddSubTask(subtask4);
 
-            ctx.LastMTR().push_back(0);
-            ctx.LastMTR().push_back(0);
+            ctx.LastMTR().Add(0);
+            ctx.LastMTR().Add(0);
             auto status = task->Decompose(ctx, 0, plan);
 
             Assert::IsTrue(status == DecompositionStatus::Rejected);
@@ -305,8 +305,8 @@ namespace FluidHTNCPPUnitTests
             SharedPtr<PrimitiveTask> subtask4 = MakeSharedPtr<PrimitiveTask>("Sub-task4");
             task->AddSubTask(subtask4);
 
-            ctx.LastMTR().push_back(1);
-            ctx.LastMTR().push_back(0);
+            ctx.LastMTR().Add(1);
+            ctx.LastMTR().Add(0);
             auto status = task->Decompose(ctx, 0, plan);
 
             Assert::IsTrue(status == DecompositionStatus::Rejected);
@@ -345,8 +345,8 @@ namespace FluidHTNCPPUnitTests
             SharedPtr<PrimitiveTask> task6 = MakeSharedPtr<PrimitiveTask>("Sub-task4");
             task->AddSubTask(task6);
 
-            ctx.LastMTR().push_back(1);
-            ctx.LastMTR().push_back(1);
+            ctx.LastMTR().Add(1);
+            ctx.LastMTR().Add(1);
             auto status = task->Decompose(ctx, 0, plan);
 
             Assert::IsTrue(status == DecompositionStatus::Succeeded);
@@ -407,8 +407,8 @@ namespace FluidHTNCPPUnitTests
             subtask5->AddEffect(eff3);
             task->AddSubTask(subtask5);
 
-            ctx.LastMTR().push_back(0);
-            ctx.LastMTR().push_back(0);
+            ctx.LastMTR().Add(0);
+            ctx.LastMTR().Add(0);
             auto status = task->Decompose(ctx, 0, plan);
 
             Assert::IsTrue(status == DecompositionStatus::Rejected);

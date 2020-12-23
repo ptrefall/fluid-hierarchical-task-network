@@ -7,7 +7,7 @@
 #ifndef PCH_H
 #define PCH_H
 
-#if !USING_CUSTOM_STL
+#if !FHTN_USING_CUSTOM_STL
 
 #include <string>
 #include <unordered_map>
@@ -20,7 +20,7 @@
 #include <functional>
 #include <cstdlib>
 #include <ctime>
-#endif //!USING_CUSTOM_STL
+#endif //!FHTN_USING_CUSTOM_STL
 
 using namespace std::string_literals;
 

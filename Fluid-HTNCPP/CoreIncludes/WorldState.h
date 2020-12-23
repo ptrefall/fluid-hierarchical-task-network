@@ -16,7 +16,7 @@ public:
     {
         return static_cast<DerivedType*>(this)->HasState(state, value);
     }
-    ValueType& GetState(IdType state)
+    ValueType GetState(IdType state)
     {
         return static_cast<DerivedType*>(this)->GetState(state);
     }

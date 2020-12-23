@@ -24,7 +24,7 @@ public:
     BaseDomainBuilder(const StringType& domainName)
     {
         _domain = MakeSharedPtr<Domain>(domainName);
-        _pointers.push_back(_domain->Root());
+        _pointers.Add(_domain->Root());
     }
     const SharedPtr<ITask> Pointer()
     {
@@ -33,7 +33,7 @@ public:
         {
             return nullptr;
         }
-        return _pointers.back();
+        return _pointers.Back();
     }
     // ========================================================= HIERARCHY HANDLING
 
@@ -61,7 +61,7 @@ public:
 
         if (_domain->Add(compoundTask, baseTask))
         {
-            _pointers.push_back(task);
+            _pointers.Add(task);
             return true;
         }
 
@@ -95,7 +95,7 @@ public:
         if (_domain->Add(compoundTask, baseTask))
         {
 
-            _pointers.push_back(parent);
+            _pointers.Add(parent);
             return true;
         }
         return false;
@@ -164,7 +164,7 @@ public:
         return _domain->Add(compoundTask, slot);
     }
     bool AddRandomSelector(const StringType& name) { return AddCompoundTask<RandomSelector>(name); }
-    void End() { _pointers.pop_back(); }
+    void End() { _pointers.PopBack(); }
     bool Splice(Domain& domain)
     {
         FHTN_FATAL_EXCEPTION(Pointer()->IsTypeOf(ITaskDerivedClassName::CompoundTask),

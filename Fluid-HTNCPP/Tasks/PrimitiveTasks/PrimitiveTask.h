@@ -29,12 +29,12 @@ public:
     // shared_ptr copy costs per function call seems reasonable.
     bool AddExecutingCondition(SharedPtr<ICondition>& condition) 
     {
-        _ExecutingConditions.push_back(condition);
+        _ExecutingConditions.Add(condition);
         return true;
     }
     bool AddEffect(SharedPtr<IEffect>& effect) 
     {
-        _Effects.push_back(effect);
+        _Effects.Add(effect);
         return true;
     }
     bool SetOperator(SharedPtr<IOperator>& action)  
@@ -57,8 +57,9 @@ public:
         {
             ctx.CurrentDecompositionDepth() += 1;
         }
-        for (auto& effect : _Effects)
+        for(size_t si = 0; si < _Effects.size();si++)
         {
+            auto& effect = _Effects[si];
             effect->Apply(ctx);
         }
         if (ctx.LogDecomposition())
@@ -80,8 +81,9 @@ public:
         {
             Log(ctx, "PrimitiveTask.IsValid check");
         }
-        for (auto& condition : _Conditions)
+        for (size_t si = 0; si < _Conditions.size(); si++)
         {
+            auto& condition = _Conditions[si];
             if (ctx.LogDecomposition())
             {
                 ctx.CurrentDecompositionDepth() += 1;
