@@ -12,7 +12,7 @@ protected:
     RandomSelector(ITaskDerivedClassName t)
         : Selector(t)
     {
-		std::srand((unsigned int)std::time(nullptr));
+		InitializeRandom();
     }
 
     // ========================================================= DECOMPOSITION
@@ -32,7 +32,7 @@ protected:
     {
         _Plan = TaskQueueType();
 
-        int taskIndex = startIndex + std::rand() %(Subtasks().size()  - startIndex);
+        int taskIndex = startIndex + NextRandom() %(Subtasks().size()  - startIndex);
         auto task = Subtasks()[taskIndex];
 
         ArrayType<int> td;
@@ -43,13 +43,13 @@ public:
     RandomSelector()
         : Selector(ITaskDerivedClassName::RandomSelector)
     {
-		std::srand((unsigned int)std::time(nullptr));
+		InitializeRandom();
     }
     RandomSelector(const StringType& name)
         : Selector(ITaskDerivedClassName::RandomSelector)
     {
         _Name = name;
-        std::srand((unsigned int)std::time(nullptr));
+        InitializeRandom();
     }
 };
 
