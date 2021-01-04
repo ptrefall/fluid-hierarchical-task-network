@@ -24,6 +24,7 @@ public:
     virtual bool AddCondition(SharedPtr<ICondition>&) override
     {
         FHTN_FATAL_EXCEPTION(false, "PausePlan Tasks do not support conditions");
+        return false;
     }
 
     bool AddEffect(SharedPtr<class IEffect>&) { FHTN_FATAL_EXCEPTION(false, "Pause Plan tasks do not support effects"); }
