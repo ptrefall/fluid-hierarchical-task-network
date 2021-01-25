@@ -153,7 +153,7 @@ var ctx = new MyContext();
 var planner = new Planner();
 ctx.Init();
 ```
-Next, let's tick the planner until the Done flag in our context is set to false.
+Next, let's tick the planner until the Done flag in our context is set to true.
 ```C#
 while (!ctx.Done)
 {
