@@ -32,6 +32,36 @@ namespace FluidHTN.Compounds
             return true;
         }
 
+        private bool BeatsLastMTR(IContext ctx, int taskIndex, int currentDecompositionIndex)
+        {
+            // If the last plan's traversal record for this decomposition layer 
+            // has a smaller index than the current task index we're about to
+            // decompose, then the new decomposition can't possibly beat the
+            // running plan, so we cancel finding a new plan.
+            if (ctx.LastMTR[currentDecompositionIndex] < taskIndex)
+            {
+                // But, if any of the earlier records beat the record in LastMTR, we're still good, as we're on a higher priority branch.
+                // This ensures that [0,0,1] can beat [0,1,0]
+                for (var i = 0; i < ctx.MethodTraversalRecord.Count; i++)
+                {
+                    var diff = ctx.MethodTraversalRecord[i] - ctx.LastMTR[i];
+                    if (diff < 0)
+                    {
+                        return true;
+                    }
+                    if (diff > 0)
+                    {
+                        // We should never really be able to get here, but just in case.
+                        return false;
+                    }
+                }
+
+                return false;
+            }
+
+            return true;
+        }
+
         // ========================================================= DECOMPOSITION
 
         /// <summary>
@@ -53,12 +83,8 @@ namespace FluidHTN.Compounds
                 {
                     if (ctx.MethodTraversalRecord.Count < ctx.LastMTR.Count)
                     {
-                        // If the last plan's traversal record for this decomposition layer 
-                        // has a smaller index than the current task index we're about to
-                        // decompose, then the new decomposition can't possibly beat the
-                        // running plan, so we cancel finding a new plan.
                         var currentDecompositionIndex = ctx.MethodTraversalRecord.Count;
-                        if (ctx.LastMTR[currentDecompositionIndex] < taskIndex)
+                        if (BeatsLastMTR(ctx, taskIndex, currentDecompositionIndex) == false)
                         {
                             ctx.MethodTraversalRecord.Add(-1);
                             if (ctx.DebugMTR) ctx.MTRDebug.Add($"REPLAN FAIL {Subtasks[taskIndex].Name}");

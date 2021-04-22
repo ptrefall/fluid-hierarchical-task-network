@@ -289,5 +289,36 @@ namespace Fluid_HTN.UnitTests
             Assert.IsTrue(ctx.MethodTraversalRecord.Count == 1);
             Assert.IsTrue(ctx.MethodTraversalRecord[0] == -1);
         }
+
+        [TestMethod]
+        public void DecomposeCompoundSubtaskWinOverLastMTR_ExpectedBehavior()
+        {
+            var ctx = new MyContext();
+            var rootTask = new Selector() { Name = "Root" };
+            var task = new Selector() { Name = "Test1" };
+            var task2 = new Selector() { Name = "Test2" };
+            var task3 = new Selector() {Name = "Test3"};
+
+            task3.AddSubtask(new PrimitiveTask() { Name = "Sub-task3-1" }.AddCondition(new FuncCondition<MyContext>("Done == true", context => context.Done == true)));
+            task3.AddSubtask(new PrimitiveTask() { Name = "Sub-task3-2" });
+
+            task2.AddSubtask(new PrimitiveTask() { Name = "Sub-task2-1" }.AddCondition(new FuncCondition<MyContext>("Done == true", context => context.Done == true)));
+            task2.AddSubtask(new PrimitiveTask() { Name = "Sub-task2-2" });
+
+            task.AddSubtask(task2);
+            task.AddSubtask(task3);
+            task.AddSubtask(new PrimitiveTask() { Name = "Sub-task1-1" }.AddCondition(new FuncCondition<MyContext>("Done == false", context => context.Done == false)));
+
+            rootTask.AddSubtask(task);
+
+            ctx.LastMTR.Add(0);
+            ctx.LastMTR.Add(1);
+            ctx.LastMTR.Add(0);
+
+            // In this test, we prove that [0, 0, 1] beats [0, 1, 0]
+            var status = rootTask.Decompose(ctx, 0, out var plan);
+
+            Assert.IsTrue(status == DecompositionStatus.Succeeded);
+        }
     }
 }
