@@ -9,6 +9,36 @@ namespace FluidHTN
 {
 class Selector : public CompoundTask
 {
+    bool BeatsLastMTR(IContext& ctx, int taskIndex, size_t currentDecompositionIndex)
+    {
+        // If the last plan's traversal record for this decomposition layer
+        // has a smaller index than the current task index we're about to
+        // decompose, then the new decomposition can't possibly beat the
+        // running plan, so we cancel finding a new plan.
+        if (ctx.LastMTR()[currentDecompositionIndex] < taskIndex)
+        {
+            // But, if any of the earlier records beat the record in LastMTR, we're still good, as we're on a higher priority
+            // branch. This ensures that [0,0,1] can beat [0,1,0]
+            for (auto i = 0; i < ctx.MethodTraversalRecord().size(); i++)
+            {
+                auto diff = ctx.MethodTraversalRecord()[i] - ctx.LastMTR()[i];
+                if (diff < 0)
+                {
+                    return true;
+                }
+                if (diff > 0)
+                {
+                    // We should never really be able to get here, but just in case.
+                    return false;
+                }
+            }
+
+            return false;
+        }
+
+        return true;
+    }
+
 protected:
     Selector(ITaskDerivedClassName t)
         : CompoundTask(t)
@@ -40,7 +70,7 @@ protected:
                     // decompose, then the new decomposition can't possibly beat the
                     // running plan, so we cancel finding a new plan.
                     auto currentDecompositionIndex = ctx.MethodTraversalRecord().size();
-                    if (ctx.LastMTR()[currentDecompositionIndex] < taskIndex)
+                    if (BeatsLastMTR(ctx,taskIndex,currentDecompositionIndex) == false)
                     {
                         ctx.MethodTraversalRecord().Add(-1);
                         if (ctx.DebugMTR())

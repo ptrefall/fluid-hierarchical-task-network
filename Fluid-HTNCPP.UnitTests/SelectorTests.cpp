@@ -390,5 +390,88 @@ namespace FluidHTNCPPUnitTests
             Assert::IsTrue(ctx.MethodTraversalRecord().size() == 1);
             Assert::IsTrue(ctx.MethodTraversalRecord()[0] == -1);
         }
+        TEST_METHOD(DecomposeCompoundSubtaskWinOverLastMTR_ExpectedBehavior)
+        {
+            DomainTestContext ctx;
+            TaskQueueType                 plan;
+            SharedPtr<CompoundTask> rootTask = MakeSharedPtr<Selector>("Root"s);
+            SharedPtr<CompoundTask>  task = MakeSharedPtr<Selector>("Test1"s);
+            SharedPtr<CompoundTask>  task2 = MakeSharedPtr<Selector>("Test2"s);
+            SharedPtr<CompoundTask>  task3 = MakeSharedPtr<Selector>("Test3"s);
+            SharedPtr<PrimitiveTask> subTask31 = MakeSharedPtr<PrimitiveTask>("Sub-task3-1");
+            SharedPtr<PrimitiveTask> subTask32 = MakeSharedPtr<PrimitiveTask>("Sub-task3-2");
+            SharedPtr<PrimitiveTask> subTask21 = MakeSharedPtr<PrimitiveTask>("Sub-task2-1");
+            SharedPtr<PrimitiveTask> subTask22 = MakeSharedPtr<PrimitiveTask>("Sub-task2-2");
+            SharedPtr<PrimitiveTask> subTask11 = MakeSharedPtr<PrimitiveTask>("Sub-task1-1");
+            SharedPtr<ICondition> ctrue = MakeSharedPtr<FuncCondition>("Done == true"s, [](IContext& ctx) {
+                return (static_cast<DomainTestContext&>(ctx).Done() == true);
+            });
+            SharedPtr<ICondition> cfalse = MakeSharedPtr<FuncCondition>("Done == false"s, [](IContext& ctx) {
+                return (static_cast<DomainTestContext&>(ctx).Done() == false);
+            });
+
+            subTask31->AddCondition(ctrue);
+            task3->AddSubTask(subTask31);
+            task3->AddSubTask(subTask32);
+
+            subTask21->AddCondition(ctrue);
+            task2->AddSubTask(subTask21);
+            task2->AddSubTask(subTask22);
+
+            task->AddSubTask(task2);
+            task->AddSubTask(task3);
+            subTask11->AddCondition(cfalse);
+            task->AddSubTask(subTask11);
+
+            rootTask->AddSubTask(task);
+
+            ctx.LastMTR().Add(0);
+            ctx.LastMTR().Add(1);
+            ctx.LastMTR().Add(0);
+
+            // In this test, we prove that [0, 0, 1] beats [0, 1, 0]
+            auto status = rootTask->Decompose(ctx, 0, plan);
+
+            Assert::IsTrue(status == DecompositionStatus::Succeeded);
+        }
+
+        TEST_METHOD( DecomposeCompoundSubtaskLoseToLastMTR2_ExpectedBehavior)
+        {
+            DomainTestContext ctx;
+            TaskQueueType                 plan;
+            SharedPtr<CompoundTask> rootTask = MakeSharedPtr<Selector>("Root"s);
+            SharedPtr<CompoundTask>  task = MakeSharedPtr<Selector>("Test1"s);
+            SharedPtr<CompoundTask>  task2 = MakeSharedPtr<Selector>("Test2"s);
+            SharedPtr<CompoundTask>  task3 = MakeSharedPtr<Selector>("Test3"s);
+            SharedPtr<PrimitiveTask> subTask21 = MakeSharedPtr<PrimitiveTask>("Sub-task2-1");
+            SharedPtr<PrimitiveTask> subTask11 = MakeSharedPtr<PrimitiveTask>("Sub-task1-1");
+            SharedPtr<ICondition> ctrue = MakeSharedPtr<FuncCondition>("Done == true"s, [](IContext& ctx) {
+                return (static_cast<DomainTestContext&>(ctx).Done() == true);
+            });
+
+            subTask21->AddCondition(ctrue);
+            task2->AddSubTask(subTask21);
+
+            subTask11->AddCondition(ctrue);
+
+            task->AddSubTask(subTask11);
+            task->AddSubTask(task);
+
+            rootTask->AddSubTask(task);
+
+            ctx.LastMTR().Add(0);
+            ctx.LastMTR().Add(1);
+            ctx.LastMTR().Add(0);
+
+            // We expect this test to be rejected, because [0,1,1] shouldn't beat [0,1,0]
+            auto status = rootTask->Decompose(ctx, 0, plan);
+
+            Assert::IsTrue(status == DecompositionStatus::Rejected);
+            Assert::IsTrue(plan.size() == 0);
+            Assert::IsTrue(ctx.MethodTraversalRecord().size() == 3);
+            Assert::IsTrue(ctx.MethodTraversalRecord()[0] == 0);
+            Assert::IsTrue(ctx.MethodTraversalRecord()[1] == 1);
+            Assert::IsTrue(ctx.MethodTraversalRecord()[2] == -1);
+        }
 	}; 
 }
