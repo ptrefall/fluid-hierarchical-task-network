@@ -69,6 +69,7 @@ public:
     /// Whether our planning system should log our decomposition. Specially condition success vs failure.
     /// </summary>
     virtual bool LogDecomposition() = 0;
+    virtual void SetLogDecomposition(bool) = 0;
 
     virtual PartialPlanQueueType& PartialPlanQueue() = 0;
     virtual void                  PartialPlanQueue(PartialPlanQueueType p) = 0;

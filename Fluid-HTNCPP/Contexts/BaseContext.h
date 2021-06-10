@@ -50,6 +50,7 @@ public:
     virtual bool&                              DebugMTR() override final { return _DebugMTR; }
     virtual Queue<IBaseDecompositionLogEntry>& DecompositionLog() override final { return _DecompositionLog; }
     virtual bool                               LogDecomposition() override final { return _LogDecomposition; }
+    virtual void                               SetLogDecomposition(bool decomp) override final { _LogDecomposition = decomp; }
     virtual PartialPlanQueueType&              PartialPlanQueue() override final { return _PartialPlanQueue; }
     virtual void                               PartialPlanQueue(PartialPlanQueueType p) override final { _PartialPlanQueue = p; }
     virtual void                               ClearPartialPlanQueue() override final { _PartialPlanQueue = PartialPlanQueueType(); }
@@ -66,7 +67,10 @@ public:
     {
         if (_WorldState != nullptr)
         {
-            _WorldStateChangeStackArray.resize(_WorldState->GetMaxPropertyCount());
+            for(int i =0 ; i < _WorldState->GetMaxPropertyCount(); i++)
+            {
+                _WorldStateChangeStackArray.Add(WorldStateStackType());
+            }
         }
         _IsInitialized = true;
     }
