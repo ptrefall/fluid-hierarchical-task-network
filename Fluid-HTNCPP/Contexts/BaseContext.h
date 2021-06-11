@@ -118,7 +118,7 @@ public:
         ArrayType<int> stackDepth(_WorldStateChangeStackArray.size());
         for (size_t i = 0; i < _WorldStateChangeStackArray.size(); i++)
         {
-            stackDepth[i] = (int)_WorldStateChangeStackArray[i].size();
+            stackDepth.Add((int)_WorldStateChangeStackArray[i].size());
         }
         return stackDepth;
     }
