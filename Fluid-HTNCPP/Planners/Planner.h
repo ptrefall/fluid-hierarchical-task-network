@@ -116,8 +116,7 @@ public:
                     ctx.HasPausedPartialPlan() = false;
                     while (ctx.PartialPlanQueue().size() > 0)
                     {
-                        lastPartialPlanQueue.push(ctx.PartialPlanQueue().front());
-                        ctx.PartialPlanQueue().pop();
+                        lastPartialPlanQueue.push(ctx.PartialPlanQueue().Dequeue());
                     }
                     // We also need to ensure that the last mtr is up to date with the on-going MTR of the partial plan,
                     // so that any new potential plan that is decomposing from the domain root has to beat the currently
@@ -193,8 +192,7 @@ public:
                 ctx.ClearPartialPlanQueue();
                 while (lastPartialPlanQueue.size() > 0)
                 {
-                    ctx.PartialPlanQueue().push(lastPartialPlanQueue.front());
-                    lastPartialPlanQueue.pop();
+                    ctx.PartialPlanQueue().push(lastPartialPlanQueue.Dequeue());
                 }
                 if (ctx.LastMTR().size() > 0)
                 {
@@ -219,8 +217,7 @@ public:
         }
         if (_currentTask == nullptr && _plan.size() > 0)
         {
-            _currentTask = _plan.front();
-            _plan.pop();
+            _currentTask = _plan.Dequeue();
 
             if (_currentTask != nullptr)
             {

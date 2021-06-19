@@ -61,6 +61,7 @@ public:
     size_t size() { return q.size(); }
     bool   empty() { return q.empty(); }
     void   clear() { q = std::queue<T>(); }
+    T& Dequeue() { T& f = front();pop(); return f;}
 };
 template<typename T>
 class Stack

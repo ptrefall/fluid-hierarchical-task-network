@@ -130,8 +130,7 @@ public:
             ctx.HasPausedPartialPlan() = false;
             while (ctx.PartialPlanQueue().size() > 0)
             {
-                auto& pair = ctx.PartialPlanQueue().front();
-                ctx.PartialPlanQueue().pop();
+                auto& pair = ctx.PartialPlanQueue().Dequeue();
 
                 FHTN_FATAL_EXCEPTION(pair.Task->IsTypeOf(ITaskDerivedClassName::CompoundTask),
                                      "PartialPlanEntry task must be a compound task");
@@ -149,8 +148,7 @@ public:
                     {
                         while (p.size() > 0)
                         {
-                            plan.push(p.front());
-                            p.pop();
+                            plan.push(p.Dequeue());
                         }
                     }
                 }
@@ -182,8 +180,7 @@ public:
                 ctx.HasPausedPartialPlan() = false;
                 while (ctx.PartialPlanQueue().size() > 0)
                 {
-                    lastPartialPlanQueue.push(ctx.PartialPlanQueue().front());
-                    ctx.PartialPlanQueue().pop();
+                    lastPartialPlanQueue.push(ctx.PartialPlanQueue().Dequeue());
                 }
             }
             // We only erase the MTR if we start from the root task of the domain.
@@ -205,8 +202,7 @@ public:
                     ctx.PartialPlanQueue().clear();
                     while (lastPartialPlanQueue.size() > 0)
                     {
-                        ctx.PartialPlanQueue().push(lastPartialPlanQueue.front());
-                        lastPartialPlanQueue.pop();
+                        ctx.PartialPlanQueue().push(lastPartialPlanQueue.Dequeue());
                     }
                 }
             }
