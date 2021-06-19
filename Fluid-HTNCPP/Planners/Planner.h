@@ -104,6 +104,7 @@ public:
             Queue<PartialPlanEntry> lastPartialPlanQueue;
             bool                    worldStateDirtyReplan = ctx.IsDirty();
 
+            ctx.IsDirty() = false;
             if (worldStateDirtyReplan)
             {
                 // If we're simply re-evaluating whether to replace the current plan because
