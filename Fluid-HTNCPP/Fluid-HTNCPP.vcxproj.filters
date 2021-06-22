@@ -1,0 +1,113 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Header Files\Tasks">
+      <UniqueIdentifier>{e5af4f3f-467c-4bae-a275-1a6734468ddb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Tasks\CompoundTasks">
+      <UniqueIdentifier>{12f97d9c-b8b9-49b3-baa1-1412b9945678}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Tasks\OtherTasks">
+      <UniqueIdentifier>{4c8bdc48-7b43-4420-8cf3-df5cb6f5d372}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Tasks\PrimitiveTasks">
+      <UniqueIdentifier>{0c2118ed-97fb-4d61-bfd7-b1924b2f3bb1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Contexts">
+      <UniqueIdentifier>{ceb9a360-f3ae-45cc-b094-6d403f97dea6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Effects">
+      <UniqueIdentifier>{a14ac7e8-ba7f-4798-b2dc-e48d20ab8477}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Conditions">
+      <UniqueIdentifier>{2a062dd9-748c-457e-9702-35d2fd6fa9a2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Operators">
+      <UniqueIdentifier>{f29103bf-38ef-4b13-8058-89b7ae0601bd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Planners">
+      <UniqueIdentifier>{748ca950-191e-4380-bb90-e46b4bb9ad92}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\DebugInterfaces">
+      <UniqueIdentifier>{c0e3a0ae-50db-4b97-b5a4-330aedacdbbe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\CoreIncludes">
+      <UniqueIdentifier>{68d5697f-c87f-416a-8e45-02e397cfa67b}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Tasks\Task.h">
+      <Filter>Header Files\Tasks</Filter>
+    </ClInclude>
+    <ClInclude Include="Tasks\CompoundTasks\CompoundTask.h">
+      <Filter>Header Files\Tasks\CompoundTasks</Filter>
+    </ClInclude>
+    <ClInclude Include="Tasks\CompoundTasks\DecompositionStatus.h">
+      <Filter>Header Files\Tasks\CompoundTasks</Filter>
+    </ClInclude>
+    <ClInclude Include="Tasks\CompoundTasks\PausePlanTask.h">
+      <Filter>Header Files\Tasks\CompoundTasks</Filter>
+    </ClInclude>
+    <ClInclude Include="Tasks\CompoundTasks\Selector.h">
+      <Filter>Header Files\Tasks\CompoundTasks</Filter>
+    </ClInclude>
+    <ClInclude Include="Tasks\CompoundTasks\Sequence.h">
+      <Filter>Header Files\Tasks\CompoundTasks</Filter>
+    </ClInclude>
+    <ClInclude Include="Tasks\OtherTasks\Slot.h">
+      <Filter>Header Files\Tasks\OtherTasks</Filter>
+    </ClInclude>
+    <ClInclude Include="Tasks\PrimitiveTasks\PrimitiveTask.h">
+      <Filter>Header Files\Tasks\PrimitiveTasks</Filter>
+    </ClInclude>
+    <ClInclude Include="Contexts\Context.h">
+      <Filter>Header Files\Contexts</Filter>
+    </ClInclude>
+    <ClInclude Include="Effects\Effect.h">
+      <Filter>Header Files\Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="Conditions\Condition.h">
+      <Filter>Header Files\Conditions</Filter>
+    </ClInclude>
+    <ClInclude Include="Operators\Operator.h">
+      <Filter>Header Files\Operators</Filter>
+    </ClInclude>
+    <ClInclude Include="Planners\Planner.h">
+      <Filter>Header Files\Planners</Filter>
+    </ClInclude>
+    <ClInclude Include="Contexts\BaseContext.h">
+      <Filter>Header Files\Contexts</Filter>
+    </ClInclude>
+    <ClInclude Include="DebugInterfaces\DecompositionLogEntry.h">
+      <Filter>Header Files\DebugInterfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="Effects\EffectType.h">
+      <Filter>Header Files\Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="Tasks\CompoundTasks\RandomSelector.h">
+      <Filter>Header Files\Tasks\CompoundTasks</Filter>
+    </ClInclude>
+    <ClInclude Include="CoreIncludes\BaseDomainBuilder.h">
+      <Filter>Header Files\CoreIncludes</Filter>
+    </ClInclude>
+    <ClInclude Include="CoreIncludes\Domain.h">
+      <Filter>Header Files\CoreIncludes</Filter>
+    </ClInclude>
+    <ClInclude Include="CoreIncludes\STLTypes.h">
+      <Filter>Header Files\CoreIncludes</Filter>
+    </ClInclude>
+    <ClInclude Include="CoreIncludes\WorldState.h">
+      <Filter>Header Files\CoreIncludes</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="pch.cpp" />
+  </ItemGroup>
+</Project>
