@@ -312,7 +312,7 @@ protected:
         if (ctx.LogDecomposition())
         {
             Log(ctx,
-                "Selector.OnDecomposeSlot:"s + ToString((int)s) + "!"s,
+                "Selector.OnDecomposeSlot:"s + DecompositionStatusToString(s) + "!"s,
                 s == DecompositionStatus::Succeeded ? ConsoleColor::Green : ConsoleColor::Red);
         }
         return s;

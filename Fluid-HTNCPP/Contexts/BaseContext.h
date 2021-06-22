@@ -21,6 +21,7 @@ protected:
     bool                              _DebugMTR = false;
     Queue<IBaseDecompositionLogEntry> _DecompositionLog;
     bool                              _LogDecomposition = false;
+    bool                              _RealTimeLog = false;
     ArrayType<int>                    _MethodTraversalRecord;
     ArrayType<StringType>             _MTRDebug;
 
@@ -51,6 +52,7 @@ public:
     virtual Queue<IBaseDecompositionLogEntry>& DecompositionLog() override final { return _DecompositionLog; }
     virtual bool                               LogDecomposition() override final { return _LogDecomposition; }
     virtual void                               SetLogDecomposition(bool decomp) override final { _LogDecomposition = decomp; }
+    virtual void                               SetRealTimeLog(bool dolog) final {_RealTimeLog = dolog; }
     virtual PartialPlanQueueType&              PartialPlanQueue() override final { return _PartialPlanQueue; }
     virtual void                               PartialPlanQueue(PartialPlanQueueType p) override final { _PartialPlanQueue = p; }
     virtual void                               ClearPartialPlanQueue() override final { _PartialPlanQueue = PartialPlanQueueType(); }
@@ -157,8 +159,13 @@ public:
         _IsInitialized = false;
     }
     // ========================================================= DECOMPOSITION LOGGING
+    virtual void RealTimeLog(StringType Name, StringType description) override{}
     void Log(StringType name, StringType description, int depth, SharedPtr<ITask> task, ConsoleColor color = ConsoleColor::White)
     {
+        if(_RealTimeLog)
+        {
+            RealTimeLog(name,description);
+        }
         if (_LogDecomposition == false)
             return;
 
@@ -173,6 +180,10 @@ public:
              SharedPtr<ICondition> condition,
              ConsoleColor          color = ConsoleColor::DarkGreen)
     {
+        if(_RealTimeLog)
+        {
+            RealTimeLog(name,description);
+        }
         if (_LogDecomposition == false)
             return;
 
@@ -184,6 +195,10 @@ public:
              SharedPtr<IEffect> effect,
              ConsoleColor       color = ConsoleColor::DarkYellow)
     {
+        if(_RealTimeLog)
+        {
+            RealTimeLog(name,description);
+        }
         if (_LogDecomposition == false)
             return;
 

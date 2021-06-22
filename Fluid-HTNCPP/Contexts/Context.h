@@ -87,6 +87,7 @@ public:
 
     virtual ArrayType<int> GetWorldStateChangeDepth() = 0;
 
+    virtual void RealTimeLog(StringType name, StringType description){}
     virtual void Log(StringType             name,
                      StringType             description,
                      int                    depth,
