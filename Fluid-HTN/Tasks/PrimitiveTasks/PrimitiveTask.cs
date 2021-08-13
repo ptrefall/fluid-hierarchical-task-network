@@ -14,7 +14,6 @@ namespace FluidHTN.PrimitiveTasks
         public ICompoundTask Parent { get; set; }
         public List<ICondition> Conditions { get; } = new List<ICondition>();
         public List<ICondition> ExecutingConditions { get; } = new List<ICondition>();
-        public TaskStatus LastStatus { get; }
         public IOperator Operator { get; private set; }
         public List<IEffect> Effects { get; } = new List<IEffect>();
 
