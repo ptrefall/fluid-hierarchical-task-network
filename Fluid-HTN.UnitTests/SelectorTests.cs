@@ -151,8 +151,9 @@ namespace Fluid_HTN.UnitTests
 
             Assert.IsTrue(status == DecompositionStatus.Succeeded);
             Assert.IsTrue(plan != null);
-            Assert.IsTrue(ctx.MethodTraversalRecord.Count == 0);
             Assert.IsTrue(plan.Count == 1);
+            Assert.IsTrue(ctx.MethodTraversalRecord.Count == 1);
+            Assert.AreEqual(ctx.MethodTraversalRecord[0], ctx.LastMTR[0]);
         }
 
         [TestMethod]
@@ -173,8 +174,9 @@ namespace Fluid_HTN.UnitTests
             Assert.IsTrue(plan != null);
             Assert.IsTrue(plan.Count == 1);
             Assert.AreEqual("Sub-task2", plan.Peek().Name);
-            Assert.IsTrue(ctx.MethodTraversalRecord.Count == 1);
+            Assert.IsTrue(ctx.MethodTraversalRecord.Count == 2);
             Assert.IsTrue(ctx.MethodTraversalRecord[0] == 0);
+            Assert.IsTrue(ctx.MethodTraversalRecord[1] == 1);
         }
 
         [TestMethod]
@@ -195,7 +197,8 @@ namespace Fluid_HTN.UnitTests
             Assert.IsTrue(plan != null);
             Assert.IsTrue(plan.Count == 1);
             Assert.AreEqual("Sub-task3", plan.Peek().Name);
-            Assert.IsTrue(ctx.MethodTraversalRecord.Count == 0);
+            Assert.IsTrue(ctx.MethodTraversalRecord.Count == 1);
+            Assert.IsTrue(ctx.MethodTraversalRecord[0] == 1);
         }
 
         [TestMethod]
@@ -220,7 +223,8 @@ namespace Fluid_HTN.UnitTests
             Assert.IsTrue(plan != null);
             Assert.IsTrue(plan.Count == 1);
             Assert.AreEqual("Sub-task4", plan.Peek().Name);
-            Assert.IsTrue(ctx.MethodTraversalRecord.Count == 0);
+            Assert.IsTrue(ctx.MethodTraversalRecord.Count == 1);
+            Assert.IsTrue(ctx.MethodTraversalRecord[0] == 1);
         }
 
         [TestMethod]
@@ -242,8 +246,9 @@ namespace Fluid_HTN.UnitTests
             Assert.IsTrue(plan != null);
             Assert.IsTrue(plan.Count == 1);
             Assert.AreEqual("Sub-task2", plan.Peek().Name);
-            Assert.IsTrue(ctx.MethodTraversalRecord.Count == 1);
+            Assert.IsTrue(ctx.MethodTraversalRecord.Count == 2);
             Assert.IsTrue(ctx.MethodTraversalRecord[0] == 0);
+            Assert.IsTrue(ctx.MethodTraversalRecord[1] == 1);
         }
 
         [TestMethod]
@@ -265,8 +270,9 @@ namespace Fluid_HTN.UnitTests
             Assert.IsTrue(plan != null);
             Assert.IsTrue(plan.Count == 1);
             Assert.AreEqual("Sub-task2", plan.Peek().Name);
-            Assert.IsTrue(ctx.MethodTraversalRecord.Count == 1);
+            Assert.IsTrue(ctx.MethodTraversalRecord.Count == 2);
             Assert.IsTrue(ctx.MethodTraversalRecord[0] == 0);
+            Assert.IsTrue(ctx.MethodTraversalRecord[1] == 1);
         }
 
         [TestMethod]

@@ -161,6 +161,7 @@ namespace Fluid_HTN.UnitTests
             var ctx = new MyContext();
             ctx.Init();
             ctx.LastMTR.Add(1);
+            ctx.LastMTR.Add(0);
 
             // Root is a Selector that branch off into task1 selector or task2 sequence.
             // MTR only tracks decomposition of compound tasks, so our MTR is only 1 layer deep here,
@@ -181,8 +182,79 @@ namespace Fluid_HTN.UnitTests
 
             Assert.IsTrue(status == DecompositionStatus.Rejected);
             Assert.IsTrue(plan == null);
-            Assert.IsTrue(ctx.MethodTraversalRecord.Count == 1);
+            Assert.IsTrue(ctx.MethodTraversalRecord.Count == 2);
+            Assert.AreEqual(ctx.MethodTraversalRecord[0], ctx.LastMTR[0]);
+            Assert.AreEqual(ctx.MethodTraversalRecord[1], ctx.LastMTR[1]);
+        }
+
+        [TestMethod]
+        public void FindPlanIfPlansAreDifferentButMTRsAreEqualThenReturnNullPlan_ExpectedBehavior()
+        {
+            var ctx = new MyContext();
+            ctx.Init();
+            ctx.LastMTR.Add(1);
+            ctx.LastMTR.Add(0);
+
+            // Root is a Selector that branch off into task1 selector or task2 sequence.
+            // MTR only tracks decomposition of compound tasks, so our MTR is only 1 layer deep here,
+            // Since both compound tasks decompose into primitive tasks.
+            var domain = new Domain<MyContext>("Test");
+            var task1 = new Sequence() { Name = "Test1" };
+            var task2 = new Selector() { Name = "Test2" };
+            var task3 = new PrimitiveTask() { Name = "Sub-task1" }.AddCondition(new FuncCondition<MyContext>("TestCondition", context => context.Done == true));
+            var task4 = new PrimitiveTask() { Name = "Sub-task1" };
+            var task5 = new PrimitiveTask() { Name = "Sub-task2" }.AddCondition(new FuncCondition<MyContext>("TestCondition", context => context.Done == true));
+            var task6 = new PrimitiveTask() { Name = "Sub-task3" };
+            domain.Add(domain.Root, task1);
+            domain.Add(domain.Root, task2);
+            domain.Add(task1, task3);
+            domain.Add(task2, task4);
+            domain.Add(task2, task5);
+            var status = domain.FindPlan(ctx, out var plan);
+
+            Assert.IsTrue(status == DecompositionStatus.Rejected);
+            Assert.IsTrue(plan == null);
+            Assert.IsTrue(ctx.MethodTraversalRecord.Count == 2);
             Assert.IsTrue(ctx.MethodTraversalRecord[0] == ctx.LastMTR[0]);
+            Assert.IsTrue(ctx.MethodTraversalRecord[1] == ctx.LastMTR[1]);
+        }
+
+        [TestMethod]
+        public void FindPlanIfSelectorFindBetterPrimaryTaskMTRChangeSuccessfully_ExpectedBehavior()
+        {
+            var ctx = new MyContext();
+            ctx.Init();
+            ctx.LastMTR.Add(0);
+            ctx.LastMTR.Add(1);
+
+            // Root is a Selector that branch off into task1 selector or task2 sequence.
+            // MTR only tracks decomposition of compound tasks, so our MTR is only 1 layer deep here,
+            // Since both compound tasks decompose into primitive tasks.
+            var domain = new Domain<MyContext>("Test");
+            var task1 = new Selector() { Name = "Test Select" };
+            var task2 = new PrimitiveTask() { Name = "Test Action A" }.AddCondition(new FuncCondition<MyContext>("Can choose A", context => context.Done == true));
+            var task3 = new PrimitiveTask() { Name = "Test Action B" }.AddCondition(new FuncCondition<MyContext>("Can not choose A", context => context.Done == false));
+            domain.Add(domain.Root, task1);
+            domain.Add(task1, task2);
+            domain.Add(task1, task3);
+
+            // We expect this to first get rejected, because LastMTR holds [0, 1] which is what we'll get back from the planner.
+            var status = domain.FindPlan(ctx, out var plan);
+            Assert.IsTrue(status == DecompositionStatus.Rejected);
+            Assert.IsTrue(plan == null);
+            Assert.IsTrue(ctx.MethodTraversalRecord.Count == 2);
+            Assert.IsTrue(ctx.MethodTraversalRecord[0] == ctx.LastMTR[0]);
+            Assert.IsTrue(ctx.MethodTraversalRecord[1] == ctx.LastMTR[1]);
+
+            // When we change the condition to Done = true, we should now be able to find a better plan!
+            ctx.Done = true;
+            status = domain.FindPlan(ctx, out plan);
+
+            Assert.IsTrue(status == DecompositionStatus.Succeeded);
+            Assert.IsTrue(plan != null);
+            Assert.IsTrue(ctx.MethodTraversalRecord.Count == 2);
+            Assert.IsTrue(ctx.MethodTraversalRecord[0] == ctx.LastMTR[0]);
+            Assert.IsTrue(ctx.MethodTraversalRecord[1] < ctx.LastMTR[1]);
         }
 
         [TestMethod]

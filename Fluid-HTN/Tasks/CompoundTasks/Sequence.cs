@@ -88,9 +88,7 @@ namespace FluidHTN.Compounds
             }
             else if (task is IPrimitiveTask primitiveTask)
             {
-                if (ctx.LogDecomposition) Log(ctx, $"Sequence.OnDecomposeTask:Pushed {primitiveTask.Name} to plan!", ConsoleColor.Blue);
-                primitiveTask.ApplyEffects(ctx);
-                Plan.Enqueue(task);
+                OnDecomposePrimitiveTask(ctx, primitiveTask, taskIndex, oldStackDepth, out result);
             }
             else if (task is PausePlanTask)
             {
@@ -114,6 +112,17 @@ namespace FluidHTN.Compounds
             var s = result.Count == 0 ? DecompositionStatus.Failed : DecompositionStatus.Succeeded;
             if (ctx.LogDecomposition) Log(ctx, $"Sequence.OnDecomposeTask:{s}!", s == DecompositionStatus.Succeeded ? ConsoleColor.Green : ConsoleColor.Red);
             return s;
+        }
+
+        protected override void OnDecomposePrimitiveTask(IContext ctx, IPrimitiveTask task, int taskIndex,
+            int[] oldStackDepth, out Queue<ITask> result)
+        {
+            // We don't add MTR tracking on sequences for primary sub-tasks, since they will always be included, so they're irrelevant to MTR tracking.
+
+            if (ctx.LogDecomposition) Log(ctx, $"Sequence.OnDecomposeTask:Pushed {task.Name} to plan!", ConsoleColor.Blue);
+            task.ApplyEffects(ctx);
+            Plan.Enqueue(task);
+            result = Plan;
         }
 
         protected override DecompositionStatus OnDecomposeCompoundTask(IContext ctx, ICompoundTask task,

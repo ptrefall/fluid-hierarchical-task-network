@@ -262,8 +262,9 @@ namespace Fluid_HTN.UnitTests
             Assert.IsTrue(status == DecompositionStatus.Succeeded);
             Assert.IsTrue(plan != null);
             Assert.IsTrue(plan.Count == 2);
-            Assert.IsTrue(ctx.MethodTraversalRecord.Count == 1);
+            Assert.IsTrue(ctx.MethodTraversalRecord.Count == 2);
             Assert.IsTrue(ctx.MethodTraversalRecord[0] == 1);
+            Assert.IsTrue(ctx.MethodTraversalRecord[1] == 1);
             Assert.AreEqual("Sub-task3", plan.Dequeue().Name);
             Assert.AreEqual("Sub-task4", plan.Dequeue().Name);
         }
