@@ -164,8 +164,8 @@ namespace Fluid_HTN.UnitTests
             ctx.LastMTR.Add(0);
 
             // Root is a Selector that branch off into task1 selector or task2 sequence.
-            // MTR only tracks decomposition of compound tasks, so our MTR is only 1 layer deep here,
-            // Since both compound tasks decompose into primitive tasks.
+            // MTR tracks decomposition of compound tasks and priary tasks that are subtasks of selectors,
+            // so our MTR is 2 layer deep.
             var domain = new Domain<MyContext>("Test");
             var task1 = new Sequence() { Name = "Test1" };
             var task2 = new Selector() { Name = "Test2" };
@@ -196,8 +196,8 @@ namespace Fluid_HTN.UnitTests
             ctx.LastMTR.Add(0);
 
             // Root is a Selector that branch off into task1 selector or task2 sequence.
-            // MTR only tracks decomposition of compound tasks, so our MTR is only 1 layer deep here,
-            // Since both compound tasks decompose into primitive tasks.
+            // MTR tracks decomposition of compound tasks and priary tasks that are subtasks of selectors,
+            // so our MTR is 2 layer deep.
             var domain = new Domain<MyContext>("Test");
             var task1 = new Sequence() { Name = "Test1" };
             var task2 = new Selector() { Name = "Test2" };
@@ -227,9 +227,11 @@ namespace Fluid_HTN.UnitTests
             ctx.LastMTR.Add(0);
             ctx.LastMTR.Add(1);
 
-            // Root is a Selector that branch off into task1 selector or task2 sequence.
-            // MTR only tracks decomposition of compound tasks, so our MTR is only 1 layer deep here,
-            // Since both compound tasks decompose into primitive tasks.
+            // Root is a Selector that branch off into two primary tasks.
+            // We intend for task3 (Test Action B) to be selected in the first run,
+            // but it will be a rejected plan because of LastMTR equality.
+            // We then change the Done state to true before we do a replan,
+            // and now we intend task 2 (Test Action A) to be selected, since its MTR beast LastMTR score.
             var domain = new Domain<MyContext>("Test");
             var task1 = new Selector() { Name = "Test Select" };
             var task2 = new PrimitiveTask() { Name = "Test Action A" }.AddCondition(new FuncCondition<MyContext>("Can choose A", context => context.Done == true));
