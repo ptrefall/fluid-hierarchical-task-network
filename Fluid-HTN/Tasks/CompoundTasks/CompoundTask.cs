@@ -59,7 +59,7 @@ namespace FluidHTN.Compounds
             foreach (var condition in Conditions)
             {
                 var result = condition.IsValid(ctx);
-                if (ctx.LogDecomposition) Log(ctx, $"PrimitiveTask.IsValid:{(result ? "Success" : "Failed")}:{condition.Name} is{(result ? "" : " not")} valid!", result ? ConsoleColor.DarkGreen : ConsoleColor.DarkRed);
+                if (ctx.LogDecomposition) Log(ctx, $"CompoundTask.IsValid:{(result ? "Success" : "Failed")}:{condition.Name} is{(result ? "" : " not")} valid!", result ? ConsoleColor.DarkGreen : ConsoleColor.DarkRed);
                 if (result == false)
                 {
                     return false;
