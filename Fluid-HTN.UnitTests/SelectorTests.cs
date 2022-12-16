@@ -328,7 +328,6 @@ namespace Fluid_HTN.UnitTests
             var rootTask = new Selector() { Name = "Root" };
             var task = new Selector() { Name = "Test1" };
             var task2 = new Selector() { Name = "Test2" };
-            var task3 = new Selector() { Name = "Test3" };
 
             task2.AddSubtask(new PrimitiveTask() { Name = "Sub-task2-1" }.AddCondition(new FuncCondition<MyContext>("Done == true", context => context.Done == true)));
             task2.AddSubtask(new PrimitiveTask() { Name = "Sub-task2-1" });
