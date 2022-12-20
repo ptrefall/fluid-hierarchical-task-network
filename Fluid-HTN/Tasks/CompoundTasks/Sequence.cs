@@ -49,7 +49,7 @@ namespace FluidHTN.Compounds
             for (var taskIndex = startIndex; taskIndex < Subtasks.Count; taskIndex++)
             {
                 var task = Subtasks[taskIndex];
-                if (ctx.LogDecomposition) Log(ctx, $"Selector.OnDecompose:Task index: {taskIndex}: {task?.Name}");
+                if (ctx.LogDecomposition) Log(ctx, $"Sequence.OnDecompose:Task index: {taskIndex}: {task?.Name}");
 
                 var status = OnDecomposeTask(ctx, task, taskIndex, oldStackDepth, out result);
                 switch (status)
