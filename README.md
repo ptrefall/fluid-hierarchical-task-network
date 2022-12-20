@@ -623,5 +623,10 @@ Example projects have been pulled into their own repositories, as not to clutter
 * [Fluid Roguelike](https://github.com/ptrefall/fluid_roguelike) (requires Unity, work in progress)
 * [Fluid Fortress](https://github.com/ptrefall/FluidFortress) (requires Unity, rushed Jam game)
 
+## Derivatives
+Over the years some awesome developers have been inspired to port Fluid HTN to new languages. Thank you!
+* [Javascript](https://github.com/TotallyGatsby/GamePlanHTN) by @TotallyGatsby
+* [C++](https://github.com/amoldeshpande/fluid-hierarchical-task-network) by @amoldeshpande
+
 ## TODO
 Review the [Projects area](https://github.com/ptrefall/fluid-hierarchical-task-network/projects) of this project to get an overview of what's on the todo-list of this project, and which new features are in progress.
