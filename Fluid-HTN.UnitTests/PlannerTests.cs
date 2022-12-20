@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using FluidHTN;
 using FluidHTN.Compounds;
 using FluidHTN.Conditions;
@@ -403,6 +404,56 @@ namespace Fluid_HTN.UnitTests
             planner.Tick(domain, ctx);
 
             Assert.IsTrue(test);
+        }
+
+        [TestMethod]
+        public void FindPlanIfConditionChangeAndOperatorIsContinuous_ExpectedBehavior()
+        {
+            var ctx = new MyContext();
+            ctx.Init();
+
+            var planner = new Planner<MyContext>();
+            var domain = new Domain<MyContext>("Test");
+            var select = new Selector() { Name = "Test Select" };
+
+            var actionA = new PrimitiveTask() { Name = "Test Action A" };
+            actionA.AddCondition(new FuncCondition<MyContext>("Can choose A", context => context.Done == true));
+            actionA.AddExecutingCondition(new FuncCondition<MyContext>("Can choose A", context => context.Done == true));
+            actionA.SetOperator(new MyOperator());
+            var actionB = new PrimitiveTask() { Name = "Test Action B" };
+            actionB.AddCondition(new FuncCondition<MyContext>("Can not choose A", context => context.Done == false));
+            actionB.AddExecutingCondition(new FuncCondition<MyContext>("Can not choose A", context => context.Done == false));
+            actionB.SetOperator(new MyOperator());
+
+            domain.Add(domain.Root, select);
+            domain.Add(select, actionA);
+            domain.Add(select, actionB);
+
+            Queue<ITask> plan;
+            ITask currentTask;
+
+            planner.Tick(domain, ctx, false);
+            plan = planner.GetPlan();
+            currentTask = planner.GetCurrentTask();
+            Assert.IsTrue(plan != null);
+            Assert.IsTrue(plan.Count == 0);
+            Assert.IsTrue(currentTask.Name == "Test Action B");
+            Assert.IsTrue(ctx.MethodTraversalRecord.Count == 2);
+            Assert.IsTrue(ctx.MethodTraversalRecord[0] == 0);
+            Assert.IsTrue(ctx.MethodTraversalRecord[1] == 1);
+
+            // When we change the condition to Done = true, we should now be able to find a better plan!
+            ctx.Done = true;
+
+            planner.Tick(domain, ctx, true);
+            plan = planner.GetPlan();
+            currentTask = planner.GetCurrentTask();
+            Assert.IsTrue(plan != null);
+            Assert.IsTrue(plan.Count == 0);
+            Assert.IsTrue(currentTask.Name == "Test Action A");
+            Assert.IsTrue(ctx.MethodTraversalRecord.Count == 2);
+            Assert.IsTrue(ctx.MethodTraversalRecord[0] == 0);
+            Assert.IsTrue(ctx.MethodTraversalRecord[1] == 0);
         }
     }
 }

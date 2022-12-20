@@ -51,6 +51,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DomainBuilderTests.cs" />
+    <Compile Include="MyOperator.cs" />
     <Compile Include="MyContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="FuncConditionTests.cs" />

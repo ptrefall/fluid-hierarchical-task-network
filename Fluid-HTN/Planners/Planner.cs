@@ -251,6 +251,7 @@ namespace FluidHTN
                                 ctx.PartialPlanQueue.Clear();
                                 ctx.IsDirty = false;
 
+                                if (allowImmediateReplan) Tick(domain, ctx, allowImmediateReplan: false);
                                 return;
                             }
 
