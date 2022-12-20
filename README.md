@@ -42,6 +42,8 @@ Compound tasks are where HTN get their “hierarchical” nature. You can think 
 Primitive tasks represent a single step that can be performed by our AI.  A set of primitive tasks is the plan that we are ultimately getting out of the HTN. Primitive tasks are comprised of an operator, a set of effects, a set of conditions and a set of executing conditions.
 #### Conditions
 Conditions are boolean validators that can be used to validate the decomposition of a compound task, or the validity of a primitive task. Primitive Tasks also have Executing Conditions, which we validate before every update to the primary task's operator during execution of a plan.
+##### Executing Conditions
+Advanced: Executing Conditions are special conditions that are evaluted every planner tick. These are only required if you have conditions that does not evaluate its validity based on world state entries, but instead based on other data in the runtime Context. The planner knows when world state has become dirty, but will not know when non-worldstate has changed, and this is where Executing Conditions come in. If an Executing Consition fail for the currently executing task, it will invalidate the running plan and require a replan.
 #### Operators
 Operators are the logic operation a primitive task should perform during plan execution. Every time an operator updates, it returns a status whether it succeeded, failed or need to continue next tick.
 #### Effects
