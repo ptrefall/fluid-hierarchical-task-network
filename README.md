@@ -20,7 +20,7 @@ A simple HTN planner based around the principles of the Builder pattern, inspire
 * Uses a Factory interface internally to create and free arrays/collections/objects, allowing the user to add pooling, or other memory management schemes.
 * Decomposition logging, for debugging.
 * Comes with Unity Package Module definitions for seamless integration into Unity projects.
-* 145 unit tests.
+* 150 unit tests.
 
 ## Support
 Join the [discord channel](https://discord.gg/MuccnAz) to share your experience and get support on the usage of Fluid HTN.
@@ -43,7 +43,7 @@ Primitive tasks represent a single step that can be performed by our AI.  A set 
 #### Conditions
 Conditions are boolean validators that can be used to validate the decomposition of a compound task, or the validity of a primitive task. Primitive Tasks also have Executing Conditions, which we validate before every update to the primary task's operator during execution of a plan.
 ##### Executing Conditions
-Advanced: Executing Conditions are special conditions that are evaluted every planner tick. These are only required if you have conditions that does not evaluate its validity based on world state entries, but instead based on other data in the runtime Context. The planner knows when world state has become dirty, but will not know when non-worldstate has changed, and this is where Executing Conditions come in. If an Executing Consition fail for the currently executing task, it will invalidate the running plan and require a replan.
+Advanced: Executing Conditions are special conditions that are evaluted every planner tick. These special conditions are useful for cases where you need to re-evaluate the validity of your conditions after planning and after setting a new task as current task during execution (e.g. the operator of the task will return continue). In this case where the operator returns continue and the condition becomes "invalid", the planner will not automatically know. Executing Conditions is one way to ensure that the planner realize that the task is now invalid. Another way is to put this logic inside the Operator and have it return Failure, which should yield the same result in practice (it triggers a replan).
 #### Operators
 Operators are the logic operation a primitive task should perform during plan execution. Every time an operator updates, it returns a status whether it succeeded, failed or need to continue next tick.
 #### Effects
