@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using FluidHTN.Conditions;
+using FluidHTN.PrimitiveTasks;
 
 namespace FluidHTN.Compounds
 {
@@ -47,6 +48,8 @@ namespace FluidHTN.Compounds
         protected abstract DecompositionStatus OnDecompose(IContext ctx, int startIndex, out Queue<ITask> result);
 
         protected abstract DecompositionStatus OnDecomposeTask(IContext ctx, ITask task, int taskIndex, int[] oldStackDepth, out Queue<ITask> result);
+
+        protected abstract void OnDecomposePrimitiveTask(IContext ctx, IPrimitiveTask task, int taskIndex, int[] oldStackDepth, out Queue<ITask> result);
 
         protected abstract DecompositionStatus OnDecomposeCompoundTask(IContext ctx, ICompoundTask task, int taskIndex, int[] oldStackDepth, out Queue<ITask> result);
 
