@@ -8,13 +8,15 @@ namespace FluidHTN.Operators
 
         private readonly Func<T, TaskStatus> _func;
         private readonly Action<T> _funcStop;
+        private readonly Action<T> _funcAborted;
 
         // ========================================================= CONSTRUCTION
 
-        public FuncOperator(Func<T, TaskStatus> func, Action<T> funcStop = null)
+        public FuncOperator(Func<T, TaskStatus> func, Action<T> funcStop = null, Action<T> funcAborted = null)
         {
             _func = func;
             _funcStop = funcStop;
+            _funcAborted = funcAborted;
         }
 
         // ========================================================= FUNCTIONALITY
@@ -34,6 +36,18 @@ namespace FluidHTN.Operators
             if (ctx is T c)
             {
                 _funcStop?.Invoke(c);
+            }
+            else
+            {
+                throw new Exception("Unexpected context type!");
+            }
+        }
+
+        public void Aborted(IContext ctx)
+        {
+            if (ctx is T c)
+            {
+                _funcAborted?.Invoke(c);
             }
             else
             {

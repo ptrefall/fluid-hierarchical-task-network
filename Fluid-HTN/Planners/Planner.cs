@@ -240,6 +240,11 @@ namespace FluidHTN
                         {
                             OnNewTaskConditionFailed?.Invoke(_currentTask, condition);
 
+                            if (_currentTask is IPrimitiveTask task)
+                            {
+                                task.Aborted(ctx);
+                            }
+
                             _currentTask = null;
                             _plan.Clear();
 
@@ -272,6 +277,8 @@ namespace FluidHTN
                             if (condition.IsValid(ctx) == false)
                             {
                                 OnCurrentTaskExecutingConditionFailed?.Invoke(task, condition);
+
+                                task.Aborted(ctx);
 
                                 _currentTask = null;
                                 _plan.Clear();
@@ -337,6 +344,8 @@ namespace FluidHTN
                         {
                             OnCurrentTaskFailed?.Invoke(task);
 
+                            task.Aborted(ctx);
+
                             _currentTask = null;
                             _plan.Clear();
 
@@ -361,6 +370,7 @@ namespace FluidHTN
                     else
                     {
                         // This should not really happen if a domain is set up properly.
+                        task.Aborted(ctx);
                         _currentTask = null;
                         LastStatus = TaskStatus.Failure;
                     }

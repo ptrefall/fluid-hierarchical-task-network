@@ -13,5 +13,10 @@ namespace Fluid_HTN.UnitTests
         public void Stop(IContext ctx)
         {
         }
+
+        public void Aborted(IContext ctx)
+        {
+
+        }
     }
 }

@@ -27,5 +27,6 @@ namespace FluidHTN.PrimitiveTasks
         void ApplyEffects(IContext ctx);
 
         void Stop(IContext ctx);
+        void Aborted(IContext ctx);
     }
 }
