@@ -48,7 +48,10 @@ namespace FluidHTN.PrimitiveTasks
 
         public void SetOperator(IOperator action)
         {
-            if (Operator != null) throw new Exception("A Primitive Task can only contain a single Operator!");
+            if (Operator != null)
+            {
+                throw new Exception("A Primitive Task can only contain a single Operator!");
+            }
 
             Operator = action;
         }
@@ -59,15 +62,26 @@ namespace FluidHTN.PrimitiveTasks
         {
             if (ctx.ContextState == ContextState.Planning)
             {
-                if (ctx.LogDecomposition) Log(ctx, $"PrimitiveTask.ApplyEffects", ConsoleColor.Yellow);
+                if (ctx.LogDecomposition)
+                {
+                    Log(ctx, $"PrimitiveTask.ApplyEffects", ConsoleColor.Yellow);
+                }
             }
 
-            if (ctx.LogDecomposition) ctx.CurrentDecompositionDepth++;
+            if (ctx.LogDecomposition)
+            {
+                ctx.CurrentDecompositionDepth++;
+            }
+
             foreach (var effect in Effects)
             {
                 effect.Apply(ctx);
             }
-            if (ctx.LogDecomposition) ctx.CurrentDecompositionDepth--;
+
+            if (ctx.LogDecomposition)
+            {
+                ctx.CurrentDecompositionDepth--;
+            }
         }
 
         public void Stop(IContext ctx)
@@ -79,21 +93,44 @@ namespace FluidHTN.PrimitiveTasks
 
         public bool IsValid(IContext ctx)
         {
-            if (ctx.LogDecomposition) Log(ctx, $"PrimitiveTask.IsValid check");
+            if (ctx.LogDecomposition)
+            {
+                Log(ctx, $"PrimitiveTask.IsValid check");
+            }
+
             foreach (var condition in Conditions)
             {
-                if (ctx.LogDecomposition) ctx.CurrentDecompositionDepth++;
+                if (ctx.LogDecomposition)
+                {
+                    ctx.CurrentDecompositionDepth++;
+                }
+
                 var result = condition.IsValid(ctx);
-                if (ctx.LogDecomposition) ctx.CurrentDecompositionDepth--;
-                if (ctx.LogDecomposition) Log(ctx, $"PrimitiveTask.IsValid:{(result ? "Success" : "Failed")}:{condition.Name} is{(result ? "" : " not")} valid!", result ? ConsoleColor.DarkGreen : ConsoleColor.DarkRed);
+
+                if (ctx.LogDecomposition)
+                {
+                    ctx.CurrentDecompositionDepth--;
+                    Log(ctx,
+                        $"PrimitiveTask.IsValid:{(result ? "Success" : "Failed")}:{condition.Name} is{(result ? "" : " not")} valid!",
+                        result ? ConsoleColor.DarkGreen : ConsoleColor.DarkRed);
+                }
+
                 if (result == false)
                 {
-                    if (ctx.LogDecomposition) Log(ctx, $"PrimitiveTask.IsValid:Failed:Preconditions not met!", ConsoleColor.Red);
+                    if (ctx.LogDecomposition)
+                    {
+                        Log(ctx, $"PrimitiveTask.IsValid:Failed:Preconditions not met!", ConsoleColor.Red);
+                    }
+
                     return false;
                 }
             }
 
-            if (ctx.LogDecomposition) Log(ctx, $"PrimitiveTask.IsValid:Success!", ConsoleColor.Green);
+            if (ctx.LogDecomposition)
+            {
+                Log(ctx, $"PrimitiveTask.IsValid:Success!", ConsoleColor.Green);
+            }
+
             return true;
         }
 

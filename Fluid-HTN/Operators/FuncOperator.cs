@@ -22,16 +22,23 @@ namespace FluidHTN.Operators
         public TaskStatus Update(IContext ctx)
         {
             if (ctx is T c)
+            {
                 return _func?.Invoke(c) ?? TaskStatus.Failure;
+            }
+
             throw new Exception("Unexpected context type!");
         }
 
         public void Stop(IContext ctx)
         {
             if (ctx is T c)
+            {
                 _funcStop?.Invoke(c);
+            }
             else
+            {
                 throw new Exception("Unexpected context type!");
+            }
         }
     }
 }

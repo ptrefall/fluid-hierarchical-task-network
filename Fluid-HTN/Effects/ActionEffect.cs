@@ -28,11 +28,17 @@ namespace FluidHTN.Effects
         {
             if (ctx is T c)
             {
-                if (ctx.LogDecomposition) ctx.Log(Name, $"ActionEffect.Apply:{Type}", ctx.CurrentDecompositionDepth+1, this);
+                if (ctx.LogDecomposition)
+                {
+                    ctx.Log(Name, $"ActionEffect.Apply:{Type}", ctx.CurrentDecompositionDepth+1, this);
+                }
+
                 _action?.Invoke(c, Type);
             }
             else
+            {
                 throw new Exception("Unexpected context type!");
+            }
         }
     }
 }

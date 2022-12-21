@@ -39,9 +39,18 @@ namespace FluidHTN.Compounds
 
         public DecompositionStatus Decompose(IContext ctx, int startIndex, out Queue<ITask> result)
         {
-            if (ctx.LogDecomposition) ctx.CurrentDecompositionDepth++;
+            if (ctx.LogDecomposition)
+            {
+                ctx.CurrentDecompositionDepth++;
+            }
+
             var status = OnDecompose(ctx, startIndex, out result);
-            if (ctx.LogDecomposition) ctx.CurrentDecompositionDepth--;
+            
+            if (ctx.LogDecomposition)
+            {
+                ctx.CurrentDecompositionDepth--;
+            }
+
             return status;
         }
 
@@ -62,7 +71,12 @@ namespace FluidHTN.Compounds
             foreach (var condition in Conditions)
             {
                 var result = condition.IsValid(ctx);
-                if (ctx.LogDecomposition) Log(ctx, $"CompoundTask.IsValid:{(result ? "Success" : "Failed")}:{condition.Name} is{(result ? "" : " not")} valid!", result ? ConsoleColor.DarkGreen : ConsoleColor.DarkRed);
+                
+                if (ctx.LogDecomposition)
+                {
+                    Log(ctx, $"CompoundTask.IsValid:{(result ? "Success" : "Failed")}:{condition.Name} is{(result ? "" : " not")} valid!", result ? ConsoleColor.DarkGreen : ConsoleColor.DarkRed);
+                }
+
                 if (result == false)
                 {
                     return false;

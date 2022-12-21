@@ -25,7 +25,9 @@ namespace FluidHTN
         public void Add(ICompoundTask parent, ITask subtask)
         {
             if (parent == subtask)
+            {
                 throw new Exception("Parent-task and Sub-task can't be the same instance!");
+            }
 
             parent.AddSubtask(subtask);
             subtask.Parent = parent;
@@ -34,7 +36,9 @@ namespace FluidHTN
         public void Add(ICompoundTask parent, Slot slot)
         {
             if (parent == slot)
+            {
                 throw new Exception("Parent-task and Sub-task can't be the same instance!");
+            }
 
             if (_slots != null)
             {
@@ -60,10 +64,14 @@ namespace FluidHTN
         public DecompositionStatus FindPlan(T ctx, out Queue<ITask> plan)
         {
             if (ctx.IsInitialized == false)
+            {
                 throw new Exception("Context was not initialized!");
+            }
 
             if (ctx.MethodTraversalRecord == null)
+            {
                 throw new Exception("We require the Method Traversal Record to have a valid instance.");
+            }
 
             ctx.ContextState = ContextState.Planning;
 
@@ -104,7 +112,9 @@ namespace FluidHTN
                     // While continuing a partial plan, we might encounter
                     // a new pause.
                     if (ctx.HasPausedPartialPlan)
+                    {
                         break;
+                    }
                 }
 
                 // If we failed to continue the paused partial plan,
@@ -112,7 +122,11 @@ namespace FluidHTN
                 if (status == DecompositionStatus.Rejected || status == DecompositionStatus.Failed)
                 {
                     ctx.MethodTraversalRecord.Clear();
-                    if (ctx.DebugMTR) ctx.MTRDebug.Clear();
+
+                    if (ctx.DebugMTR)
+                    {
+                        ctx.MTRDebug.Clear();
+                    }
 
                     status = Root.Decompose(ctx, 0, out plan);
                 }
@@ -120,10 +134,12 @@ namespace FluidHTN
             else
             {
                 Queue<PartialPlanEntry> lastPartialPlanQueue = null;
+
                 if (ctx.HasPausedPartialPlan)
                 {
                     ctx.HasPausedPartialPlan = false;
                     lastPartialPlanQueue = ctx.Factory.CreateQueue<PartialPlanEntry>();
+
                     while (ctx.PartialPlanQueue.Count > 0)
                     {
                         lastPartialPlanQueue.Enqueue(ctx.PartialPlanQueue.Dequeue());
@@ -132,7 +148,11 @@ namespace FluidHTN
 
                 // We only erase the MTR if we start from the root task of the domain.
                 ctx.MethodTraversalRecord.Clear();
-                if (ctx.DebugMTR) ctx.MTRDebug.Clear();
+
+                if (ctx.DebugMTR)
+                {
+                    ctx.MTRDebug.Clear();
+                }
 
                 status = Root.Decompose(ctx, 0, out plan);
 
@@ -144,10 +164,12 @@ namespace FluidHTN
                     {
                         ctx.HasPausedPartialPlan = true;
                         ctx.PartialPlanQueue.Clear();
+
                         while (lastPartialPlanQueue.Count > 0)
                         {
                             ctx.PartialPlanQueue.Enqueue(lastPartialPlanQueue.Dequeue());
                         }
+
                         ctx.Factory.FreeQueue(ref lastPartialPlanQueue);
                     }
                 }
@@ -160,11 +182,13 @@ namespace FluidHTN
             if (isMTRsEqual)
             {
                 for (var i = 0; i < ctx.MethodTraversalRecord.Count; i++)
+                {
                     if (ctx.MethodTraversalRecord[i] < ctx.LastMTR[i])
                     {
                         isMTRsEqual = false;
                         break;
                     }
+                }
 
                 if (isMTRsEqual)
                 {
@@ -197,7 +221,11 @@ namespace FluidHTN
                 for (var i = 0; i < ctx.WorldStateChangeStack.Length; i++)
                 {
                     var stack = ctx.WorldStateChangeStack[i];
-                    if (stack != null && stack.Count > 0) stack.Clear();
+
+                    if (stack != null && stack.Count > 0)
+                    {
+                        stack.Clear();
+                    }
                 }
             }
 

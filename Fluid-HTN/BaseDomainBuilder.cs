@@ -35,7 +35,11 @@ namespace FluidHTN
         {
             get
             {
-                if (_pointers.Count == 0) return null;
+                if (_pointers.Count == 0)
+                {
+                    return null;
+                }
+
                 return _pointers[_pointers.Count - 1];
             }
         }
@@ -292,10 +296,14 @@ namespace FluidHTN
         public DB Splice(Domain<T> domain)
         {
             if (Pointer is ICompoundTask compoundTask)
+            {
                 _domain.Add(compoundTask, domain.Root);
+            }
             else
+            {
                 throw new Exception(
                     "Pointer is not a compound task type. Did you forget an End()?");
+            }
 
             return (DB) this;
         }
@@ -315,8 +323,10 @@ namespace FluidHTN
                 _domain.Add(compoundTask, slot);
             }
             else
+            {
                 throw new Exception(
                     "Pointer is not a compound task type. Did you forget an End()?");
+            }
 
             return (DB) this;
         }
@@ -346,9 +356,12 @@ namespace FluidHTN
         public Domain<T> Build()
         {
             if (Pointer != _domain.Root)
+            {
                 throw new Exception($"The domain definition lacks one or more End() statements. Pointer is '{Pointer.Name}', but expected '{_domain.Root.Name}'.");
+            }
 
             _factory.FreeList(ref _pointers);
+
             return _domain;
         }
     }

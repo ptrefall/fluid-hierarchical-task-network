@@ -64,7 +64,12 @@ namespace FluidHTN.Compounds
         public virtual bool IsValid(IContext ctx)
         {
             var result = Subtask != null;
-            if (ctx.LogDecomposition) Log(ctx, $"Slot.IsValid:{(result ? "Success" : "Failed")}!", result ? ConsoleColor.Green : ConsoleColor.Red);
+            
+            if (ctx.LogDecomposition)
+            {
+                Log(ctx, $"Slot.IsValid:{(result ? "Success" : "Failed")}!", result ? ConsoleColor.Green : ConsoleColor.Red);
+            }
+
             return result;
         }
 

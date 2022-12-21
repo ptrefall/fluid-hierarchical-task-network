@@ -37,18 +37,30 @@ namespace FluidHTN.Contexts
             {
                 WorldStateChangeStack = new Stack<KeyValuePair<EffectType, byte>>[WorldState.Length];
                 for (var i = 0; i < WorldState.Length; i++)
+                {
                     WorldStateChangeStack[i] = new Stack<KeyValuePair<EffectType, byte>>();
+                }
             }
 
             if (DebugMTR)
             {
-                if (MTRDebug == null) MTRDebug = new List<string>();
-                if (LastMTRDebug == null) LastMTRDebug = new List<string>();
+                if (MTRDebug == null)
+                {
+                    MTRDebug = new List<string>();
+                }
+
+                if (LastMTRDebug == null)
+                {
+                    LastMTRDebug = new List<string>();
+                }
             }
 
             if (LogDecomposition)
             {
-                if (DecompositionLog == null) DecompositionLog = new Queue<IBaseDecompositionLogEntry>();
+                if (DecompositionLog == null)
+                {
+                    DecompositionLog = new Queue<IBaseDecompositionLogEntry>();
+                }
             }
 
             IsInitialized = true;
@@ -63,9 +75,15 @@ namespace FluidHTN.Contexts
 
         public byte GetState(int state)
         {
-            if (ContextState == ContextState.Executing) return WorldState[state];
+            if (ContextState == ContextState.Executing)
+            {
+                return WorldState[state];
+            }
 
-            if (WorldStateChangeStack[state].Count == 0) return WorldState[state];
+            if (WorldStateChangeStack[state].Count == 0)
+            {
+                return WorldState[state];
+            }
 
             return WorldStateChangeStack[state].Peek().Value;
         }
@@ -76,11 +94,15 @@ namespace FluidHTN.Contexts
             {
                 // Prevent setting the world state dirty if we're not changing anything.
                 if (WorldState[state] == value)
+                {
                     return;
+                }
 
                 WorldState[state] = value;
                 if (setAsDirty)
+                {
                     IsDirty = true; // When a state change during execution, we need to mark the context dirty for replanning!
+                }
             }
             else
             {
@@ -93,7 +115,11 @@ namespace FluidHTN.Contexts
         public int[] GetWorldStateChangeDepth(IFactory factory)
         {
             var stackDepth = factory.CreateArray<int>(WorldStateChangeStack.Length);
-            for (var i = 0; i < WorldStateChangeStack.Length; i++) stackDepth[i] = WorldStateChangeStack[i]?.Count ?? 0;
+
+            for (var i = 0; i < WorldStateChangeStack.Length; i++)
+            {
+                stackDepth[i] = WorldStateChangeStack[i]?.Count ?? 0;
+            }
 
             return stackDepth;
         }
@@ -101,22 +127,34 @@ namespace FluidHTN.Contexts
         public void TrimForExecution()
         {
             if (ContextState == ContextState.Executing)
+            {
                 throw new Exception("Can not trim a context when in execution mode");
+            }
 
             foreach (var stack in WorldStateChangeStack)
+            {
                 while (stack.Count != 0 && stack.Peek().Key != EffectType.Permanent)
+                {
                     stack.Pop();
+                }
+            }
         }
 
         public void TrimToStackDepth(int[] stackDepth)
         {
             if (ContextState == ContextState.Executing)
+            {
                 throw new Exception("Can not trim a context when in execution mode");
+            }
 
             for (var i = 0; i < stackDepth.Length; i++)
             {
                 var stack = WorldStateChangeStack[i];
-                while (stack.Count > stackDepth[i]) stack.Pop();
+
+                while (stack.Count > stackDepth[i])
+                {
+                    stack.Pop();
+                }
             }
         }
 
@@ -141,7 +179,9 @@ namespace FluidHTN.Contexts
         public void Log(string name, string description, int depth, ITask task, ConsoleColor color = ConsoleColor.White)
         {
             if (LogDecomposition == false)
+            {
                 return;
+            }
 
             DecompositionLog.Enqueue(new DecomposedCompoundTaskEntry
             {
@@ -156,7 +196,9 @@ namespace FluidHTN.Contexts
         public void Log(string name, string description, int depth, ICondition condition, ConsoleColor color = ConsoleColor.DarkGreen)
         {
             if (LogDecomposition == false)
+            {
                 return;
+            }
 
             DecompositionLog.Enqueue(new DecomposedConditionEntry
             {
@@ -171,7 +213,9 @@ namespace FluidHTN.Contexts
         public void Log(string name, string description, int depth, IEffect effect, ConsoleColor color = ConsoleColor.DarkYellow)
         {
             if (LogDecomposition == false)
+            {
                 return;
+            }
 
             DecompositionLog.Enqueue(new DecomposedEffectEntry
             {

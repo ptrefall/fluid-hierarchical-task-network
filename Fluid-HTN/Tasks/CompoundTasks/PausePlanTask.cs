@@ -43,7 +43,11 @@ namespace FluidHTN
 
         public bool IsValid(IContext ctx)
         {
-            if (ctx.LogDecomposition) Log(ctx, $"PausePlanTask.IsValid:Success!");
+            if (ctx.LogDecomposition)
+            {
+                Log(ctx, $"PausePlanTask.IsValid:Success!");
+            }
+
             return true;
         }
 

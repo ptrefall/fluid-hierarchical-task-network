@@ -97,7 +97,9 @@ namespace FluidHTN
         public void Tick(Domain<T> domain, T ctx, bool allowImmediateReplan = true)
         {
             if (ctx.IsInitialized == false)
+            {
                 throw new Exception("Context was not initialized!");
+            }
 
             DecompositionStatus decompositionStatus = DecompositionStatus.Failed;
             bool isTryingToReplacePlan = false;
@@ -130,12 +132,18 @@ namespace FluidHTN
                         // so that any new potential plan that is decomposing from the domain root has to beat the currently
                         // running partial plan.
                         ctx.LastMTR.Clear();
-                        foreach (var record in ctx.MethodTraversalRecord) ctx.LastMTR.Add(record);
+                        foreach (var record in ctx.MethodTraversalRecord)
+                        {
+                            ctx.LastMTR.Add(record);
+                        }
 
                         if (ctx.DebugMTR)
                         {
                             ctx.LastMTRDebug.Clear();
-                            foreach (var record in ctx.MTRDebug) ctx.LastMTRDebug.Add(record);
+                            foreach (var record in ctx.MTRDebug)
+                            {
+                                ctx.LastMTRDebug.Add(record);
+                            }
                         }
                     }
                 }
@@ -154,7 +162,10 @@ namespace FluidHTN
                     }
 
                     _plan.Clear();
-                    while (newPlan.Count > 0) _plan.Enqueue(newPlan.Dequeue());
+                    while (newPlan.Count > 0)
+                    {
+                        _plan.Enqueue(newPlan.Dequeue());
+                    }
 
                     if (_currentTask != null && _currentTask is IPrimitiveTask t)
                     {
@@ -168,12 +179,18 @@ namespace FluidHTN
                     if (ctx.MethodTraversalRecord != null)
                     {
                         ctx.LastMTR.Clear();
-                        foreach (var record in ctx.MethodTraversalRecord) ctx.LastMTR.Add(record);
+                        foreach (var record in ctx.MethodTraversalRecord)
+                        {
+                            ctx.LastMTR.Add(record);
+                        }
 
                         if (ctx.DebugMTR)
                         {
                             ctx.LastMTRDebug.Clear();
-                            foreach (var record in ctx.MTRDebug) ctx.LastMTRDebug.Add(record);
+                            foreach (var record in ctx.MTRDebug)
+                            {
+                                ctx.LastMTRDebug.Add(record);
+                            }
                         }
                     }
                 }
@@ -190,13 +207,19 @@ namespace FluidHTN
                     if (ctx.LastMTR.Count > 0)
                     {
                         ctx.MethodTraversalRecord.Clear();
-                        foreach (var record in ctx.LastMTR) ctx.MethodTraversalRecord.Add(record);
+                        foreach (var record in ctx.LastMTR)
+                        {
+                            ctx.MethodTraversalRecord.Add(record);
+                        }
                         ctx.LastMTR.Clear();
 
                         if (ctx.DebugMTR)
                         {
                             ctx.MTRDebug.Clear();
-                            foreach (var record in ctx.LastMTRDebug) ctx.MTRDebug.Add(record);
+                            foreach (var record in ctx.LastMTRDebug)
+                            {
+                                ctx.MTRDebug.Add(record);
+                            }
                             ctx.LastMTRDebug.Clear();
                         }
                     }
@@ -209,7 +232,9 @@ namespace FluidHTN
                 if (_currentTask != null)
                 {
                     OnNewTask?.Invoke(_currentTask);
+
                     foreach (var condition in _currentTask.Conditions)
+                    {
                         // If a condition failed, then the plan failed to progress! A replan is required.
                         if (condition.IsValid(ctx) == false)
                         {
@@ -219,7 +244,11 @@ namespace FluidHTN
                             _plan.Clear();
 
                             ctx.LastMTR.Clear();
-                            if (ctx.DebugMTR) ctx.LastMTRDebug.Clear();
+
+                            if (ctx.DebugMTR)
+                            {
+                                ctx.LastMTRDebug.Clear();
+                            }
 
                             ctx.HasPausedPartialPlan = false;
                             ctx.PartialPlanQueue.Clear();
@@ -227,15 +256,18 @@ namespace FluidHTN
 
                             return;
                         }
+                    }
                 }
             }
 
             if (_currentTask != null)
+            {
                 if (_currentTask is IPrimitiveTask task)
                 {
                     if (task.Operator != null)
                     {
                         foreach (var condition in task.ExecutingConditions)
+                        {
                             // If a condition failed, then the plan failed to progress! A replan is required.
                             if (condition.IsValid(ctx) == false)
                             {
@@ -245,15 +277,24 @@ namespace FluidHTN
                                 _plan.Clear();
 
                                 ctx.LastMTR.Clear();
-                                if (ctx.DebugMTR) ctx.LastMTRDebug.Clear();
+
+                                if (ctx.DebugMTR)
+                                {
+                                    ctx.LastMTRDebug.Clear();
+                                }
 
                                 ctx.HasPausedPartialPlan = false;
                                 ctx.PartialPlanQueue.Clear();
                                 ctx.IsDirty = false;
 
-                                if (allowImmediateReplan) Tick(domain, ctx, allowImmediateReplan: false);
+                                if (allowImmediateReplan)
+                                {
+                                    Tick(domain, ctx, allowImmediateReplan: false);
+                                }
+
                                 return;
                             }
+                        }
 
                         LastStatus = task.Operator.Update(ctx);
 
@@ -276,11 +317,18 @@ namespace FluidHTN
                             if (_plan.Count == 0)
                             {
                                 ctx.LastMTR.Clear();
-                                if (ctx.DebugMTR) ctx.LastMTRDebug.Clear();
+
+                                if (ctx.DebugMTR)
+                                {
+                                    ctx.LastMTRDebug.Clear();
+                                }
 
                                 ctx.IsDirty = false;
 
-                                if (allowImmediateReplan) Tick(domain, ctx, allowImmediateReplan: false);
+                                if (allowImmediateReplan)
+                                {
+                                    Tick(domain, ctx, allowImmediateReplan: false);
+                                }
                             }
                         }
 
@@ -293,7 +341,11 @@ namespace FluidHTN
                             _plan.Clear();
 
                             ctx.LastMTR.Clear();
-                            if (ctx.DebugMTR) ctx.LastMTRDebug.Clear();
+
+                            if (ctx.DebugMTR)
+                            {
+                                ctx.LastMTRDebug.Clear();
+                            }
 
                             ctx.HasPausedPartialPlan = false;
                             ctx.PartialPlanQueue.Clear();
@@ -313,6 +365,7 @@ namespace FluidHTN
                         LastStatus = TaskStatus.Failure;
                     }
                 }
+            }
 
             if (_currentTask == null && _plan.Count == 0 && isTryingToReplacePlan == false &&
                 (decompositionStatus == DecompositionStatus.Failed ||
@@ -332,6 +385,7 @@ namespace FluidHTN
             {
                 task.Stop(ctx);
             }
+
             _currentTask = null;
         }
 
