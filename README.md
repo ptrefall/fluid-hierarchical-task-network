@@ -629,6 +629,7 @@ Example projects have been pulled into their own repositories, as not to clutter
 Over the years some awesome developers have been inspired to port Fluid HTN to new languages. Thank you!
 * [Javascript](https://github.com/TotallyGatsby/GamePlanHTN) by [@TotallyGatsby](https://github.com/TotallyGatsby).
 * [C++](https://github.com/amoldeshpande/fluid-hierarchical-task-network) by [@amoldeshpande](https://github.com/amoldeshpande).
+* [Lua](https://github.com/Safebox36/OdaiHTN) by [@Safebox36](https://github.com/Safebox36).
 
 ## TODO
 Review the [Projects area](https://github.com/ptrefall/fluid-hierarchical-task-network/projects) of this project to get an overview of what's on the todo-list of this project, and which new features are in progress.
