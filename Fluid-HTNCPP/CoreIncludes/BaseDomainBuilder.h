@@ -38,7 +38,7 @@ public:
     // ========================================================= HIERARCHY HANDLING
 
     /// <summary>
-    ///     Compound tasks are where HTN get their “hierarchical” nature. You can think of a compound task as
+    ///     Compound tasks are where HTN get their hierarchical nature. You can think of a compound task as
     ///     a high level task that has multiple ways of being accomplished. There are primarily two types of
     ///     compound tasks. Selectors and Sequencers. A Selector must be able to decompose a single sub-task,
     ///     while a Sequence must be able to decompose all its sub-tasks successfully for itself to have decomposed
@@ -69,7 +69,7 @@ public:
     }
     template<typename T>
     bool AddCompoundTask(StringType name)
-	{
+    {
         SharedPtr<CompoundTask> ptr = MakeSharedPtr<T>(name);
         return AddCompoundTask(name, ptr);
     };
