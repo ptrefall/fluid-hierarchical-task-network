@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using FluidHTN.Compounds;
 using FluidHTN.Conditions;
 using FluidHTN.PrimitiveTasks;
@@ -94,6 +95,7 @@ namespace FluidHTN
         /// </summary>
         /// <param name="domain"></param>
         /// <param name="ctx"></param>
+        /// <param name="allowImmediateReplan"></param>
         public void Tick(Domain<T> domain, T ctx, bool allowImmediateReplan = true)
         {
             if (ctx.IsInitialized == false)
@@ -101,288 +103,424 @@ namespace FluidHTN
                 throw new Exception("Context was not initialized!");
             }
 
-            DecompositionStatus decompositionStatus = DecompositionStatus.Failed;
-            bool isTryingToReplacePlan = false;
+            var decompositionStatus = DecompositionStatus.Failed;
+            var isTryingToReplacePlan = false;
+            
             // Check whether state has changed or the current plan has finished running.
             // and if so, try to find a new plan.
-            if (_currentTask == null && (_plan.Count == 0) || ctx.IsDirty)
+            if (ShouldFindNewPlan(ctx))
             {
-                Queue<PartialPlanEntry> lastPartialPlanQueue = null;
+                isTryingToReplacePlan = TryFindNewPlan(domain, ctx, out decompositionStatus);
+            }
 
-                var worldStateDirtyReplan = ctx.IsDirty;
-                ctx.IsDirty = false;
-
-                if (worldStateDirtyReplan)
+            // If the plan has more tasks, we try to select the next one.
+            if (HasPlanMoreTasks())
+            {
+                if (TrySelectNextTaskInPlan(domain, ctx) == false)
                 {
-                    // If we're simply re-evaluating whether to replace the current plan because
-                    // some world state got dirt, then we do not intend to continue a partial plan
-                    // right now, but rather see whether the world state changed to a degree where
-                    // we should pursue a better plan. Thus, if this replan fails to find a better
-                    // plan, we have to add back the partial plan temps cached above.
-                    if (ctx.HasPausedPartialPlan)
-                    {
-                        ctx.HasPausedPartialPlan = false;
-                        lastPartialPlanQueue = ctx.Factory.CreateQueue<PartialPlanEntry>();
-                        while (ctx.PartialPlanQueue.Count > 0)
-                        {
-                            lastPartialPlanQueue.Enqueue(ctx.PartialPlanQueue.Dequeue());
-                        }
-
-                        // We also need to ensure that the last mtr is up to date with the on-going MTR of the partial plan,
-                        // so that any new potential plan that is decomposing from the domain root has to beat the currently
-                        // running partial plan.
-                        ctx.LastMTR.Clear();
-                        foreach (var record in ctx.MethodTraversalRecord)
-                        {
-                            ctx.LastMTR.Add(record);
-                        }
-
-                        if (ctx.DebugMTR)
-                        {
-                            ctx.LastMTRDebug.Clear();
-                            foreach (var record in ctx.MTRDebug)
-                            {
-                                ctx.LastMTRDebug.Add(record);
-                            }
-                        }
-                    }
-                }
-
-                decompositionStatus = domain.FindPlan(ctx, out var newPlan);
-                isTryingToReplacePlan = _plan.Count > 0;
-                if (decompositionStatus == DecompositionStatus.Succeeded || decompositionStatus == DecompositionStatus.Partial)
-                {
-                    if (OnReplacePlan != null && (_plan.Count > 0 || _currentTask != null))
-                    {
-                        OnReplacePlan.Invoke(_plan, _currentTask, newPlan);
-                    }
-                    else if (OnNewPlan != null && _plan.Count == 0)
-                    {
-                        OnNewPlan.Invoke(newPlan);
-                    }
-
-                    _plan.Clear();
-                    while (newPlan.Count > 0)
-                    {
-                        _plan.Enqueue(newPlan.Dequeue());
-                    }
-
-                    if (_currentTask != null && _currentTask is IPrimitiveTask t)
-                    {
-                        OnStopCurrentTask?.Invoke(t);
-                        t.Stop(ctx);
-                        _currentTask = null;
-                    }
-
-                    // Copy the MTR into our LastMTR to represent the current plan's decomposition record
-                    // that must be beat to replace the plan.
-                    if (ctx.MethodTraversalRecord != null)
-                    {
-                        ctx.LastMTR.Clear();
-                        foreach (var record in ctx.MethodTraversalRecord)
-                        {
-                            ctx.LastMTR.Add(record);
-                        }
-
-                        if (ctx.DebugMTR)
-                        {
-                            ctx.LastMTRDebug.Clear();
-                            foreach (var record in ctx.MTRDebug)
-                            {
-                                ctx.LastMTRDebug.Add(record);
-                            }
-                        }
-                    }
-                }
-                else if (lastPartialPlanQueue != null)
-                {
-                    ctx.HasPausedPartialPlan = true;
-                    ctx.PartialPlanQueue.Clear();
-                    while (lastPartialPlanQueue.Count > 0)
-                    {
-                        ctx.PartialPlanQueue.Enqueue(lastPartialPlanQueue.Dequeue());
-                    }
-                    ctx.Factory.FreeQueue(ref lastPartialPlanQueue);
-
-                    if (ctx.LastMTR.Count > 0)
-                    {
-                        ctx.MethodTraversalRecord.Clear();
-                        foreach (var record in ctx.LastMTR)
-                        {
-                            ctx.MethodTraversalRecord.Add(record);
-                        }
-                        ctx.LastMTR.Clear();
-
-                        if (ctx.DebugMTR)
-                        {
-                            ctx.MTRDebug.Clear();
-                            foreach (var record in ctx.LastMTRDebug)
-                            {
-                                ctx.MTRDebug.Add(record);
-                            }
-                            ctx.LastMTRDebug.Clear();
-                        }
-                    }
+                    return;
                 }
             }
 
-            if (_currentTask == null && _plan.Count > 0)
+            // If the current task is a primitive task, we try to tick its operator.
+            if (_currentTask is IPrimitiveTask task)
             {
-                _currentTask = _plan.Dequeue();
-                if (_currentTask != null)
+                if (TryTickPrimitiveTaskOperator(domain, ctx, task, allowImmediateReplan) == false)
                 {
-                    OnNewTask?.Invoke(_currentTask);
-
-                    foreach (var condition in _currentTask.Conditions)
-                    {
-                        // If a condition failed, then the plan failed to progress! A replan is required.
-                        if (condition.IsValid(ctx) == false)
-                        {
-                            OnNewTaskConditionFailed?.Invoke(_currentTask, condition);
-
-                            if (_currentTask is IPrimitiveTask task)
-                            {
-                                task.Aborted(ctx);
-                            }
-
-                            _currentTask = null;
-                            _plan.Clear();
-
-                            ctx.LastMTR.Clear();
-
-                            if (ctx.DebugMTR)
-                            {
-                                ctx.LastMTRDebug.Clear();
-                            }
-
-                            ctx.HasPausedPartialPlan = false;
-                            ctx.PartialPlanQueue.Clear();
-                            ctx.IsDirty = false;
-
-                            return;
-                        }
-                    }
+                    return;
                 }
             }
 
-            if (_currentTask != null)
-            {
-                if (_currentTask is IPrimitiveTask task)
-                {
-                    if (task.Operator != null)
-                    {
-                        foreach (var condition in task.ExecutingConditions)
-                        {
-                            // If a condition failed, then the plan failed to progress! A replan is required.
-                            if (condition.IsValid(ctx) == false)
-                            {
-                                OnCurrentTaskExecutingConditionFailed?.Invoke(task, condition);
-
-                                task.Aborted(ctx);
-
-                                _currentTask = null;
-                                _plan.Clear();
-
-                                ctx.LastMTR.Clear();
-
-                                if (ctx.DebugMTR)
-                                {
-                                    ctx.LastMTRDebug.Clear();
-                                }
-
-                                ctx.HasPausedPartialPlan = false;
-                                ctx.PartialPlanQueue.Clear();
-                                ctx.IsDirty = false;
-
-                                if (allowImmediateReplan)
-                                {
-                                    Tick(domain, ctx, allowImmediateReplan: false);
-                                }
-
-                                return;
-                            }
-                        }
-
-                        LastStatus = task.Operator.Update(ctx);
-
-                        // If the operation finished successfully, we set task to null so that we dequeue the next task in the plan the following tick.
-                        if (LastStatus == TaskStatus.Success)
-                        {
-                            OnCurrentTaskCompletedSuccessfully?.Invoke(task);
-
-                            // All effects that is a result of running this task should be applied when the task is a success.
-                            foreach (var effect in task.Effects)
-                            {
-                                if (effect.Type == EffectType.PlanAndExecute)
-                                {
-                                    OnApplyEffect?.Invoke(effect);
-                                    effect.Apply(ctx);
-                                }
-                            }
-
-                            _currentTask = null;
-                            if (_plan.Count == 0)
-                            {
-                                ctx.LastMTR.Clear();
-
-                                if (ctx.DebugMTR)
-                                {
-                                    ctx.LastMTRDebug.Clear();
-                                }
-
-                                ctx.IsDirty = false;
-
-                                if (allowImmediateReplan)
-                                {
-                                    Tick(domain, ctx, allowImmediateReplan: false);
-                                }
-                            }
-                        }
-
-                        // If the operation failed to finish, we need to fail the entire plan, so that we will replan the next tick.
-                        else if (LastStatus == TaskStatus.Failure)
-                        {
-                            OnCurrentTaskFailed?.Invoke(task);
-
-                            task.Aborted(ctx);
-
-                            _currentTask = null;
-                            _plan.Clear();
-
-                            ctx.LastMTR.Clear();
-
-                            if (ctx.DebugMTR)
-                            {
-                                ctx.LastMTRDebug.Clear();
-                            }
-
-                            ctx.HasPausedPartialPlan = false;
-                            ctx.PartialPlanQueue.Clear();
-                            ctx.IsDirty = false;
-                        }
-
-                        // Otherwise the operation isn't done yet and need to continue.
-                        else
-                        {
-                            OnCurrentTaskContinues?.Invoke(task);
-                        }
-                    }
-                    else
-                    {
-                        // This should not really happen if a domain is set up properly.
-                        task.Aborted(ctx);
-                        _currentTask = null;
-                        LastStatus = TaskStatus.Failure;
-                    }
-                }
-            }
-
-            if (_currentTask == null && _plan.Count == 0 && isTryingToReplacePlan == false &&
-                (decompositionStatus == DecompositionStatus.Failed ||
-                 decompositionStatus == DecompositionStatus.Rejected))
+            // Check whether the planner failed to find a plan
+            if (HasFailedToFindPlan(isTryingToReplacePlan, decompositionStatus))
             {
                 LastStatus = TaskStatus.Failure;
             }
+        }
+
+        /// <summary>
+        /// Check whether state has changed or the current plan has finished running.
+        /// and if so, try to find a new plan.
+        /// </summary>
+        /// <param name="ctx"></param>
+        /// <returns></returns>
+        private bool ShouldFindNewPlan(T ctx)
+        {
+            return _currentTask == null && (_plan.Count == 0) || ctx.IsDirty;
+        }
+
+        private bool TryFindNewPlan(Domain<T> domain, T ctx, out DecompositionStatus decompositionStatus)
+        {
+            Queue<PartialPlanEntry> lastPartialPlanQueue = null;
+
+            if (ctx.IsDirty)
+            {
+                OnPrepareWorldStateDirtyReplan(ctx, ref lastPartialPlanQueue);
+                ctx.IsDirty = false;
+            }
+
+            var isTryingToReplacePlan = _plan.Count > 0;
+
+            decompositionStatus = domain.FindPlan(ctx, out var newPlan);
+
+            if (HasFoundNewPlan(decompositionStatus))
+            {
+                OnFoundNewPlan(ctx, newPlan);
+            }
+            else if (lastPartialPlanQueue != null)
+            {
+                AddBackRunningPartialPlan(ctx, lastPartialPlanQueue);
+            }
+
+            return isTryingToReplacePlan;
+        }
+
+        /// <summary>
+        /// If we're simply re-evaluating whether to replace the current plan because
+        /// some world state got dirty, then we do not intend to continue a partial plan
+        /// right now, but rather see whether the world state changed to a degree where
+        /// we should pursue a better plan. Thus, if this replan fails to find a better
+        /// plan, we have to add back the partial plan temps cached above.
+        /// </summary>
+        private void OnPrepareWorldStateDirtyReplan(T ctx, ref Queue<PartialPlanEntry> lastPartialPlanQueue)
+        {
+            if (ctx.HasPausedPartialPlan)
+            {
+                ctx.HasPausedPartialPlan = false;
+                lastPartialPlanQueue = ctx.Factory.CreateQueue<PartialPlanEntry>();
+                while (ctx.PartialPlanQueue.Count > 0)
+                {
+                    lastPartialPlanQueue.Enqueue(ctx.PartialPlanQueue.Dequeue());
+                }
+
+                // We also need to ensure that the last mtr is up to date with the on-going MTR of the partial plan,
+                // so that any new potential plan that is decomposing from the domain root has to beat the currently
+                // running partial plan.
+                ctx.LastMTR.Clear();
+                foreach (var record in ctx.MethodTraversalRecord)
+                {
+                    ctx.LastMTR.Add(record);
+                }
+
+                if (ctx.DebugMTR)
+                {
+                    ctx.LastMTRDebug.Clear();
+                    foreach (var record in ctx.MTRDebug)
+                    {
+                        ctx.LastMTRDebug.Add(record);
+                    }
+                }
+            }
+        }
+
+        private bool HasFoundNewPlan(DecompositionStatus decompositionStatus)
+        {
+            return decompositionStatus == DecompositionStatus.Succeeded ||
+                   decompositionStatus == DecompositionStatus.Partial;
+        }
+
+        private void OnFoundNewPlan(T ctx, Queue<ITask> newPlan)
+        {
+            if (OnReplacePlan != null && (_plan.Count > 0 || _currentTask != null))
+            {
+                OnReplacePlan.Invoke(_plan, _currentTask, newPlan);
+            }
+            else if (OnNewPlan != null && _plan.Count == 0)
+            {
+                OnNewPlan.Invoke(newPlan);
+            }
+
+            _plan.Clear();
+            while (newPlan.Count > 0)
+            {
+                _plan.Enqueue(newPlan.Dequeue());
+            }
+
+            if (_currentTask != null && _currentTask is IPrimitiveTask t)
+            {
+                OnStopCurrentTask?.Invoke(t);
+                t.Stop(ctx);
+                _currentTask = null;
+            }
+
+            // Copy the MTR into our LastMTR to represent the current plan's decomposition record
+            // that must be beat to replace the plan.
+            if (ctx.MethodTraversalRecord != null)
+            {
+                ctx.LastMTR.Clear();
+                foreach (var record in ctx.MethodTraversalRecord)
+                {
+                    ctx.LastMTR.Add(record);
+                }
+
+                if (ctx.DebugMTR)
+                {
+                    ctx.LastMTRDebug.Clear();
+                    foreach (var record in ctx.MTRDebug)
+                    {
+                        ctx.LastMTRDebug.Add(record);
+                    }
+                }
+            }
+        }
+
+        private void AddBackRunningPartialPlan(T ctx, Queue<PartialPlanEntry> lastPartialPlanQueue)
+        {
+            ctx.HasPausedPartialPlan = true;
+            ctx.PartialPlanQueue.Clear();
+            while (lastPartialPlanQueue.Count > 0)
+            {
+                ctx.PartialPlanQueue.Enqueue(lastPartialPlanQueue.Dequeue());
+            }
+            ctx.Factory.FreeQueue(ref lastPartialPlanQueue);
+
+            if (ctx.LastMTR.Count > 0)
+            {
+                ctx.MethodTraversalRecord.Clear();
+                foreach (var record in ctx.LastMTR)
+                {
+                    ctx.MethodTraversalRecord.Add(record);
+                }
+                ctx.LastMTR.Clear();
+
+                if (ctx.DebugMTR)
+                {
+                    ctx.MTRDebug.Clear();
+                    foreach (var record in ctx.LastMTRDebug)
+                    {
+                        ctx.MTRDebug.Add(record);
+                    }
+                    ctx.LastMTRDebug.Clear();
+                }
+            }
+        }
+
+        /// <summary>
+        /// If current task is null, we need to verify that the plan has more tasks queued.
+        /// </summary>
+        /// <returns></returns>
+        private bool HasPlanMoreTasks()
+        {
+            return _currentTask == null && _plan.Count > 0;
+        }
+
+        /// <summary>
+        /// Dequeues the next task of the plan and checks its conditions. If a condition fails, we require a replan.
+        /// </summary>
+        /// <param name="domain"></param>
+        /// <param name="ctx"></param>
+        /// <returns></returns>
+        private bool TrySelectNextTaskInPlan(Domain<T> domain, T ctx)
+        {
+            _currentTask = _plan.Dequeue();
+            if (_currentTask != null)
+            {
+                OnNewTask?.Invoke(_currentTask);
+
+                foreach (var condition in _currentTask.Conditions)
+                {
+                    // If a condition failed, then the plan failed to progress! A replan is required.
+                    if (condition.IsValid(ctx) == false)
+                    {
+                        OnNewTaskConditionFailed?.Invoke(_currentTask, condition);
+
+                        if (_currentTask is IPrimitiveTask task)
+                        {
+                            task.Aborted(ctx);
+                        }
+
+                        _currentTask = null;
+                        _plan.Clear();
+
+                        ctx.LastMTR.Clear();
+
+                        if (ctx.DebugMTR)
+                        {
+                            ctx.LastMTRDebug.Clear();
+                        }
+
+                        ctx.HasPausedPartialPlan = false;
+                        ctx.PartialPlanQueue.Clear();
+                        ctx.IsDirty = false;
+
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// While we have a valid primitive task running, we should tick it each tick of the plan execution.
+        /// </summary>
+        /// <param name="domain"></param>
+        /// <param name="ctx"></param>
+        /// <param name="task"></param>
+        /// <param name="allowImmediateReplan"></param>
+        /// <returns></returns>
+        private bool TryTickPrimitiveTaskOperator(Domain<T> domain, T ctx, IPrimitiveTask task, bool allowImmediateReplan)
+        {
+            if (task.Operator != null)
+            {
+                if (IsExecutingConditionsValid(domain, ctx, task, allowImmediateReplan) == false)
+                {
+                    return false;
+                }
+
+                LastStatus = task.Operator.Update(ctx);
+
+                // If the operation finished successfully, we set task to null so that we dequeue the next task in the plan the following tick.
+                if (LastStatus == TaskStatus.Success)
+                {
+                    OnOperationFinishedSuccessfully(domain, ctx, task, allowImmediateReplan);
+                }
+
+                // If the operation failed to finish, we need to fail the entire plan, so that we will replan the next tick.
+                else if (LastStatus == TaskStatus.Failure)
+                {
+                    FailEntirePlan(ctx, task);
+                }
+
+                // Otherwise the operation isn't done yet and need to continue.
+                else
+                {
+                    OnCurrentTaskContinues?.Invoke(task);
+                }
+            }
+            else
+            {
+                // This should not really happen if a domain is set up properly.
+                task.Aborted(ctx);
+                _currentTask = null;
+                LastStatus = TaskStatus.Failure;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Ensure executing conditions are valid during plan execution
+        /// </summary>
+        /// <param name="domain"></param>
+        /// <param name="ctx"></param>
+        /// <param name="task"></param>
+        /// <param name="allowImmediateReplan"></param>
+        /// <returns></returns>
+        private bool IsExecutingConditionsValid(Domain<T> domain, T ctx, IPrimitiveTask task, bool allowImmediateReplan)
+        {
+            foreach (var condition in task.ExecutingConditions)
+            {
+                // If a condition failed, then the plan failed to progress! A replan is required.
+                if (condition.IsValid(ctx) == false)
+                {
+                    OnCurrentTaskExecutingConditionFailed?.Invoke(task, condition);
+
+                    task.Aborted(ctx);
+
+                    _currentTask = null;
+                    _plan.Clear();
+
+                    ctx.LastMTR.Clear();
+
+                    if (ctx.DebugMTR)
+                    {
+                        ctx.LastMTRDebug.Clear();
+                    }
+
+                    ctx.HasPausedPartialPlan = false;
+                    ctx.PartialPlanQueue.Clear();
+                    ctx.IsDirty = false;
+
+                    if (allowImmediateReplan)
+                    {
+                        Tick(domain, ctx, allowImmediateReplan: false);
+                    }
+
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// If the operation finished successfully, we set task to null so that we dequeue the next task in the plan the following tick.
+        /// </summary>
+        /// <param name="domain"></param>
+        /// <param name="ctx"></param>
+        /// <param name="task"></param>
+        /// <param name="allowImmediateReplan"></param>
+        private void OnOperationFinishedSuccessfully(Domain<T> domain, T ctx, IPrimitiveTask task, bool allowImmediateReplan)
+        {
+            OnCurrentTaskCompletedSuccessfully?.Invoke(task);
+
+            // All effects that is a result of running this task should be applied when the task is a success.
+            foreach (var effect in task.Effects)
+            {
+                if (effect.Type == EffectType.PlanAndExecute)
+                {
+                    OnApplyEffect?.Invoke(effect);
+                    effect.Apply(ctx);
+                }
+            }
+
+            _currentTask = null;
+            if (_plan.Count == 0)
+            {
+                ctx.LastMTR.Clear();
+
+                if (ctx.DebugMTR)
+                {
+                    ctx.LastMTRDebug.Clear();
+                }
+
+                ctx.IsDirty = false;
+
+                if (allowImmediateReplan)
+                {
+                    Tick(domain, ctx, allowImmediateReplan: false);
+                }
+            }
+        }
+
+        /// <summary>
+        /// If the operation failed to finish, we need to fail the entire plan, so that we will replan the next tick.
+        /// </summary>
+        /// <param name="ctx"></param>
+        /// <param name="task"></param>
+        private void FailEntirePlan(T ctx, IPrimitiveTask task)
+        {
+            OnCurrentTaskFailed?.Invoke(task);
+
+            task.Aborted(ctx);
+
+            _currentTask = null;
+            _plan.Clear();
+
+            ctx.LastMTR.Clear();
+
+            if (ctx.DebugMTR)
+            {
+                ctx.LastMTRDebug.Clear();
+            }
+
+            ctx.HasPausedPartialPlan = false;
+            ctx.PartialPlanQueue.Clear();
+            ctx.IsDirty = false;
+        }
+
+        /// <summary>
+        /// If current task is null, and plan is empty, and we're not trying to replace the current plan, and decomposition failed or was rejected, then the planner failed to find a plan.
+        /// </summary>
+        /// <param name="isTryingToReplacePlan"></param>
+        /// <param name="decompositionStatus"></param>
+        /// <returns></returns>
+        private bool HasFailedToFindPlan(bool isTryingToReplacePlan, DecompositionStatus decompositionStatus)
+        {
+            return _currentTask == null && _plan.Count == 0 && isTryingToReplacePlan == false &&
+                   (decompositionStatus == DecompositionStatus.Failed ||
+                    decompositionStatus == DecompositionStatus.Rejected);
         }
 
         // ========================================================= RESET
