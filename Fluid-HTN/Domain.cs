@@ -105,7 +105,7 @@ namespace FluidHTN
                 status = DecompositionStatus.Rejected;
             }
 
-            if (status == DecompositionStatus.Succeeded || status == DecompositionStatus.Partial)
+            if (HasDecompositionSucceeded(status))
             {
                 // Apply permanent world state changes to the actual world state used during plan execution.
                 ApplyPermanentWorldStateStackChanges(ctx);
@@ -138,50 +138,106 @@ namespace FluidHTN
         /// <returns></returns>
         private DecompositionStatus OnReplanDuringPartialPlanning(T ctx, ref Queue<ITask> plan, DecompositionStatus status)
         {
-            Queue<PartialPlanEntry> lastPartialPlanQueue = null;
+            var lastPartialPlanQueue = CacheLastPartialPlan(ctx);
 
-            if (ctx.HasPausedPartialPlan)
+            ClearMethodTraversalRecord(ctx);
+
+            // Replan through decomposition of the hierarchy
+            status = Root.Decompose(ctx, 0, out plan);
+
+            if (HasDecompositionFailed(status))
             {
-                ctx.HasPausedPartialPlan = false;
-                lastPartialPlanQueue = ctx.Factory.CreateQueue<PartialPlanEntry>();
-
-                while (ctx.PartialPlanQueue.Count > 0)
-                {
-                    lastPartialPlanQueue.Enqueue(ctx.PartialPlanQueue.Dequeue());
-                }
+                RestoreLastPartialPlan(ctx, lastPartialPlanQueue, status);
             }
 
-            // We only erase the MTR if we start from the root task of the domain.
+            return status;
+        }
+
+        /// <summary>
+        /// If there is a paused partial plan, we cache it to a last partial plan queue.
+        /// This is useful when we want to perform a replan, but don't know yet if it will
+        /// win over the current plan.
+        /// </summary>
+        /// <param name="ctx"></param>
+        /// <returns></returns>
+        private Queue<PartialPlanEntry> CacheLastPartialPlan(T ctx)
+        {
+            if (ctx.HasPausedPartialPlan == false)
+            {
+                return null;
+            }
+
+            ctx.HasPausedPartialPlan = false;
+            var lastPartialPlanQueue = ctx.Factory.CreateQueue<PartialPlanEntry>();
+
+            while (ctx.PartialPlanQueue.Count > 0)
+            {
+                lastPartialPlanQueue.Enqueue(ctx.PartialPlanQueue.Dequeue());
+            }
+
+            return lastPartialPlanQueue;
+
+        }
+
+        /// <summary>
+        /// We only erase the MTR if we start from the root task of the domain.
+        /// </summary>
+        /// <param name="ctx"></param>
+        private void ClearMethodTraversalRecord(T ctx)
+        {
             ctx.MethodTraversalRecord.Clear();
 
             if (ctx.DebugMTR)
             {
                 ctx.MTRDebug.Clear();
             }
+        }
 
-            status = Root.Decompose(ctx, 0, out plan);
+        /// <summary>
+        /// If decomposition status is failed or rejected, the replan failed.
+        /// </summary>
+        /// <param name="status"></param>
+        /// <returns></returns>
+        private bool HasDecompositionFailed(DecompositionStatus status)
+        {
+            return status == DecompositionStatus.Rejected || status == DecompositionStatus.Failed;
+        }
 
-            // If we failed to find a new plan, we have to restore the old plan,
-            // if it was a partial plan.
-            if (lastPartialPlanQueue != null)
+        /// <summary>
+        /// If decomposition status is failed or rejected, the replan failed.
+        /// </summary>
+        /// <param name="status"></param>
+        /// <returns></returns>
+        private bool HasDecompositionSucceeded(DecompositionStatus status)
+        {
+            return status == DecompositionStatus.Succeeded || status == DecompositionStatus.Partial;
+        }
+
+        /// <summary>
+        /// If we failed to find a new plan, we have to restore the old plan,
+        /// if it was a partial plan.
+        /// </summary>
+        /// <param name="ctx"></param>
+        /// <param name="lastPartialPlanQueue"></param>
+        /// <param name="status"></param>
+        private void RestoreLastPartialPlan(T ctx, Queue<PartialPlanEntry> lastPartialPlanQueue, DecompositionStatus status)
+        {
+            if (lastPartialPlanQueue == null)
             {
-                if (status == DecompositionStatus.Rejected || status == DecompositionStatus.Failed)
-                {
-                    ctx.HasPausedPartialPlan = true;
-                    ctx.PartialPlanQueue.Clear();
-
-                    while (lastPartialPlanQueue.Count > 0)
-                    {
-                        ctx.PartialPlanQueue.Enqueue(lastPartialPlanQueue.Dequeue());
-                    }
-
-                    ctx.Factory.FreeQueue(ref lastPartialPlanQueue);
-                }
+                return;
             }
 
-            return status;
+            ctx.HasPausedPartialPlan = true;
+            ctx.PartialPlanQueue.Clear();
+
+            while (lastPartialPlanQueue.Count > 0)
+            {
+                ctx.PartialPlanQueue.Enqueue(lastPartialPlanQueue.Dequeue());
+            }
+
+            ctx.Factory.FreeQueue(ref lastPartialPlanQueue);
         }
-        
+
         /// <summary>
         /// We first check whether we have a stored start task. This is true
         /// if we had a partial plan pause somewhere in our plan, and we now
@@ -204,13 +260,10 @@ namespace FluidHTN
                 }
                 else
                 {
-                    status = kvp.Task.Decompose(ctx, kvp.TaskIndex, out var p);
-                    if (status == DecompositionStatus.Succeeded || status == DecompositionStatus.Partial)
+                    status = kvp.Task.Decompose(ctx, kvp.TaskIndex, out var subPlan);
+                    if (HasDecompositionSucceeded(status))
                     {
-                        while (p.Count > 0)
-                        {
-                            plan.Enqueue(p.Dequeue());
-                        }
+                        EnqueueToExistingPlan(ref plan, subPlan);
                     }
                 }
 
@@ -224,21 +277,28 @@ namespace FluidHTN
 
             // If we failed to continue the paused partial plan,
             // then we have to start planning from the root.
-            if (status == DecompositionStatus.Rejected || status == DecompositionStatus.Failed)
+            if (HasDecompositionFailed(status))
             {
-                ctx.MethodTraversalRecord.Clear();
-
-                if (ctx.DebugMTR)
-                {
-                    ctx.MTRDebug.Clear();
-                }
+                ClearMethodTraversalRecord(ctx);
 
                 status = Root.Decompose(ctx, 0, out plan);
             }
 
             return status;
         }
-    
+
+        /// <summary>
+        /// Enqueues the sub plan's queue onto the existing plan
+        /// </summary>
+        /// <param name="plan"></param>
+        /// <param name="subPlan"></param>
+        private void EnqueueToExistingPlan(ref Queue<ITask> plan, Queue<ITask> subPlan)
+        {
+            while (subPlan.Count > 0)
+            {
+                plan.Enqueue(subPlan.Dequeue());
+            }
+        }
 
         /// <summary>
         /// If this MTR equals the last MTR, then we need to double-check whether we ended up

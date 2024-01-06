@@ -146,19 +146,12 @@ namespace FluidHTN
         /// <returns></returns>
         private bool ShouldFindNewPlan(T ctx)
         {
-            return _currentTask == null && (_plan.Count == 0) || ctx.IsDirty;
+            return ctx.IsDirty || (_currentTask == null && (_plan.Count == 0));
         }
 
         private bool TryFindNewPlan(Domain<T> domain, T ctx, out DecompositionStatus decompositionStatus)
         {
-            Queue<PartialPlanEntry> lastPartialPlanQueue = null;
-
-            if (ctx.IsDirty)
-            {
-                OnPrepareWorldStateDirtyReplan(ctx, ref lastPartialPlanQueue);
-                ctx.IsDirty = false;
-            }
-
+            var lastPartialPlanQueue = OnPrepareWorldStateDirtyReplan(ctx);
             var isTryingToReplacePlan = _plan.Count > 0;
 
             decompositionStatus = domain.FindPlan(ctx, out var newPlan);
@@ -169,7 +162,8 @@ namespace FluidHTN
             }
             else if (lastPartialPlanQueue != null)
             {
-                AddBackRunningPartialPlan(ctx, lastPartialPlanQueue);
+                RestoreLastPartialPlan(ctx, lastPartialPlanQueue);
+                RestoreLastMethodTraversalRecord(ctx);
             }
 
             return isTryingToReplacePlan;
@@ -182,33 +176,68 @@ namespace FluidHTN
         /// we should pursue a better plan. Thus, if this replan fails to find a better
         /// plan, we have to add back the partial plan temps cached above.
         /// </summary>
-        private void OnPrepareWorldStateDirtyReplan(T ctx, ref Queue<PartialPlanEntry> lastPartialPlanQueue)
+        private Queue<PartialPlanEntry> OnPrepareWorldStateDirtyReplan(T ctx)
         {
-            if (ctx.HasPausedPartialPlan)
+            if (ctx.IsDirty == false)
             {
-                ctx.HasPausedPartialPlan = false;
-                lastPartialPlanQueue = ctx.Factory.CreateQueue<PartialPlanEntry>();
-                while (ctx.PartialPlanQueue.Count > 0)
-                {
-                    lastPartialPlanQueue.Enqueue(ctx.PartialPlanQueue.Dequeue());
-                }
+                return null;
+            }
 
-                // We also need to ensure that the last mtr is up to date with the on-going MTR of the partial plan,
-                // so that any new potential plan that is decomposing from the domain root has to beat the currently
-                // running partial plan.
-                ctx.LastMTR.Clear();
-                foreach (var record in ctx.MethodTraversalRecord)
-                {
-                    ctx.LastMTR.Add(record);
-                }
+            ctx.IsDirty = false;
 
-                if (ctx.DebugMTR)
+            var lastPartialPlan = CacheLastPartialPlan(ctx);
+            if (lastPartialPlan == null)
+            {
+                return null;
+            }
+
+            // We also need to ensure that the last mtr is up to date with the on-going MTR of the partial plan,
+            // so that any new potential plan that is decomposing from the domain root has to beat the currently
+            // running partial plan.
+            UpdateLastMTR(ctx);
+
+            return lastPartialPlan;
+        }
+
+        private Queue<PartialPlanEntry> CacheLastPartialPlan(T ctx)
+        {
+            if (ctx.HasPausedPartialPlan == false)
+            {
+                return null;
+            }
+
+            ctx.HasPausedPartialPlan = false;
+            var lastPartialPlanQueue = ctx.Factory.CreateQueue<PartialPlanEntry>();
+
+            while (ctx.PartialPlanQueue.Count > 0)
+            {
+                lastPartialPlanQueue.Enqueue(ctx.PartialPlanQueue.Dequeue());
+            }
+
+            return lastPartialPlanQueue;
+
+        }
+
+        /// <summary>
+        /// We also need to ensure that the last mtr is up to date with the on-going MTR of the partial plan,
+        /// so that any new potential plan that is decomposing from the domain root has to beat the currently
+        /// running partial plan.
+        /// </summary>
+        /// <param name="ctx"></param>
+        private void UpdateLastMTR(T ctx)
+        {
+            ctx.LastMTR.Clear();
+            foreach (var record in ctx.MethodTraversalRecord)
+            {
+                ctx.LastMTR.Add(record);
+            }
+
+            if (ctx.DebugMTR)
+            {
+                ctx.LastMTRDebug.Clear();
+                foreach (var record in ctx.MTRDebug)
                 {
-                    ctx.LastMTRDebug.Clear();
-                    foreach (var record in ctx.MTRDebug)
-                    {
-                        ctx.LastMTRDebug.Add(record);
-                    }
+                    ctx.LastMTRDebug.Add(record);
                 }
             }
         }
@@ -245,6 +274,16 @@ namespace FluidHTN
 
             // Copy the MTR into our LastMTR to represent the current plan's decomposition record
             // that must be beat to replace the plan.
+            CopyMtrToLastMtr(ctx);
+        }
+
+        /// <summary>
+        /// Copy the MTR into our LastMTR to represent the current plan's decomposition record
+        /// that must be beat to replace the plan.
+        /// </summary>
+        /// <param name="ctx"></param>
+        private void CopyMtrToLastMtr(T ctx)
+        {
             if (ctx.MethodTraversalRecord != null)
             {
                 ctx.LastMTR.Clear();
@@ -252,7 +291,7 @@ namespace FluidHTN
                 {
                     ctx.LastMTR.Add(record);
                 }
-
+                
                 if (ctx.DebugMTR)
                 {
                     ctx.LastMTRDebug.Clear();
@@ -264,16 +303,21 @@ namespace FluidHTN
             }
         }
 
-        private void AddBackRunningPartialPlan(T ctx, Queue<PartialPlanEntry> lastPartialPlanQueue)
+        private void RestoreLastPartialPlan(T ctx, Queue<PartialPlanEntry> lastPartialPlanQueue)
         {
             ctx.HasPausedPartialPlan = true;
             ctx.PartialPlanQueue.Clear();
+            
             while (lastPartialPlanQueue.Count > 0)
             {
                 ctx.PartialPlanQueue.Enqueue(lastPartialPlanQueue.Dequeue());
             }
+            
             ctx.Factory.FreeQueue(ref lastPartialPlanQueue);
+        }
 
+        private void RestoreLastMethodTraversalRecord(T ctx)
+        {
             if (ctx.LastMTR.Count > 0)
             {
                 ctx.MethodTraversalRecord.Clear();
@@ -283,15 +327,17 @@ namespace FluidHTN
                 }
                 ctx.LastMTR.Clear();
 
-                if (ctx.DebugMTR)
+                if (ctx.DebugMTR == false)
                 {
-                    ctx.MTRDebug.Clear();
-                    foreach (var record in ctx.LastMTRDebug)
-                    {
-                        ctx.MTRDebug.Add(record);
-                    }
-                    ctx.LastMTRDebug.Clear();
+                    return;
                 }
+
+                ctx.MTRDebug.Clear();
+                foreach (var record in ctx.LastMTRDebug)
+                {
+                    ctx.MTRDebug.Add(record);
+                }
+                ctx.LastMTRDebug.Clear();
             }
         }
 
@@ -374,28 +420,25 @@ namespace FluidHTN
                 if (LastStatus == TaskStatus.Success)
                 {
                     OnOperationFinishedSuccessfully(domain, ctx, task, allowImmediateReplan);
+                    return true;
                 }
 
                 // If the operation failed to finish, we need to fail the entire plan, so that we will replan the next tick.
-                else if (LastStatus == TaskStatus.Failure)
+                if (LastStatus == TaskStatus.Failure)
                 {
                     FailEntirePlan(ctx, task);
+                    return true;
                 }
 
                 // Otherwise the operation isn't done yet and need to continue.
-                else
-                {
-                    OnCurrentTaskContinues?.Invoke(task);
-                }
-            }
-            else
-            {
-                // This should not really happen if a domain is set up properly.
-                task.Aborted(ctx);
-                _currentTask = null;
-                LastStatus = TaskStatus.Failure;
+                OnCurrentTaskContinues?.Invoke(task);
+                return true;
             }
 
+            // This should not really happen if a domain is set up properly.
+            task.Aborted(ctx);
+            _currentTask = null;
+            LastStatus = TaskStatus.Failure;
             return true;
         }
 
