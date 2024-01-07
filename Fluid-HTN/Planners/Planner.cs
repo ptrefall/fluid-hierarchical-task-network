@@ -114,9 +114,10 @@ namespace FluidHTN
             }
 
             // If the plan has more tasks, we try to select the next one.
-            if (HasPlanMoreTasks())
+            if (CanSelectNextTaskInPlan())
             {
-                if (TrySelectNextTaskInPlan(domain, ctx) == false)
+                // Select the next task, but check whether the conditions of the next task failed to validate.
+                if (SelectNextTaskInPlan(domain, ctx) == false)
                 {
                     return;
                 }
@@ -146,12 +147,12 @@ namespace FluidHTN
         /// <returns></returns>
         private bool ShouldFindNewPlan(T ctx)
         {
-            return ctx.IsDirty || (_currentTask == null && (_plan.Count == 0));
+            return ctx.IsDirty || (_currentTask == null && _plan.Count == 0);
         }
 
         private bool TryFindNewPlan(Domain<T> domain, T ctx, out DecompositionStatus decompositionStatus)
         {
-            var lastPartialPlanQueue = OnPrepareWorldStateDirtyReplan(ctx);
+            var lastPartialPlanQueue = PrepareDirtyWorldStateForReplan(ctx);
             var isTryingToReplacePlan = _plan.Count > 0;
 
             decompositionStatus = domain.FindPlan(ctx, out var newPlan);
@@ -173,10 +174,9 @@ namespace FluidHTN
         /// If we're simply re-evaluating whether to replace the current plan because
         /// some world state got dirty, then we do not intend to continue a partial plan
         /// right now, but rather see whether the world state changed to a degree where
-        /// we should pursue a better plan. Thus, if this replan fails to find a better
-        /// plan, we have to add back the partial plan temps cached above.
+        /// we should pursue a better plan.
         /// </summary>
-        private Queue<PartialPlanEntry> OnPrepareWorldStateDirtyReplan(T ctx)
+        private Queue<PartialPlanEntry> PrepareDirtyWorldStateForReplan(T ctx)
         {
             if (ctx.IsDirty == false)
             {
@@ -194,7 +194,7 @@ namespace FluidHTN
             // We also need to ensure that the last mtr is up to date with the on-going MTR of the partial plan,
             // so that any new potential plan that is decomposing from the domain root has to beat the currently
             // running partial plan.
-            UpdateLastMTR(ctx);
+            CopyMtrToLastMtr(ctx);
 
             return lastPartialPlan;
         }
@@ -218,28 +218,17 @@ namespace FluidHTN
 
         }
 
-        /// <summary>
-        /// We also need to ensure that the last mtr is up to date with the on-going MTR of the partial plan,
-        /// so that any new potential plan that is decomposing from the domain root has to beat the currently
-        /// running partial plan.
-        /// </summary>
-        /// <param name="ctx"></param>
-        private void UpdateLastMTR(T ctx)
+        private void RestoreLastPartialPlan(T ctx, Queue<PartialPlanEntry> lastPartialPlanQueue)
         {
-            ctx.LastMTR.Clear();
-            foreach (var record in ctx.MethodTraversalRecord)
+            ctx.HasPausedPartialPlan = true;
+            ctx.PartialPlanQueue.Clear();
+
+            while (lastPartialPlanQueue.Count > 0)
             {
-                ctx.LastMTR.Add(record);
+                ctx.PartialPlanQueue.Enqueue(lastPartialPlanQueue.Dequeue());
             }
 
-            if (ctx.DebugMTR)
-            {
-                ctx.LastMTRDebug.Clear();
-                foreach (var record in ctx.MTRDebug)
-                {
-                    ctx.LastMTRDebug.Add(record);
-                }
-            }
+            ctx.Factory.FreeQueue(ref lastPartialPlanQueue);
         }
 
         private bool HasFoundNewPlan(DecompositionStatus decompositionStatus)
@@ -265,6 +254,7 @@ namespace FluidHTN
                 _plan.Enqueue(newPlan.Dequeue());
             }
 
+            // If a task was running from the previous plan, we stop it.
             if (_currentTask != null && _currentTask is IPrimitiveTask t)
             {
                 OnStopCurrentTask?.Invoke(t);
@@ -303,19 +293,11 @@ namespace FluidHTN
             }
         }
 
-        private void RestoreLastPartialPlan(T ctx, Queue<PartialPlanEntry> lastPartialPlanQueue)
-        {
-            ctx.HasPausedPartialPlan = true;
-            ctx.PartialPlanQueue.Clear();
-            
-            while (lastPartialPlanQueue.Count > 0)
-            {
-                ctx.PartialPlanQueue.Enqueue(lastPartialPlanQueue.Dequeue());
-            }
-            
-            ctx.Factory.FreeQueue(ref lastPartialPlanQueue);
-        }
-
+        /// <summary>
+        /// Copy the Last MTR back into our MTR. This is done during rollback when a new plan
+        /// failed to beat the last plan.
+        /// </summary>
+        /// <param name="ctx"></param>
         private void RestoreLastMethodTraversalRecord(T ctx)
         {
             if (ctx.LastMTR.Count > 0)
@@ -345,7 +327,7 @@ namespace FluidHTN
         /// If current task is null, we need to verify that the plan has more tasks queued.
         /// </summary>
         /// <returns></returns>
-        private bool HasPlanMoreTasks()
+        private bool CanSelectNextTaskInPlan()
         {
             return _currentTask == null && _plan.Count > 0;
         }
@@ -356,42 +338,14 @@ namespace FluidHTN
         /// <param name="domain"></param>
         /// <param name="ctx"></param>
         /// <returns></returns>
-        private bool TrySelectNextTaskInPlan(Domain<T> domain, T ctx)
+        private bool SelectNextTaskInPlan(Domain<T> domain, T ctx)
         {
             _currentTask = _plan.Dequeue();
             if (_currentTask != null)
             {
                 OnNewTask?.Invoke(_currentTask);
 
-                foreach (var condition in _currentTask.Conditions)
-                {
-                    // If a condition failed, then the plan failed to progress! A replan is required.
-                    if (condition.IsValid(ctx) == false)
-                    {
-                        OnNewTaskConditionFailed?.Invoke(_currentTask, condition);
-
-                        if (_currentTask is IPrimitiveTask task)
-                        {
-                            task.Aborted(ctx);
-                        }
-
-                        _currentTask = null;
-                        _plan.Clear();
-
-                        ctx.LastMTR.Clear();
-
-                        if (ctx.DebugMTR)
-                        {
-                            ctx.LastMTRDebug.Clear();
-                        }
-
-                        ctx.HasPausedPartialPlan = false;
-                        ctx.PartialPlanQueue.Clear();
-                        ctx.IsDirty = false;
-
-                        return false;
-                    }
-                }
+                return IsConditionsValid(ctx);
             }
 
             return true;
@@ -419,7 +373,7 @@ namespace FluidHTN
                 // If the operation finished successfully, we set task to null so that we dequeue the next task in the plan the following tick.
                 if (LastStatus == TaskStatus.Success)
                 {
-                    OnOperationFinishedSuccessfully(domain, ctx, task, allowImmediateReplan);
+                    OnOperatorFinishedSuccessfully(domain, ctx, task, allowImmediateReplan);
                     return true;
                 }
 
@@ -443,6 +397,28 @@ namespace FluidHTN
         }
 
         /// <summary>
+        /// Ensure conditions are valid when a new task is selected from the plan
+        /// </summary>
+        /// <param name="ctx"></param>
+        /// <returns></returns>
+        private bool IsConditionsValid(T ctx)
+        {
+            foreach (var condition in _currentTask.Conditions)
+            {
+                // If a condition failed, then the plan failed to progress! A replan is required.
+                if (condition.IsValid(ctx) == false)
+                {
+                    OnNewTaskConditionFailed?.Invoke(_currentTask, condition);
+                    AbortTask(ctx, _currentTask as IPrimitiveTask);
+
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        /// <summary>
         /// Ensure executing conditions are valid during plan execution
         /// </summary>
         /// <param name="domain"></param>
@@ -459,21 +435,7 @@ namespace FluidHTN
                 {
                     OnCurrentTaskExecutingConditionFailed?.Invoke(task, condition);
 
-                    task.Aborted(ctx);
-
-                    _currentTask = null;
-                    _plan.Clear();
-
-                    ctx.LastMTR.Clear();
-
-                    if (ctx.DebugMTR)
-                    {
-                        ctx.LastMTRDebug.Clear();
-                    }
-
-                    ctx.HasPausedPartialPlan = false;
-                    ctx.PartialPlanQueue.Clear();
-                    ctx.IsDirty = false;
+                    AbortTask(ctx, task);
 
                     if (allowImmediateReplan)
                     {
@@ -488,13 +450,24 @@ namespace FluidHTN
         }
 
         /// <summary>
+        /// When a task is aborted (due to failed condition checks),
+        /// we prepare the context for a replan next tick.
+        /// </summary>
+        /// <param name="ctx"></param>
+        private void AbortTask(T ctx, IPrimitiveTask task)
+        {
+            task?.Aborted(ctx);
+            ClearPlanForReplan(ctx);
+        }
+
+        /// <summary>
         /// If the operation finished successfully, we set task to null so that we dequeue the next task in the plan the following tick.
         /// </summary>
         /// <param name="domain"></param>
         /// <param name="ctx"></param>
         /// <param name="task"></param>
         /// <param name="allowImmediateReplan"></param>
-        private void OnOperationFinishedSuccessfully(Domain<T> domain, T ctx, IPrimitiveTask task, bool allowImmediateReplan)
+        private void OnOperatorFinishedSuccessfully(Domain<T> domain, T ctx, IPrimitiveTask task, bool allowImmediateReplan)
         {
             OnCurrentTaskCompletedSuccessfully?.Invoke(task);
 
@@ -537,7 +510,15 @@ namespace FluidHTN
             OnCurrentTaskFailed?.Invoke(task);
 
             task.Aborted(ctx);
-
+            ClearPlanForReplan(ctx);
+        }
+        
+        /// <summary>
+        /// Prepare the planner state and context for a clean replan
+        /// </summary>
+        /// <param name="ctx"></param>
+        private void ClearPlanForReplan(T ctx)
+        {
             _currentTask = null;
             _plan.Clear();
 
@@ -568,7 +549,7 @@ namespace FluidHTN
 
         // ========================================================= RESET
 
-        public void Reset(IContext ctx)
+        public void Reset(T ctx)
         {
             _plan.Clear();
 
@@ -577,7 +558,7 @@ namespace FluidHTN
                 task.Stop(ctx);
             }
 
-            _currentTask = null;
+            ClearPlanForReplan(ctx);
         }
 
         // ========================================================= GETTERS

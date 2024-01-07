@@ -99,7 +99,7 @@ namespace FluidHTN
             // If this MTR equals the last MTR, then we need to double-check whether we ended up
             // just finding the exact same plan. During decomposition each compound task can't check
             // for equality, only for less than, so this case needs to be treated after the fact.
-            if (DoubleCheckMtrEquality(ctx))
+            if (HasFoundSamePlan(ctx))
             {
                 plan = null;
                 status = DecompositionStatus.Rejected;
@@ -180,6 +180,31 @@ namespace FluidHTN
         }
 
         /// <summary>
+        /// If we failed to find a new plan, we have to restore the old plan,
+        /// if it was a partial plan.
+        /// </summary>
+        /// <param name="ctx"></param>
+        /// <param name="lastPartialPlanQueue"></param>
+        /// <param name="status"></param>
+        private void RestoreLastPartialPlan(T ctx, Queue<PartialPlanEntry> lastPartialPlanQueue, DecompositionStatus status)
+        {
+            if (lastPartialPlanQueue == null)
+            {
+                return;
+            }
+
+            ctx.HasPausedPartialPlan = true;
+            ctx.PartialPlanQueue.Clear();
+
+            while (lastPartialPlanQueue.Count > 0)
+            {
+                ctx.PartialPlanQueue.Enqueue(lastPartialPlanQueue.Dequeue());
+            }
+
+            ctx.Factory.FreeQueue(ref lastPartialPlanQueue);
+        }
+
+        /// <summary>
         /// We only erase the MTR if we start from the root task of the domain.
         /// </summary>
         /// <param name="ctx"></param>
@@ -211,31 +236,6 @@ namespace FluidHTN
         private bool HasDecompositionSucceeded(DecompositionStatus status)
         {
             return status == DecompositionStatus.Succeeded || status == DecompositionStatus.Partial;
-        }
-
-        /// <summary>
-        /// If we failed to find a new plan, we have to restore the old plan,
-        /// if it was a partial plan.
-        /// </summary>
-        /// <param name="ctx"></param>
-        /// <param name="lastPartialPlanQueue"></param>
-        /// <param name="status"></param>
-        private void RestoreLastPartialPlan(T ctx, Queue<PartialPlanEntry> lastPartialPlanQueue, DecompositionStatus status)
-        {
-            if (lastPartialPlanQueue == null)
-            {
-                return;
-            }
-
-            ctx.HasPausedPartialPlan = true;
-            ctx.PartialPlanQueue.Clear();
-
-            while (lastPartialPlanQueue.Count > 0)
-            {
-                ctx.PartialPlanQueue.Enqueue(lastPartialPlanQueue.Dequeue());
-            }
-
-            ctx.Factory.FreeQueue(ref lastPartialPlanQueue);
         }
 
         /// <summary>
@@ -307,7 +307,7 @@ namespace FluidHTN
         /// </summary>
         /// <param name="ctx"></param>
         /// <returns></returns>
-        private bool DoubleCheckMtrEquality(T ctx)
+        private bool HasFoundSamePlan(T ctx)
         {
             var isMTRsEqual = ctx.MethodTraversalRecord.Count == ctx.LastMTR.Count;
             if (isMTRsEqual)
