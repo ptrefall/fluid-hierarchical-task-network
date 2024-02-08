@@ -364,7 +364,7 @@ public class MoveToOperator : IOperator
         switch(_location)
         {
             case Location.Enemy:
-                if (ctx.NavAgent.SetDestination(ctx.BridgeLocation))
+                if (ctx.NavAgent.SetDestination(ctx.EnemyLocation))
                 {
                     ctx.NavAgent.isStopped = false;
                     return TaskStatus.Continue;
