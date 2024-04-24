@@ -172,7 +172,7 @@ namespace Fluid_HTN.UnitTests
             var task3 = new PrimitiveTask() { Name = "Sub-task1" }.AddCondition(new FuncCondition<MyContext>("TestCondition", context => context.Done == true));
             var task4 = new PrimitiveTask() { Name = "Sub-task1" };
             var task5 = new PrimitiveTask() { Name = "Sub-task2" }.AddCondition(new FuncCondition<MyContext>("TestCondition", context => context.Done == true));
-            var task6 = new PrimitiveTask() { Name = "Sub-task3" };
+
             domain.Add(domain.Root, task1);
             domain.Add(domain.Root, task2);
             domain.Add(task1, task3);
@@ -204,7 +204,7 @@ namespace Fluid_HTN.UnitTests
             var task3 = new PrimitiveTask() { Name = "Sub-task1" }.AddCondition(new FuncCondition<MyContext>("TestCondition", context => context.Done == true));
             var task4 = new PrimitiveTask() { Name = "Sub-task1" };
             var task5 = new PrimitiveTask() { Name = "Sub-task2" }.AddCondition(new FuncCondition<MyContext>("TestCondition", context => context.Done == true));
-            var task6 = new PrimitiveTask() { Name = "Sub-task3" };
+
             domain.Add(domain.Root, task1);
             domain.Add(domain.Root, task2);
             domain.Add(task1, task3);
