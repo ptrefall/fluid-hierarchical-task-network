@@ -89,95 +89,226 @@ namespace FluidHTN
             // the running partial plan.
             if (ctx.HasPausedPartialPlan && ctx.LastMTR.Count == 0)
             {
-                ctx.HasPausedPartialPlan = false;
-                while (ctx.PartialPlanQueue.Count > 0)
-                {
-                    var kvp = ctx.PartialPlanQueue.Dequeue();
-                    if (plan == null)
-                    {
-                        status = kvp.Task.Decompose(ctx, kvp.TaskIndex, out plan);
-                    }
-                    else
-                    {
-                        status = kvp.Task.Decompose(ctx, kvp.TaskIndex, out var p);
-                        if (status == DecompositionStatus.Succeeded || status == DecompositionStatus.Partial)
-                        {
-                            while (p.Count > 0)
-                            {
-                                plan.Enqueue(p.Dequeue());
-                            }
-                        }
-                    }
-
-                    // While continuing a partial plan, we might encounter
-                    // a new pause.
-                    if (ctx.HasPausedPartialPlan)
-                    {
-                        break;
-                    }
-                }
-
-                // If we failed to continue the paused partial plan,
-                // then we have to start planning from the root.
-                if (status == DecompositionStatus.Rejected || status == DecompositionStatus.Failed)
-                {
-                    ctx.MethodTraversalRecord.Clear();
-
-                    if (ctx.DebugMTR)
-                    {
-                        ctx.MTRDebug.Clear();
-                    }
-
-                    status = Root.Decompose(ctx, 0, out plan);
-                }
+                status = OnPausedPartialPlan(ctx, ref plan, status);
             }
             else
             {
-                Queue<PartialPlanEntry> lastPartialPlanQueue = null;
+                status = OnReplanDuringPartialPlanning(ctx, ref plan, status);
+            }
 
+            // If this MTR equals the last MTR, then we need to double-check whether we ended up
+            // just finding the exact same plan. During decomposition each compound task can't check
+            // for equality, only for less than, so this case needs to be treated after the fact.
+            if (HasFoundSamePlan(ctx))
+            {
+                plan = null;
+                status = DecompositionStatus.Rejected;
+            }
+
+            if (HasDecompositionSucceeded(status))
+            {
+                // Apply permanent world state changes to the actual world state used during plan execution.
+                ApplyPermanentWorldStateStackChanges(ctx);
+            }
+            else
+            {
+                // Clear away any changes that might have been applied to the stack
+                // No changes should be made or tracked further when the plan failed.
+                ClearWorldStateStackChanges(ctx);
+            }
+
+            ctx.ContextState = ContextState.Executing;
+            return status;
+        }
+
+        /// <summary>
+        /// We first check whether we have a stored start task. This is true
+        /// if we had a partial plan pause somewhere in our plan, and we now
+        /// want to continue where we left off.
+        /// If this is the case, we don't erase the MTR, but continue building it.
+        /// However, if we have a partial plan, but LastMTR is not 0, that means
+        /// that the partial plan is still running, but something triggered a replan.
+        /// When this happens, we have to plan from the domain root (we're not
+        /// continuing the current plan), so that we're open for other plans to replace
+        /// the running partial plan.
+        /// </summary>
+        /// <param name="ctx"></param>
+        /// <param name="plan"></param>
+        /// <param name="status"></param>
+        /// <returns></returns>
+        private DecompositionStatus OnReplanDuringPartialPlanning(T ctx, ref Queue<ITask> plan, DecompositionStatus status)
+        {
+            var lastPartialPlanQueue = CacheLastPartialPlan(ctx);
+
+            ClearMethodTraversalRecord(ctx);
+
+            // Replan through decomposition of the hierarchy
+            status = Root.Decompose(ctx, 0, out plan);
+
+            if (HasDecompositionFailed(status))
+            {
+                RestoreLastPartialPlan(ctx, lastPartialPlanQueue, status);
+            }
+
+            return status;
+        }
+
+        /// <summary>
+        /// If there is a paused partial plan, we cache it to a last partial plan queue.
+        /// This is useful when we want to perform a replan, but don't know yet if it will
+        /// win over the current plan.
+        /// </summary>
+        /// <param name="ctx"></param>
+        /// <returns></returns>
+        private Queue<PartialPlanEntry> CacheLastPartialPlan(T ctx)
+        {
+            if (ctx.HasPausedPartialPlan == false)
+            {
+                return null;
+            }
+
+            ctx.HasPausedPartialPlan = false;
+            var lastPartialPlanQueue = ctx.Factory.CreateQueue<PartialPlanEntry>();
+
+            while (ctx.PartialPlanQueue.Count > 0)
+            {
+                lastPartialPlanQueue.Enqueue(ctx.PartialPlanQueue.Dequeue());
+            }
+
+            return lastPartialPlanQueue;
+
+        }
+
+        /// <summary>
+        /// If we failed to find a new plan, we have to restore the old plan,
+        /// if it was a partial plan.
+        /// </summary>
+        /// <param name="ctx"></param>
+        /// <param name="lastPartialPlanQueue"></param>
+        /// <param name="status"></param>
+        private void RestoreLastPartialPlan(T ctx, Queue<PartialPlanEntry> lastPartialPlanQueue, DecompositionStatus status)
+        {
+            if (lastPartialPlanQueue == null)
+            {
+                return;
+            }
+
+            ctx.HasPausedPartialPlan = true;
+            ctx.PartialPlanQueue.Clear();
+
+            while (lastPartialPlanQueue.Count > 0)
+            {
+                ctx.PartialPlanQueue.Enqueue(lastPartialPlanQueue.Dequeue());
+            }
+
+            ctx.Factory.FreeQueue(ref lastPartialPlanQueue);
+        }
+
+        /// <summary>
+        /// We only erase the MTR if we start from the root task of the domain.
+        /// </summary>
+        /// <param name="ctx"></param>
+        private void ClearMethodTraversalRecord(T ctx)
+        {
+            ctx.MethodTraversalRecord.Clear();
+
+            if (ctx.DebugMTR)
+            {
+                ctx.MTRDebug.Clear();
+            }
+        }
+
+        /// <summary>
+        /// If decomposition status is failed or rejected, the replan failed.
+        /// </summary>
+        /// <param name="status"></param>
+        /// <returns></returns>
+        private bool HasDecompositionFailed(DecompositionStatus status)
+        {
+            return status == DecompositionStatus.Rejected || status == DecompositionStatus.Failed;
+        }
+
+        /// <summary>
+        /// If decomposition status is failed or rejected, the replan failed.
+        /// </summary>
+        /// <param name="status"></param>
+        /// <returns></returns>
+        private bool HasDecompositionSucceeded(DecompositionStatus status)
+        {
+            return status == DecompositionStatus.Succeeded || status == DecompositionStatus.Partial;
+        }
+
+        /// <summary>
+        /// We first check whether we have a stored start task. This is true
+        /// if we had a partial plan pause somewhere in our plan, and we now
+        /// want to continue where we left off.
+        /// If this is the case, we don't erase the MTR, but continue building it.
+        /// </summary>
+        /// <param name="ctx"></param>
+        /// <param name="plan"></param>
+        /// <param name="status"></param>
+        /// <returns></returns>
+        private DecompositionStatus OnPausedPartialPlan(T ctx, ref Queue<ITask> plan, DecompositionStatus status)
+        {
+            ctx.HasPausedPartialPlan = false;
+            while (ctx.PartialPlanQueue.Count > 0)
+            {
+                var kvp = ctx.PartialPlanQueue.Dequeue();
+                if (plan == null)
+                {
+                    status = kvp.Task.Decompose(ctx, kvp.TaskIndex, out plan);
+                }
+                else
+                {
+                    status = kvp.Task.Decompose(ctx, kvp.TaskIndex, out var subPlan);
+                    if (HasDecompositionSucceeded(status))
+                    {
+                        EnqueueToExistingPlan(ref plan, subPlan);
+                    }
+                }
+
+                // While continuing a partial plan, we might encounter
+                // a new pause.
                 if (ctx.HasPausedPartialPlan)
                 {
-                    ctx.HasPausedPartialPlan = false;
-                    lastPartialPlanQueue = ctx.Factory.CreateQueue<PartialPlanEntry>();
-
-                    while (ctx.PartialPlanQueue.Count > 0)
-                    {
-                        lastPartialPlanQueue.Enqueue(ctx.PartialPlanQueue.Dequeue());
-                    }
-                }
-
-                // We only erase the MTR if we start from the root task of the domain.
-                ctx.MethodTraversalRecord.Clear();
-
-                if (ctx.DebugMTR)
-                {
-                    ctx.MTRDebug.Clear();
-                }
-
-                status = Root.Decompose(ctx, 0, out plan);
-
-                // If we failed to find a new plan, we have to restore the old plan,
-                // if it was a partial plan.
-                if (lastPartialPlanQueue != null)
-                {
-                    if (status == DecompositionStatus.Rejected || status == DecompositionStatus.Failed)
-                    {
-                        ctx.HasPausedPartialPlan = true;
-                        ctx.PartialPlanQueue.Clear();
-
-                        while (lastPartialPlanQueue.Count > 0)
-                        {
-                            ctx.PartialPlanQueue.Enqueue(lastPartialPlanQueue.Dequeue());
-                        }
-
-                        ctx.Factory.FreeQueue(ref lastPartialPlanQueue);
-                    }
+                    break;
                 }
             }
 
-            // If this MTR equals the last MTR, then we need to double check whether we ended up
-            // just finding the exact same plan. During decomposition each compound task can't check
-            // for equality, only for less than, so this case needs to be treated after the fact.
+            // If we failed to continue the paused partial plan,
+            // then we have to start planning from the root.
+            if (HasDecompositionFailed(status))
+            {
+                ClearMethodTraversalRecord(ctx);
+
+                status = Root.Decompose(ctx, 0, out plan);
+            }
+
+            return status;
+        }
+
+        /// <summary>
+        /// Enqueues the sub plan's queue onto the existing plan
+        /// </summary>
+        /// <param name="plan"></param>
+        /// <param name="subPlan"></param>
+        private void EnqueueToExistingPlan(ref Queue<ITask> plan, Queue<ITask> subPlan)
+        {
+            while (subPlan.Count > 0)
+            {
+                plan.Enqueue(subPlan.Dequeue());
+            }
+        }
+
+        /// <summary>
+        /// If this MTR equals the last MTR, then we need to double-check whether we ended up
+        /// just finding the exact same plan. During decomposition each compound task can't check
+        /// for equality, only for less than, so this case needs to be treated after the fact.
+        /// </summary>
+        /// <param name="ctx"></param>
+        /// <returns></returns>
+        private bool HasFoundSamePlan(T ctx)
+        {
             var isMTRsEqual = ctx.MethodTraversalRecord.Count == ctx.LastMTR.Count;
             if (isMTRsEqual)
             {
@@ -190,47 +321,46 @@ namespace FluidHTN
                     }
                 }
 
-                if (isMTRsEqual)
-                {
-                    plan = null;
-                    status = DecompositionStatus.Rejected;
-                }
+                return isMTRsEqual;
             }
 
-            if (status == DecompositionStatus.Succeeded || status == DecompositionStatus.Partial)
+            return false;
+        }
+
+        /// <summary>
+        /// Apply permanent world state changes to the actual world state used during plan execution.
+        /// </summary>
+        /// <param name="ctx"></param>
+        private void ApplyPermanentWorldStateStackChanges(T ctx)
+        {
+            // Trim away any plan-only or plan&execute effects from the world state change stack, that only
+            // permanent effects on the world state remains now that the planning is done.
+            ctx.TrimForExecution();
+            
+            for (int i = 0; i < ctx.WorldStateChangeStack.Length; i++)
             {
-                // Trim away any plan-only or plan&execute effects from the world state change stack, that only
-                // permanent effects on the world state remains now that the planning is done.
-                ctx.TrimForExecution();
-
-                // Apply permanent world state changes to the actual world state used during plan execution.
-                for (var i = 0; i < ctx.WorldStateChangeStack.Length; i++)
+                var stack = ctx.WorldStateChangeStack[i];
+                if (stack != null && stack.Count > 0)
                 {
-                    var stack = ctx.WorldStateChangeStack[i];
-                    if (stack != null && stack.Count > 0)
-                    {
-                        ctx.WorldState[i] = stack.Peek().Value;
-                        stack.Clear();
-                    }
+                    ctx.WorldState[i] = stack.Peek().Value;
+                    stack.Clear();
                 }
             }
-            else
+        }
+
+        /// <summary>
+        /// Clear away any changes that might have been applied to the stack
+        /// </summary>
+        /// <param name="ctx"></param>
+        private void ClearWorldStateStackChanges(T ctx)
+        {
+            foreach (var stack in ctx.WorldStateChangeStack)
             {
-                // Clear away any changes that might have been applied to the stack
-                // No changes should be made or tracked further when the plan failed.
-                for (var i = 0; i < ctx.WorldStateChangeStack.Length; i++)
+                if (stack != null && stack.Count > 0)
                 {
-                    var stack = ctx.WorldStateChangeStack[i];
-
-                    if (stack != null && stack.Count > 0)
-                    {
-                        stack.Clear();
-                    }
+                    stack.Clear();
                 }
             }
-
-            ctx.ContextState = ContextState.Executing;
-            return status;
         }
 
         // ========================================================= SLOTS
