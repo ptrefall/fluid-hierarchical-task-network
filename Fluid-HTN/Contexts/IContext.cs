@@ -29,7 +29,9 @@ namespace FluidHTN
         ContextState ContextState { get; set; }
         int CurrentDecompositionDepth { get; set; }
 
-        IFactory Factory { get; set; }
+        IFactory Factory { get; }
+
+        IPlannerState PlannerState { get; }
 
         /// <summary>
         ///     The Method Traversal Record is used while decomposing a domain and
