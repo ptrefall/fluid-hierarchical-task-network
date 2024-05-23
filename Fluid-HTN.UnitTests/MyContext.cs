@@ -15,7 +15,8 @@ public enum MyWorldState : byte
 internal class MyContext : BaseContext
 {
     private byte[] _worldState = new byte[Enum.GetValues(typeof(MyWorldState)).Length];
-    public override IFactory Factory { get; set; } = new DefaultFactory();
+    public override IFactory Factory { get; protected set; } = new DefaultFactory();
+    public override IPlannerState PlannerState { get; protected set; } = new DefaultPlannerState();
     public override List<string> MTRDebug { get; set; } = null;
     public override List<string> LastMTRDebug { get; set; } = null;
     public override bool DebugMTR { get; } = false;

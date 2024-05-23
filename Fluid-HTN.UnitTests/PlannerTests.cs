@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Security.Cryptography.X509Certificates;
 using FluidHTN;
 using FluidHTN.Compounds;
 using FluidHTN.Conditions;
@@ -13,25 +14,6 @@ namespace Fluid_HTN.UnitTests
     [TestClass]
     public class PlannerTests
     {
-        [TestMethod]
-        public void GetPlanReturnsClearInstanceAtStart_ExpectedBehavior()
-        {
-            var planner = new Planner<MyContext>();
-            var plan = planner.GetPlan();
-
-            Assert.IsTrue(plan != null);
-            Assert.IsTrue(plan.Count == 0);
-        }
-
-        [TestMethod]
-        public void GetCurrentTaskReturnsNullAtStart_ExpectedBehavior()
-        {
-            var planner = new Planner<MyContext>();
-            var task = planner.GetCurrentTask();
-
-            Assert.IsTrue(task == null);
-        }
-
         [TestMethod]
         [ExpectedException(typeof(NullReferenceException), AllowDerivedTypes = false)]
         public void TickWithNullParametersThrowsNRE_ExpectedBehavior()
@@ -82,10 +64,9 @@ namespace Fluid_HTN.UnitTests
             domain.Add(task1, task2);
 
             planner.Tick(domain, ctx);
-            var currentTask = planner.GetCurrentTask();
 
-            Assert.IsTrue(currentTask == null);
-            Assert.IsTrue(planner.LastStatus == TaskStatus.Failure);
+            Assert.IsTrue(ctx.PlannerState.CurrentTask == null);
+            Assert.IsTrue(ctx.PlannerState.LastStatus == TaskStatus.Failure);
         }
 
         [TestMethod]
@@ -102,10 +83,9 @@ namespace Fluid_HTN.UnitTests
             domain.Add(task1, task2);
 
             planner.Tick(domain, ctx);
-            var currentTask = planner.GetCurrentTask();
 
-            Assert.IsTrue(currentTask == null);
-            Assert.IsTrue(planner.LastStatus == TaskStatus.Failure);
+            Assert.IsTrue(ctx.PlannerState.CurrentTask == null);
+            Assert.IsTrue(ctx.PlannerState.LastStatus == TaskStatus.Failure);
         }
 
         [TestMethod]
@@ -122,10 +102,9 @@ namespace Fluid_HTN.UnitTests
             domain.Add(task1, task2);
 
             planner.Tick(domain, ctx);
-            var currentTask = planner.GetCurrentTask();
 
-            Assert.IsTrue(currentTask == null);
-            Assert.IsTrue(planner.LastStatus == TaskStatus.Success);
+            Assert.IsTrue(ctx.PlannerState.CurrentTask == null);
+            Assert.IsTrue(ctx.PlannerState.LastStatus == TaskStatus.Success);
         }
 
         [TestMethod]
@@ -142,10 +121,9 @@ namespace Fluid_HTN.UnitTests
             domain.Add(task1, task2);
 
             planner.Tick(domain, ctx);
-            var currentTask = planner.GetCurrentTask();
 
-            Assert.IsTrue(currentTask != null);
-            Assert.IsTrue(planner.LastStatus == TaskStatus.Continue);
+            Assert.IsTrue(ctx.PlannerState.CurrentTask != null);
+            Assert.IsTrue(ctx.PlannerState.LastStatus == TaskStatus.Continue);
         }
 
         [TestMethod]
@@ -155,7 +133,7 @@ namespace Fluid_HTN.UnitTests
             var ctx = new MyContext();
             ctx.Init();
             var planner = new Planner<MyContext>();
-            planner.OnNewPlan = (p) => { test = p.Count == 1; };
+            ctx.PlannerState.OnNewPlan = (p) => { test = p.Count == 1; };
             var domain = new Domain<MyContext>("Test");
             var task1 = new Selector() { Name = "Test" };
             var task2 = new PrimitiveTask() { Name = "Sub-task" };
@@ -175,7 +153,7 @@ namespace Fluid_HTN.UnitTests
             var ctx = new MyContext();
             ctx.Init();
             var planner = new Planner<MyContext>();
-            planner.OnReplacePlan = (op, ct, p) => { test = op.Count == 0 && ct != null && p.Count == 1; };
+            ctx.PlannerState.OnReplacePlan = (op, ct, p) => { test = op.Count == 0 && ct != null && p.Count == 1; };
             var domain = new Domain<MyContext>("Test");
             var task1 = new Selector() { Name = "Test1" };
             var task2 = new Selector() { Name = "Test2" };
@@ -205,7 +183,7 @@ namespace Fluid_HTN.UnitTests
             var ctx = new MyContext();
             ctx.Init();
             var planner = new Planner<MyContext>();
-            planner.OnNewTask = (t) => { test = t.Name == "Sub-task"; };
+            ctx.PlannerState.OnNewTask = (t) => { test = t.Name == "Sub-task"; };
             var domain = new Domain<MyContext>("Test");
             var task1 = new Selector() { Name = "Test" };
             var task2 = new PrimitiveTask() { Name = "Sub-task" };
@@ -225,7 +203,7 @@ namespace Fluid_HTN.UnitTests
             var ctx = new MyContext();
             ctx.Init();
             var planner = new Planner<MyContext>();
-            planner.OnNewTaskConditionFailed = (t, c) => { test = t.Name == "Sub-task1"; };
+            ctx.PlannerState.OnNewTaskConditionFailed = (t, c) => { test = t.Name == "Sub-task1"; };
             var domain = new Domain<MyContext>("Test");
             var task1 = new Selector() { Name = "Test1" };
             var task2 = new Selector() { Name = "Test2" };
@@ -260,7 +238,7 @@ namespace Fluid_HTN.UnitTests
             var ctx = new MyContext();
             ctx.Init();
             var planner = new Planner<MyContext>();
-            planner.OnStopCurrentTask = (t) => { test = t.Name == "Sub-task2"; };
+            ctx.PlannerState.OnStopCurrentTask = (t) => { test = t.Name == "Sub-task2"; };
             var domain = new Domain<MyContext>("Test");
             var task1 = new Selector() { Name = "Test1" };
             var task2 = new Selector() { Name = "Test2" };
@@ -290,7 +268,7 @@ namespace Fluid_HTN.UnitTests
             var ctx = new MyContext();
             ctx.Init();
             var planner = new Planner<MyContext>();
-            planner.OnCurrentTaskCompletedSuccessfully = (t) => { test = t.Name == "Sub-task1"; };
+            ctx.PlannerState.OnCurrentTaskCompletedSuccessfully = (t) => { test = t.Name == "Sub-task1"; };
             var domain = new Domain<MyContext>("Test");
             var task1 = new Selector() { Name = "Test1" };
             var task2 = new Selector() { Name = "Test2" };
@@ -320,7 +298,7 @@ namespace Fluid_HTN.UnitTests
             var ctx = new MyContext();
             ctx.Init();
             var planner = new Planner<MyContext>();
-            planner.OnApplyEffect = (e) => { test = e.Name == "TestEffect"; };
+            ctx.PlannerState.OnApplyEffect = (e) => { test = e.Name == "TestEffect"; };
             var domain = new Domain<MyContext>("Test");
             var task1 = new Selector() { Name = "Test1" };
             var task2 = new Selector() { Name = "Test2" };
@@ -352,7 +330,7 @@ namespace Fluid_HTN.UnitTests
             var ctx = new MyContext();
             ctx.Init();
             var planner = new Planner<MyContext>();
-            planner.OnCurrentTaskFailed = (t) => { test = t.Name == "Sub-task"; };
+            ctx.PlannerState.OnCurrentTaskFailed = (t) => { test = t.Name == "Sub-task"; };
             var domain = new Domain<MyContext>("Test");
             var task1 = new Selector() { Name = "Test" };
             var task2 = new PrimitiveTask() { Name = "Sub-task" };
@@ -372,7 +350,7 @@ namespace Fluid_HTN.UnitTests
             var ctx = new MyContext();
             ctx.Init();
             var planner = new Planner<MyContext>();
-            planner.OnCurrentTaskContinues = (t) => { test = t.Name == "Sub-task"; };
+            ctx.PlannerState.OnCurrentTaskContinues = (t) => { test = t.Name == "Sub-task"; };
             var domain = new Domain<MyContext>("Test");
             var task1 = new Selector() { Name = "Test" };
             var task2 = new PrimitiveTask() { Name = "Sub-task" };
@@ -392,7 +370,7 @@ namespace Fluid_HTN.UnitTests
             var ctx = new MyContext();
             ctx.Init();
             var planner = new Planner<MyContext>();
-            planner.OnCurrentTaskExecutingConditionFailed = (t, c) => { test = t.Name == "Sub-task" && c.Name == "TestCondition"; };
+            ctx.PlannerState.OnCurrentTaskExecutingConditionFailed = (t, c) => { test = t.Name == "Sub-task" && c.Name == "TestCondition"; };
             var domain = new Domain<MyContext>("Test");
             var task1 = new Selector() { Name = "Test" };
             var task2 = new PrimitiveTask() { Name = "Sub-task" };
@@ -433,8 +411,8 @@ namespace Fluid_HTN.UnitTests
             ITask currentTask;
 
             planner.Tick(domain, ctx, false);
-            plan = planner.GetPlan();
-            currentTask = planner.GetCurrentTask();
+            plan = ctx.PlannerState.Plan;
+            currentTask = ctx.PlannerState.CurrentTask;
             Assert.IsTrue(plan != null);
             Assert.IsTrue(plan.Count == 0);
             Assert.IsTrue(currentTask.Name == "Test Action B");
@@ -446,8 +424,8 @@ namespace Fluid_HTN.UnitTests
             ctx.Done = true;
 
             planner.Tick(domain, ctx, true);
-            plan = planner.GetPlan();
-            currentTask = planner.GetCurrentTask();
+            plan = ctx.PlannerState.Plan;
+            currentTask = ctx.PlannerState.CurrentTask;
             Assert.IsTrue(plan != null);
             Assert.IsTrue(plan.Count == 0);
             Assert.IsTrue(currentTask.Name == "Test Action A");
@@ -481,8 +459,8 @@ namespace Fluid_HTN.UnitTests
             ITask currentTask;
 
             planner.Tick(domain, ctx, false);
-            plan = planner.GetPlan();
-            currentTask = planner.GetCurrentTask();
+            plan = ctx.PlannerState.Plan;
+            currentTask = ctx.PlannerState.CurrentTask;
             Assert.IsTrue(plan != null);
             Assert.IsTrue(plan.Count == 0);
             Assert.IsTrue(currentTask.Name == "Test Action B");
@@ -494,8 +472,8 @@ namespace Fluid_HTN.UnitTests
             ctx.SetState(MyWorldState.HasA, true, EffectType.Permanent);
 
             planner.Tick(domain, ctx, true);
-            plan = planner.GetPlan();
-            currentTask = planner.GetCurrentTask();
+            plan = ctx.PlannerState.Plan;
+            currentTask = ctx.PlannerState.CurrentTask;
             Assert.IsTrue(plan != null);
             Assert.IsTrue(plan.Count == 0);
             Assert.IsTrue(currentTask.Name == "Test Action A");
@@ -531,8 +509,8 @@ namespace Fluid_HTN.UnitTests
             ITask currentTask;
 
             planner.Tick(domain, ctx, false);
-            plan = planner.GetPlan();
-            currentTask = planner.GetCurrentTask();
+            plan = ctx.PlannerState.Plan;
+            currentTask = ctx.PlannerState.CurrentTask;
             Assert.IsTrue(plan != null);
             Assert.IsTrue(plan.Count == 0);
             Assert.IsTrue(currentTask.Name == "Test Action A");
@@ -544,8 +522,8 @@ namespace Fluid_HTN.UnitTests
             ctx.SetState(MyWorldState.HasA, true, EffectType.Permanent);
 
             planner.Tick(domain, ctx, true);
-            plan = planner.GetPlan();
-            currentTask = planner.GetCurrentTask();
+            plan = ctx.PlannerState.Plan;
+            currentTask = ctx.PlannerState.CurrentTask;
             Assert.IsTrue(plan != null);
             Assert.IsTrue(plan.Count == 0);
             Assert.IsTrue(currentTask.Name == "Test Action B");
