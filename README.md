@@ -20,7 +20,7 @@ A simple HTN planner based around the principles of the Builder pattern, inspire
 * Uses a Factory interface internally to create and free arrays/collections/objects, allowing the user to add pooling, or other memory management schemes.
 * Decomposition logging, for debugging.
 * Comes with Unity Package Module definitions for seamless integration into Unity projects.
-* 150 unit tests.
+* 148 unit tests.
 
 ## Support
 Join the [discord channel](https://discord.gg/MuccnAz) to share your experience and get support on the usage of Fluid HTN.
@@ -75,7 +75,8 @@ public class MyContext : BaseContext
     public override Queue<IBaseDecompositionLogEntry> DecompositionLog { get; set; } = null;
     public override bool LogDecomposition { get; } = false;
     
-    public override IFactory Factory { get; set; } = new DefaultFactory();
+    public override IFactory Factory { get; protected set; } = new DefaultFactory();
+    public override IPlannerState PlannerState { get; protected set; } = new DefaultPlannerState();
     private byte[] _worldState = new byte[Enum.GetValues(typeof(MyWorldState)).Length];
     public override byte[] WorldState => _worldState;
     
@@ -571,7 +572,7 @@ foreach(var log in ctx.LastMTRDebug)
 ```
 The reason these debug properties are all abstract in BaseContext, is because Fluid HTN must be generic enough to be used varied environments. In Unity, for instance, a user might want to have these debug flags enabled only when in the editor, or when running the game in a special dev-mode. Or maybe the user doesn't use Unity at all, and other policies are applied for when to debug.
 #### Callback hooks in the planner
-Sometimes these debug logs won't be enough to understand how the planner flows and gives us the results it does. Or maybe there is a need to hook up to certain events in the planner for other purposes. The planner exposes multiple callbacks that we can hook up to.
+Sometimes these debug logs won't be enough to understand how the planner flows and gives us the results it does. Or maybe there is a need to hook up to certain events in the planner for other purposes. The planner state exposes multiple callbacks that we can hook up to.
 
 OnNewPlan(newPlan) is called when we found a new plan, and there is no old plan to replace.
 ```C#
