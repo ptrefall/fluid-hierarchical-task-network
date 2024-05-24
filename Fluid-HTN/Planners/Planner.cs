@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using FluidHTN.Compounds;
-using FluidHTN.Conditions;
 using FluidHTN.PrimitiveTasks;
 
 namespace FluidHTN
