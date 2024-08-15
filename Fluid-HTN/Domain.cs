@@ -35,11 +35,6 @@ namespace FluidHTN
 
         public void Add(ICompoundTask parent, Slot slot)
         {
-            if (parent == slot)
-            {
-                throw new Exception("Parent-task and Sub-task can't be the same instance!");
-            }
-
             if (_slots != null)
             {
                 if (_slots.ContainsKey(slot.SlotId))
