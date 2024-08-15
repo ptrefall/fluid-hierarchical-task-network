@@ -31,7 +31,6 @@ It is highly recommended to read and watch the following resources on HTN planni
 * [Troy Humphreys' GameAIPro article](http://www.gameaipro.com/GameAIPro/GameAIPro_Chapter12_Exploring_HTN_Planners_through_Example.pdf)
 * [AI and Games' Horizon Zero Dawn coverage](https://www.youtube.com/watch?v=XxuSFBVQULY)
 * [AI and Games' Transformers coverage](https://www.youtube.com/watch?v=kXm467TFTcY)
-* [AiGameDev's Planning in games overview](http://aigamedev.com/open/review/planning-in-games/)
 
 If you want an in-depth look into ai planning, the University of Edinburgh has a great series on the topic
 * [University of Edinburgh's AI Planning series](https://www.youtube.com/watch?v=7Vy8970q0Xc&list=PLwJ2VKmefmxpUJEGB1ff6yUZ5Zd7Gegn2)
@@ -619,8 +618,10 @@ The [Fluid HTN Extension library](https://github.com/ptrefall/fluid-hierarchical
 
 ## Examples
 Example projects have been pulled into their own repositories, as not to clutter the core library. More examples are still in progress, so please check back here to see when they become available.
-* [Fluid Text Adventure](https://github.com/ptrefall/fluid-text-adventure)
+### Version 0.3 compatible
 * [Fluid Troll Bridge](https://github.com/ptrefall/fluid-troll-bridge) (requires Unity)
+### Version 0.2 compatible
+* [Fluid Text Adventure](https://github.com/ptrefall/fluid-text-adventure)
 * [Fluid Goap Coffai](https://github.com/ptrefall/fluid-goap-coffai)
 * [Fluid Smart Objects](https://github.com/ptrefall/fluid-smart-objects)
 * [Fluid Roguelike](https://github.com/ptrefall/fluid_roguelike) (requires Unity, work in progress)
