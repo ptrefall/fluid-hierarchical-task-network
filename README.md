@@ -31,7 +31,6 @@ It is highly recommended to read and watch the following resources on HTN planni
 * [Troy Humphreys' GameAIPro article](http://www.gameaipro.com/GameAIPro/GameAIPro_Chapter12_Exploring_HTN_Planners_through_Example.pdf)
 * [AI and Games' Horizon Zero Dawn coverage](https://www.youtube.com/watch?v=XxuSFBVQULY)
 * [AI and Games' Transformers coverage](https://www.youtube.com/watch?v=kXm467TFTcY)
-* [AiGameDev's Planning in games overview](http://aigamedev.com/open/review/planning-in-games/)
 
 If you want an in-depth look into ai planning, the University of Edinburgh has a great series on the topic
 * [University of Edinburgh's AI Planning series](https://www.youtube.com/watch?v=7Vy8970q0Xc&list=PLwJ2VKmefmxpUJEGB1ff6yUZ5Zd7Gegn2)
