@@ -1,9 +1,16 @@
 {
     "name": "fluid.htn",
     "displayName": "Fluid HTN",
-    "version": "0.1.0",
-    "unity": "2019.1",
+    "version": "0.3.2",
+    "unity": "2022.3",
     "author": "Pål Trefall",
-    "description": "HTN Planner Framework",
-    "dependencies": {}
+	"author": {
+		"name": "Pål Trefall",
+		"email": "ptrefall@gmail.com",
+		"url": "https://github.com/ptrefall/fluid-hierarchical-task-network/"
+	  },
+    "description": "Hierarchical Task Network Planner",
+	"documentationUrl": "https://github.com/ptrefall/fluid-hierarchical-task-network/blob/master/README.md",
+    "dependencies": {},
+	"type": "library"
 }

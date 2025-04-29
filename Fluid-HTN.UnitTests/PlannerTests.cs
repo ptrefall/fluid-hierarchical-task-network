@@ -530,5 +530,179 @@ namespace Fluid_HTN.UnitTests
             Assert.IsTrue(ctx.MethodTraversalRecord[0] == 0);
             Assert.IsTrue(ctx.MethodTraversalRecord[1] == 1);
         }
+
+        [TestMethod]
+        public void ToggleBetweenTwoPlansWithOnlyPlannerConditionWontWork_ExpectedBehavior()
+        {
+            var c = new MyContext();
+            c.Init();
+
+            var planner = new Planner<MyContext>();
+            var domain = new DomainBuilder<MyContext>("Test")
+                .Action("A")
+                    .Condition("Is True", ctx => ctx.HasState(MyWorldState.HasA))
+                    .Do(ctx =>
+                {
+                    ctx.Done = true;
+                    return TaskStatus.Continue;
+                })
+                .End()
+                .Action("B")
+                    .Condition("Is False", ctx => ctx.HasState(MyWorldState.HasA) == false)
+                    .Do(ctx =>
+                {
+                    ctx.Done = false;
+                    return TaskStatus.Continue;
+                })
+                .End()
+                .Build();
+
+            c.SetState(MyWorldState.HasA, true, EffectType.Permanent);
+            planner.Tick(domain, c);
+            Assert.IsTrue(c.Done); // We're running Action A
+
+            c.SetState(MyWorldState.HasA, false, EffectType.Permanent);
+            planner.Tick(domain, c);
+            Assert.IsTrue(c.Done); // Our change triggered a replan, but B can't beat A due to MTR. So A won't get invalidated.
+        }
+
+        [TestMethod]
+        public void ToggleBetweenTwoPlansWithExecutingConditionWillWork_ExpectedBehavior()
+        {
+            var c = new MyContext();
+            c.Init();
+
+            var planner = new Planner<MyContext>();
+            var domain = new DomainBuilder<MyContext>("Test")
+                .Action("A")
+                .Condition("Is True", ctx => ctx.HasState(MyWorldState.HasA))
+                .ExecutingCondition("Is True", ctx => ctx.HasState(MyWorldState.HasA))
+                .Do(ctx =>
+                {
+                    ctx.Done = true;
+                    return TaskStatus.Continue;
+                })
+                .End()
+                .Action("B")
+                .Condition("Is False", ctx => ctx.HasState(MyWorldState.HasA) == false)
+                .ExecutingCondition("Is False", ctx => ctx.HasState(MyWorldState.HasA) == false)
+                .Do(ctx =>
+                {
+                    ctx.Done = false;
+                    return TaskStatus.Continue;
+                })
+                .End()
+                .Build();
+
+            c.SetState(MyWorldState.HasA, true, EffectType.Permanent);
+            planner.Tick(domain, c);
+            Assert.IsTrue(c.Done); // We're running A
+
+            c.SetState(MyWorldState.HasA, false, EffectType.Permanent);
+            planner.Tick(domain, c);
+            Assert.IsFalse(c.Done); // Out executing condition will realize that A is no longer valid, and we find B instead.
+
+            c.SetState(MyWorldState.HasA, true, EffectType.Permanent);
+            planner.Tick(domain, c);
+            Assert.IsTrue(c.Done); // We're running A
+        }
+
+        [TestMethod]
+        public void ToggleBetweenTwoPlansWithConditionSuccessInOperatorWillWork_ExpectedBehavior()
+        {
+            var c = new MyContext();
+            c.Init();
+
+            var planner = new Planner<MyContext>();
+            var domain = new DomainBuilder<MyContext>("Test")
+                .Action("A")
+                .Condition("Is True", ctx => ctx.HasState(MyWorldState.HasA))
+                .Do(ctx =>
+                {
+                    if (ctx.HasState(MyWorldState.HasA) == false)
+                    {
+                        return TaskStatus.Success;
+                    }
+
+                    ctx.Done = true;
+                    return TaskStatus.Continue;
+                })
+                .End()
+                .Action("B")
+                .Condition("Is False", ctx => ctx.HasState(MyWorldState.HasA) == false)
+                .Do(ctx =>
+                {
+                    if (ctx.HasState(MyWorldState.HasA))
+                    {
+                        return TaskStatus.Success;
+                    }
+
+                    ctx.Done = false;
+                    return TaskStatus.Continue;
+                })
+                .End()
+                .Build();
+
+            c.SetState(MyWorldState.HasA, true, EffectType.Permanent);
+            planner.Tick(domain, c);
+            Assert.IsTrue(c.Done); // We're running A
+
+            c.SetState(MyWorldState.HasA, false, EffectType.Permanent);
+            planner.Tick(domain, c);
+            Assert.IsFalse(c.Done); // Out executing condition will realize that A is no longer valid, and we find B instead.
+
+            c.SetState(MyWorldState.HasA, true, EffectType.Permanent);
+            planner.Tick(domain, c);
+            Assert.IsTrue(c.Done); // We're running A
+        }
+
+        [TestMethod]
+        public void ToggleBetweenTwoPlansWithConditionFailureInOperatorWontWork_ExpectedBehavior()
+        {
+            var c = new MyContext();
+            c.Init();
+
+            var planner = new Planner<MyContext>();
+            var domain = new DomainBuilder<MyContext>("Test")
+                .Action("A")
+                .Condition("Is True", ctx => ctx.HasState(MyWorldState.HasA))
+                .Do(ctx =>
+                {
+                    if (ctx.HasState(MyWorldState.HasA) == false)
+                    {
+                        return TaskStatus.Failure;
+                    }
+
+                    ctx.Done = true;
+                    return TaskStatus.Continue;
+                })
+                .End()
+                .Action("B")
+                .Condition("Is False", ctx => ctx.HasState(MyWorldState.HasA) == false)
+                .Do(ctx =>
+                {
+                    if (ctx.HasState(MyWorldState.HasA))
+                    {
+                        return TaskStatus.Failure;
+                    }
+
+                    ctx.Done = false;
+                    return TaskStatus.Continue;
+                })
+                .End()
+                .Build();
+
+            c.SetState(MyWorldState.HasA, true, EffectType.Permanent);
+            planner.Tick(domain, c);
+            Assert.IsTrue(c.Done); // We're running A
+
+            c.SetState(MyWorldState.HasA, false, EffectType.Permanent);
+            planner.Tick(domain, c);
+            Assert.IsFalse(c.Done); // Out executing condition will realize that A is no longer valid, and we find B instead.
+
+            c.SetState(MyWorldState.HasA, true, EffectType.Permanent);
+            planner.Tick(domain, c);
+            Assert.IsTrue(c.Done); // We're running A
+        }
     }
 }

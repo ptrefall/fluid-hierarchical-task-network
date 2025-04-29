@@ -310,7 +310,7 @@ namespace FluidHTN
                 // If the operation failed to finish, we need to fail the entire plan, so that we will replan the next tick.
                 if (ctx.PlannerState.LastStatus == TaskStatus.Failure)
                 {
-                    FailEntirePlan(ctx, task);
+                    FailEntirePlan(domain, ctx, task, allowImmediateReplan);
                     return true;
                 }
 
@@ -435,12 +435,17 @@ namespace FluidHTN
         /// </summary>
         /// <param name="ctx"></param>
         /// <param name="task"></param>
-        private void FailEntirePlan(T ctx, IPrimitiveTask task)
+        private void FailEntirePlan(Domain<T> domain, T ctx, IPrimitiveTask task, bool allowImmediateReplan)
         {
             ctx.PlannerState.OnCurrentTaskFailed?.Invoke(task);
 
             task.Aborted(ctx);
             ClearPlanForReplan(ctx);
+
+            if (allowImmediateReplan)
+            {
+                Tick(domain, ctx, allowImmediateReplan: false);
+            }
         }
         
         /// <summary>
