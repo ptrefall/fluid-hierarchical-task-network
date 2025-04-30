@@ -1,0 +1,26 @@
+﻿---
+BasedOnStyle: Microsoft
+AccessModifierOffset : -4
+AlignConsecutiveAssignments: false
+AlignConsecutiveDeclarations: true
+#AllowShortFunctionsOnASingleLine: Inline
+AllowShortFunctionsOnASingleLine: InlineOnly
+AlwaysBreakTemplateDeclarations  : true
+BreakBeforeBraces: Custom
+BraceWrapping : 
+ AfterEnum : true
+ AfterCaseLabel : true
+BreakConstructorInitializers: BeforeComma
+ColumnLimit: 132
+#IndentCaseBlocks: 'true'
+IndentCaseLabels: 'true'
+PointerAlignment: Left
+UseTab : 'Never'
+
+SortIncludes : false
+
+AlignAfterOpenBracket: Align
+AllowAllArgumentsOnNextLine: false
+BinPackParameters : false
+BinPackArguments : false
+...
