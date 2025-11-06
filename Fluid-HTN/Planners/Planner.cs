@@ -51,6 +51,14 @@ namespace FluidHTN
                 {
                     return;
                 }
+
+                if (ctx.PlannerState.CurrentTask is IPrimitiveTask taskToStart)
+                {
+                    if (TryStartPrimitiveTaskOperator(domain, ctx, taskToStart, allowImmediateReplan) == false)
+                    {
+                        return;
+                    }
+                }
             }
 
             // If the current task is a primitive task, we try to tick its operator.
@@ -282,6 +290,49 @@ namespace FluidHTN
         }
 
         /// <summary>
+        /// When a new task is selected, we should run Start on its Operator.
+        /// </summary>
+        /// <param name="domain"></param>
+        /// <param name="ctx"></param>
+        /// <param name="task"></param>
+        /// <param name="allowImmediateReplan"></param>
+        /// <returns></returns>
+        private bool TryStartPrimitiveTaskOperator(Domain<T> domain, T ctx, IPrimitiveTask task, bool allowImmediateReplan)
+        {
+            if (task.Operator != null)
+            {
+                ctx.PlannerState.LastStatus = task.Operator.Start(ctx);
+
+                // If the operation finished successfully already on start, we set task to null so that we dequeue the next task in the plan the following tick.
+                if (ctx.PlannerState.LastStatus == TaskStatus.Success)
+                {
+                    // We have to first invoke that the task operator has run its start function successfully, before we report that the operator finished.
+                    ctx.PlannerState.OnCurrentTaskStarted?.Invoke(task);
+
+                    OnOperatorFinishedSuccessfully(domain, ctx, task, allowImmediateReplan);
+                    return true;
+                }
+
+                // If the operation failed to start, we need to fail the entire plan, so that we will replan the next tick.
+                if (ctx.PlannerState.LastStatus == TaskStatus.Failure)
+                {
+                    FailEntirePlan(domain, ctx, task, allowImmediateReplan);
+                    return true;
+                }
+
+                // Otherwise the operation started as expected, and we are ready to start running Update ticks on the operator.
+                ctx.PlannerState.OnCurrentTaskStarted?.Invoke(task);
+                return true;
+            }
+
+            // This should not really happen if a domain is set up properly.
+            task.Abort(ctx);
+            ctx.PlannerState.CurrentTask = null;
+            ctx.PlannerState.LastStatus = TaskStatus.Failure;
+            return true;
+        }
+
+        /// <summary>
         /// While we have a valid primitive task running, we should tick it each tick of the plan execution.
         /// </summary>
         /// <param name="domain"></param>
@@ -320,7 +371,7 @@ namespace FluidHTN
             }
 
             // This should not really happen if a domain is set up properly.
-            task.Aborted(ctx);
+            task.Abort(ctx);
             ctx.PlannerState.CurrentTask = null;
             ctx.PlannerState.LastStatus = TaskStatus.Failure;
             return true;
@@ -386,7 +437,7 @@ namespace FluidHTN
         /// <param name="ctx"></param>
         private void AbortTask(T ctx, IPrimitiveTask task)
         {
-            task?.Aborted(ctx);
+            task?.Abort(ctx);
             ClearPlanForReplan(ctx);
         }
 
@@ -439,7 +490,7 @@ namespace FluidHTN
         {
             ctx.PlannerState.OnCurrentTaskFailed?.Invoke(task);
 
-            task.Aborted(ctx);
+            task.Abort(ctx);
             ClearPlanForReplan(ctx);
 
             if (allowImmediateReplan)

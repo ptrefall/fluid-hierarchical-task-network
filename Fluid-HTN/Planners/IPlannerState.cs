@@ -62,6 +62,11 @@ namespace FluidHTN
         Action<IPrimitiveTask> OnCurrentTaskFailed { get; set; }
 
         /// <summary>
+        ///		OnCurrentTaskStarted(task) is called once when a new task in the plan is selected.
+        /// </summary>
+        Action<IPrimitiveTask> OnCurrentTaskStarted { get; set; }
+
+        /// <summary>
         ///		OnCurrentTaskContinues(task) is called every tick that a currently running task
         ///		needs to continue.
         /// </summary>

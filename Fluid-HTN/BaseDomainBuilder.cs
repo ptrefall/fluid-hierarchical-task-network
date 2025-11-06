@@ -235,13 +235,11 @@ namespace FluidHTN
         /// <summary>
         ///     The operator of an Action / primitive task.
         /// </summary>
-        /// <param name="action"></param>
-        /// <returns></returns>
-        public DB Do(Func<T, TaskStatus> action, Action<T> forceStopAction = null)
+        public DB Do(Func<T, TaskStatus> action, Func<T, TaskStatus> start = null, Action<T> forceStopAction = null)
         {
             if (Pointer is IPrimitiveTask task)
             {
-                var op = new FuncOperator<T>(action, forceStopAction);
+                var op = new FuncOperator<T>(func: action, start: start, funcStop: forceStopAction);
                 task.SetOperator(op);
             }
             else

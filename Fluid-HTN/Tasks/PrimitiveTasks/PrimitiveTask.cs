@@ -89,9 +89,9 @@ namespace FluidHTN.PrimitiveTasks
             Operator?.Stop(ctx);
         }
 
-        public void Aborted(IContext ctx)
+        public void Abort(IContext ctx)
         {
-            Operator?.Aborted(ctx);
+            Operator?.Abort(ctx);
         }
 
         // ========================================================= VALIDITY

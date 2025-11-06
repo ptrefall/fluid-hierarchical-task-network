@@ -5,6 +5,11 @@ namespace Fluid_HTN.UnitTests
 {
     internal class MyOperator : IOperator
     {
+        public TaskStatus Start(IContext ctx)
+        {
+            return TaskStatus.Continue;
+        }
+
         public TaskStatus Update(IContext ctx)
         {
             return TaskStatus.Continue;
@@ -14,7 +19,7 @@ namespace Fluid_HTN.UnitTests
         {
         }
 
-        public void Aborted(IContext ctx)
+        public void Abort(IContext ctx)
         {
 
         }

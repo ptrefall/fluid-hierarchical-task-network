@@ -231,6 +231,66 @@ namespace Fluid_HTN.UnitTests
         }
 
         [TestMethod]
+        public void OnStartNewTask_ExpectedBehavior()
+        {
+            bool test = false;
+            var ctx = new MyContext();
+            ctx.Init();
+            var planner = new Planner<MyContext>();
+            ctx.PlannerState.OnCurrentTaskStarted = (t) => { test = t.Name == "Sub-task"; };
+            var domain = new Domain<MyContext>("Test");
+            var task1 = new Selector() { Name = "Test" };
+            var task2 = new PrimitiveTask() { Name = "Sub-task" };
+            task2.SetOperator(new FuncOperator<MyContext>((context) => TaskStatus.Continue, start: (context) => TaskStatus.Continue));
+            domain.Add(domain.Root, task1);
+            domain.Add(task1, task2);
+
+            planner.Tick(domain, ctx);
+
+            Assert.IsTrue(test);
+        }
+
+        [TestMethod]
+        public void StartNewTaskCanCompleteTask_ExpectedBehavior()
+        {
+            bool test = false;
+            var ctx = new MyContext();
+            ctx.Init();
+            var planner = new Planner<MyContext>();
+            ctx.PlannerState.OnCurrentTaskCompletedSuccessfully = (t) => { test = t.Name == "Sub-task"; };
+            var domain = new Domain<MyContext>("Test");
+            var task1 = new Selector() { Name = "Test" };
+            var task2 = new PrimitiveTask() { Name = "Sub-task" };
+            task2.SetOperator(new FuncOperator<MyContext>((context) => TaskStatus.Continue, start: (context) => TaskStatus.Success));
+            domain.Add(domain.Root, task1);
+            domain.Add(task1, task2);
+
+            planner.Tick(domain, ctx);
+
+            Assert.IsTrue(test);
+        }
+
+        [TestMethod]
+        public void StartNewTaskCanFailTask_ExpectedBehavior()
+        {
+            bool test = false;
+            var ctx = new MyContext();
+            ctx.Init();
+            var planner = new Planner<MyContext>();
+            ctx.PlannerState.OnCurrentTaskFailed = (t) => { test = t.Name == "Sub-task"; };
+            var domain = new Domain<MyContext>("Test");
+            var task1 = new Selector() { Name = "Test" };
+            var task2 = new PrimitiveTask() { Name = "Sub-task" };
+            task2.SetOperator(new FuncOperator<MyContext>((context) => TaskStatus.Continue, start: (context) => TaskStatus.Failure));
+            domain.Add(domain.Root, task1);
+            domain.Add(task1, task2);
+
+            planner.Tick(domain, ctx);
+
+            Assert.IsTrue(test);
+        }
+
+        [TestMethod]
         public void OnStopCurrentTask_ExpectedBehavior()
         {
             bool test = false;

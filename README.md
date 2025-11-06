@@ -20,7 +20,7 @@ A simple HTN planner based around the principles of the Builder pattern, inspire
 * Uses a Factory interface internally to create and free arrays/collections/objects, allowing the user to add pooling, or other memory management schemes.
 * Decomposition logging, for debugging.
 * Comes with Unity Package Module definitions for seamless integration into Unity projects.
-* 148 unit tests.
+* 158 unit tests.
 
 ## Support
 Join the [discord channel](https://discord.gg/MuccnAz) to share your experience and get support on the usage of Fluid HTN.

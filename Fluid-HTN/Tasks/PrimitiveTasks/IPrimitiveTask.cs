@@ -26,7 +26,16 @@ namespace FluidHTN.PrimitiveTasks
         ITask AddEffect(IEffect effect);
         void ApplyEffects(IContext ctx);
 
+        /// <summary>
+        /// Graceful end of task execution.
+        /// </summary>
+        /// <param name="ctx"></param>
         void Stop(IContext ctx);
-        void Aborted(IContext ctx);
+
+        /// <summary>
+        /// Forced termination of task execution.
+        /// </summary>
+        /// <param name="ctx"></param>
+        void Abort(IContext ctx);
     }
 }

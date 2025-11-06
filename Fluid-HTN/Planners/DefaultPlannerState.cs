@@ -23,6 +23,7 @@ namespace FluidHTN
         public Action<IPrimitiveTask> OnCurrentTaskCompletedSuccessfully { get; set; }
         public Action<IEffect> OnApplyEffect { get; set; }
         public Action<IPrimitiveTask> OnCurrentTaskFailed { get; set; }
+        public Action<IPrimitiveTask> OnCurrentTaskStarted { get; set; }
         public Action<IPrimitiveTask> OnCurrentTaskContinues { get; set; }
         public Action<IPrimitiveTask, ICondition> OnCurrentTaskExecutingConditionFailed { get; set; }
     }

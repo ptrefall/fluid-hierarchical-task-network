@@ -75,7 +75,7 @@ namespace Fluid_HTN.UnitTests
         {
             var ctx = new MyContext();
             var task = new PrimitiveTask() { Name = "Test" };
-            task.SetOperator(new FuncOperator<MyContext>(null, context => context.Done = true));
+            task.SetOperator(new FuncOperator<MyContext>(null, funcStop: context => context.Done = true));
             task.Stop(ctx);
 
             Assert.IsTrue(task.Operator != null);
