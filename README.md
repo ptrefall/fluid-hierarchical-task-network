@@ -335,14 +335,20 @@ public class MoveToOperator : IOperator
         _location = location;
         _speed = speed;
     }
+	
+	public TaskStatus Start(IContext ctx)
+    {
+		if(ctx is MyContext c) 
+        {
+			return InitiateMovement(c);
+		}
+        throw new Exception("Unexpected context type!");
+	}
     
     public TaskStatus Update(IContext ctx)
     {
         if(ctx is MyContext c) 
         {
-            if(c.NavAgent.isStopped)
-                return InitiateMovement(c);
-                
             return TickMovement(c);
         }
         throw new Exception("Unexpected context type!");
@@ -618,7 +624,7 @@ The [Fluid HTN Extension library](https://github.com/ptrefall/fluid-hierarchical
 
 ## Examples
 Example projects have been pulled into their own repositories, as not to clutter the core library. More examples are still in progress, so please check back here to see when they become available.
-### Version 0.3 compatible
+### Version 0.4 compatible
 * [Fluid Troll Bridge](https://github.com/ptrefall/fluid-troll-bridge) (requires Unity)
 ### Version 0.2 compatible
 * [Fluid Text Adventure](https://github.com/ptrefall/fluid-text-adventure)
