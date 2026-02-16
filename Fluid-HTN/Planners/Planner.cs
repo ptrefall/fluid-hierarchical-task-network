@@ -7,8 +7,7 @@ namespace FluidHTN
 {
     /// <summary>
     ///     A planner is a responsible for handling the management of finding plans in a domain, replan when the state of the
-    ///     running plan
-    ///     demands it, or look for a new potential plan if the world state gets dirty.
+    ///     running plan demands it, or look for a new potential plan if the world state gets dirty.
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public class Planner<T> where T : IContext
@@ -19,14 +18,13 @@ namespace FluidHTN
         ///     Call this with a domain and context instance to have the planner manage plan and task handling for the domain at
         ///     runtime.
         ///     If the plan completes or fails, the planner will find a new plan, or if the context is marked dirty, the planner
-        ///     will attempt
-        ///     a replan to see whether we can find a better plan now that the state of the world has changed.
+        ///     will attempt a replan to see whether we can find a better plan now that the state of the world has changed.
         ///     This planner can also be used as a blueprint for writing a custom planner.
         /// </summary>
         /// <param name="domain"></param>
         /// <param name="ctx"></param>
-        /// <param name="allowImmediateReplan"></param>
-        public void Tick(Domain<T> domain, T ctx, bool allowImmediateReplan = true)
+        /// <param name="allowImmediateReplanAndExecute"></param>
+        public void Tick(Domain<T> domain, T ctx, bool allowImmediateReplanAndExecute = true)
         {
             if (ctx.IsInitialized == false)
             {
@@ -54,7 +52,7 @@ namespace FluidHTN
 
                 if (ctx.PlannerState.CurrentTask is IPrimitiveTask taskToStart)
                 {
-                    if (TryStartPrimitiveTaskOperator(domain, ctx, taskToStart, allowImmediateReplan) == false)
+                    if (TryStartPrimitiveTaskOperator(domain, ctx, taskToStart, allowImmediateReplanAndExecute) == false)
                     {
                         return;
                     }
@@ -64,7 +62,7 @@ namespace FluidHTN
             // If the current task is a primitive task, we try to tick its operator.
             if (ctx.PlannerState.CurrentTask is IPrimitiveTask task)
             {
-                if (TryTickPrimitiveTaskOperator(domain, ctx, task, allowImmediateReplan) == false)
+                if (TryTickPrimitiveTaskOperator(domain, ctx, task, allowImmediateReplanAndExecute) == false)
                 {
                     return;
                 }
@@ -295,9 +293,9 @@ namespace FluidHTN
         /// <param name="domain"></param>
         /// <param name="ctx"></param>
         /// <param name="task"></param>
-        /// <param name="allowImmediateReplan"></param>
+        /// <param name="allowImmediateReplanAndExecute"></param>
         /// <returns></returns>
-        private bool TryStartPrimitiveTaskOperator(Domain<T> domain, T ctx, IPrimitiveTask task, bool allowImmediateReplan)
+        private bool TryStartPrimitiveTaskOperator(Domain<T> domain, T ctx, IPrimitiveTask task, bool allowImmediateReplanAndExecute)
         {
             if (task.Operator != null)
             {
@@ -309,14 +307,14 @@ namespace FluidHTN
                     // We have to first invoke that the task operator has run its start function successfully, before we report that the operator finished.
                     ctx.PlannerState.OnCurrentTaskStarted?.Invoke(task);
 
-                    OnOperatorFinishedSuccessfully(domain, ctx, task, allowImmediateReplan);
+                    OnOperatorFinishedSuccessfully(domain, ctx, task, allowImmediateReplanAndExecute);
                     return true;
                 }
 
                 // If the operation failed to start, we need to fail the entire plan, so that we will replan the next tick.
                 if (ctx.PlannerState.LastStatus == TaskStatus.Failure)
                 {
-                    FailEntirePlan(domain, ctx, task, allowImmediateReplan);
+                    FailEntirePlan(domain, ctx, task, allowImmediateReplanAndExecute);
                     return true;
                 }
 
@@ -338,13 +336,13 @@ namespace FluidHTN
         /// <param name="domain"></param>
         /// <param name="ctx"></param>
         /// <param name="task"></param>
-        /// <param name="allowImmediateReplan"></param>
+        /// <param name="allowImmediateReplanAndExecute"></param>
         /// <returns></returns>
-        private bool TryTickPrimitiveTaskOperator(Domain<T> domain, T ctx, IPrimitiveTask task, bool allowImmediateReplan)
+        private bool TryTickPrimitiveTaskOperator(Domain<T> domain, T ctx, IPrimitiveTask task, bool allowImmediateReplanAndExecute)
         {
             if (task.Operator != null)
             {
-                if (IsExecutingConditionsValid(domain, ctx, task, allowImmediateReplan) == false)
+                if (IsExecutingConditionsValid(domain, ctx, task, allowImmediateReplanAndExecute) == false)
                 {
                     return false;
                 }
@@ -354,14 +352,14 @@ namespace FluidHTN
                 // If the operation finished successfully, we set task to null so that we dequeue the next task in the plan the following tick.
                 if (ctx.PlannerState.LastStatus == TaskStatus.Success)
                 {
-                    OnOperatorFinishedSuccessfully(domain, ctx, task, allowImmediateReplan);
+                    OnOperatorFinishedSuccessfully(domain, ctx, task, allowImmediateReplanAndExecute);
                     return true;
                 }
 
                 // If the operation failed to finish, we need to fail the entire plan, so that we will replan the next tick.
                 if (ctx.PlannerState.LastStatus == TaskStatus.Failure)
                 {
-                    FailEntirePlan(domain, ctx, task, allowImmediateReplan);
+                    FailEntirePlan(domain, ctx, task, allowImmediateReplanAndExecute);
                     return true;
                 }
 
@@ -407,7 +405,7 @@ namespace FluidHTN
         /// <param name="task"></param>
         /// <param name="allowImmediateReplan"></param>
         /// <returns></returns>
-        private bool IsExecutingConditionsValid(Domain<T> domain, T ctx, IPrimitiveTask task, bool allowImmediateReplan)
+        private bool IsExecutingConditionsValid(Domain<T> domain, T ctx, IPrimitiveTask task, bool allowImmediateReplanAndExecute)
         {
             foreach (var condition in task.ExecutingConditions)
             {
@@ -418,9 +416,9 @@ namespace FluidHTN
 
                     AbortTask(ctx, task);
 
-                    if (allowImmediateReplan)
+                    if (allowImmediateReplanAndExecute)
                     {
-                        Tick(domain, ctx, allowImmediateReplan: false);
+                        Tick(domain, ctx, allowImmediateReplanAndExecute: false);
                     }
 
                     return false;
@@ -447,8 +445,8 @@ namespace FluidHTN
         /// <param name="domain"></param>
         /// <param name="ctx"></param>
         /// <param name="task"></param>
-        /// <param name="allowImmediateReplan"></param>
-        private void OnOperatorFinishedSuccessfully(Domain<T> domain, T ctx, IPrimitiveTask task, bool allowImmediateReplan)
+        /// <param name="allowImmediateReplanAndExecute"></param>
+        private void OnOperatorFinishedSuccessfully(Domain<T> domain, T ctx, IPrimitiveTask task, bool allowImmediateReplanAndExecute)
         {
             ctx.PlannerState.OnCurrentTaskCompletedSuccessfully?.Invoke(task);
 
@@ -474,9 +472,9 @@ namespace FluidHTN
 
                 ctx.IsDirty = false;
 
-                if (allowImmediateReplan)
+                if (allowImmediateReplanAndExecute)
                 {
-                    Tick(domain, ctx, allowImmediateReplan: false);
+                    Tick(domain, ctx, allowImmediateReplanAndExecute: false);
                 }
             }
         }
@@ -486,16 +484,16 @@ namespace FluidHTN
         /// </summary>
         /// <param name="ctx"></param>
         /// <param name="task"></param>
-        private void FailEntirePlan(Domain<T> domain, T ctx, IPrimitiveTask task, bool allowImmediateReplan)
+        private void FailEntirePlan(Domain<T> domain, T ctx, IPrimitiveTask task, bool allowImmediateReplanAndExecute)
         {
             ctx.PlannerState.OnCurrentTaskFailed?.Invoke(task);
 
             task.Abort(ctx);
             ClearPlanForReplan(ctx);
 
-            if (allowImmediateReplan)
+            if (allowImmediateReplanAndExecute)
             {
-                Tick(domain, ctx, allowImmediateReplan: false);
+                Tick(domain, ctx, allowImmediateReplanAndExecute: false);
             }
         }
         

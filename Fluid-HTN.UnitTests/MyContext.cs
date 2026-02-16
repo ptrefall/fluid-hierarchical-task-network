@@ -26,6 +26,7 @@ internal class MyContext : BaseContext
 
     // Custom state
     public bool Done { get; set; } = false;
+    public int ExecutionCount { get; set; } = 0;
 
     public override void Init()
     {

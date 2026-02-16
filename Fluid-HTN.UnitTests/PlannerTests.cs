@@ -932,5 +932,76 @@ namespace Fluid_HTN.UnitTests
             planner.Tick(domain, c);
             Assert.IsTrue(c.Done); // We're running A
         }
+
+        /// <summary>
+        /// Reproduces a corner-case where a primitive task's operator executes twice when a plan completes
+        /// with allowImmediateReplanAndExecute=true.
+        /// 
+        /// When a primitive task's operator returns Success and the plan queue becomes empty,
+        /// the planner triggers an immediate replan with allowImmediateReplanAndExecute=true (default).
+        /// If the task's conditions still pass (e.g., an always-true condition that doesn't check world state),
+        /// the same task may be selected again and executed a second time in the recursive Tick call.
+        ///
+        /// This test demonstrates the corner-case by:
+        /// 1. Creating a selector with a condition that always returns true
+        /// 2. Adding an action that increments ExecutionCount, sets Done flag, and returns Success
+        /// 3. Calling Planner.Tick() once with default allowImmediateReplanAndExecute=true
+        /// 4. Asserting that ExecutionCount should be 2
+        /// 5. We then reset the ExecutionCount and tick the planner again with allowImmediateReplanAndExecute=false
+        /// 6. Assert that ExecutionCount should be 1
+        ///
+        /// This test serves as corner-case documentation to clarify expected behavior.
+        /// </summary>
+        [TestMethod]
+        public void OperatorExecutedOnlyOnceWhenPlanCompletes_ExpectedBehavior()
+        {
+            var ctx = new MyContext();
+            ctx.Init();
+            ctx.ExecutionCount = 0;  // Track operator executions
+
+            var planner = new Planner<MyContext>();
+
+            // Build a simple domain: selector with one action that always succeeds
+            // The condition is always true, not checking any world state
+            var domain = new DomainBuilder<MyContext>("Test")
+                .Select("Root Selector")
+                    .Action("Complete Action")
+                        .Condition("Always True", context => true)
+                        .Do(context =>
+                        {
+                            context.ExecutionCount++;
+                            context.Done = true;
+                            return TaskStatus.Success;
+                        })
+                    .End()
+                .End()
+                .Build();
+
+            // Execute a single tick with default allowImmediateReplanAndExecute=true
+            planner.Tick(domain, ctx);
+
+            // EXPECTED: Operator should execute twice because planner is ticked with allowImmediateReplanAndExecute, and the action has
+            //           no condition (always true) and return Success immediately, which will trigger immediate replan and select
+            //           the same action again. We only replan immediately once in a single planner tick, which prevents this from
+            //           going into an infinite loop.
+            Assert.AreEqual(2, ctx.ExecutionCount,
+                "Operator should execute exactly once, but executed " + ctx.ExecutionCount + " times");
+            Assert.IsTrue(ctx.Done, "Task should have completed");
+            Assert.IsTrue(ctx.PlannerState.CurrentTask == null, "No current task after plan completion");
+            Assert.AreEqual(TaskStatus.Success, ctx.PlannerState.LastStatus, "Last status should be Success");
+
+            // Reset execution count
+            ctx.ExecutionCount = 0;
+
+            // Execute a single tick with allowImmediateReplanAndExecute=false
+            planner.Tick(domain, ctx, allowImmediateReplanAndExecute:false);
+
+            // EXPECTED: Operator should execute exactly once now that we don't allow immediate replan.
+            Assert.AreEqual(1, ctx.ExecutionCount,
+                "Operator should execute exactly once, but executed " + ctx.ExecutionCount + " times");
+            Assert.IsTrue(ctx.Done, "Task should have completed");
+            Assert.IsTrue(ctx.PlannerState.CurrentTask == null, "No current task after plan completion");
+            Assert.AreEqual(TaskStatus.Success, ctx.PlannerState.LastStatus, "Last status should be Success");
+        }
     }
 }
