@@ -109,9 +109,9 @@ namespace Fluid_HTN.UnitTests
         }
 
         /// <summary>
-        /// Verifies that the generic CompoundTask&lt;T&gt;() builder method correctly creates a Selector compound task when given the Selector type parameter.
+        /// Verifies that the generic CompoundTask<T>() builder method correctly creates a Selector compound task when given the Selector type parameter.
         /// This test demonstrates the generic builder pattern that allows creating any compound task type through a generic method rather than using a named method.
-        /// The CompoundTask&lt;T&gt;() method provides an extension point for creating custom compound task types while maintaining the fluent builder interface.
+        /// The CompoundTask<T>() method provides an extension point for creating custom compound task types while maintaining the fluent builder interface.
         /// This approach increases flexibility by allowing users to define their own compound task subclasses and use them directly with the builder.
         /// </summary>
         [TestMethod]
@@ -168,9 +168,9 @@ namespace Fluid_HTN.UnitTests
         }
 
         /// <summary>
-        /// Verifies that the generic CompoundTask&lt;Sequence&gt;() builder method correctly creates a Sequence compound task.
+        /// Verifies that the generic CompoundTask<Sequence>() builder method correctly creates a Sequence compound task.
         /// This test demonstrates the alternative generic approach to creating compound tasks, providing consistency with other task creation methods.
-        /// The generic CompoundTask&lt;T&gt;() method allows type-safe instantiation of any compound task type that has a parameterless constructor.
+        /// The generic CompoundTask<T>() method allows type-safe instantiation of any compound task type that has a parameterless constructor.
         /// This pattern supports extensibility by allowing custom compound task implementations to integrate seamlessly into the fluent builder interface.
         /// </summary>
         [TestMethod]
@@ -226,9 +226,9 @@ namespace Fluid_HTN.UnitTests
         }
 
         /// <summary>
-        /// Verifies that the generic PrimitiveTask&lt;PrimitiveTask&gt;() builder method correctly creates a primitive task using the generic pattern.
-        /// This test demonstrates the alternative generic approach to creating primitive tasks, providing consistency with the generic CompoundTask&lt;T&gt;() pattern.
-        /// The generic PrimitiveTask&lt;T&gt;() method allows instantiation of custom primitive task implementations while maintaining type safety.
+        /// Verifies that the generic PrimitiveTask<PrimitiveTask>() builder method correctly creates a primitive task using the generic pattern.
+        /// This test demonstrates the alternative generic approach to creating primitive tasks, providing consistency with the generic CompoundTask<T>() pattern.
+        /// The generic PrimitiveTask<T>() method allows instantiation of custom primitive task implementations while maintaining type safety.
         /// This approach supports extensibility by allowing users to define custom primitive task subclasses and integrate them into the builder interface.
         /// </summary>
         [TestMethod]
