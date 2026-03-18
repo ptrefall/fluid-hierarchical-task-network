@@ -56,6 +56,11 @@ namespace FluidHTN.Compounds
         {
             Plan.Clear();
 
+            // Snapshot the current world state change stack depths before we begin decomposing
+            // subtasks. Because a Sequence must succeed as a whole, any world state effects applied
+            // during a failed subtask decomposition must be rolled back. We capture this snapshot
+            // here — outside the subtask loop — so that TrimToStackDepth can undo all accumulated
+            // changes across every subtask attempted so far.
             var oldStackDepth = ctx.GetWorldStateChangeDepth(ctx.Factory);
 
             for (var taskIndex = startIndex; taskIndex < Subtasks.Count; taskIndex++)
@@ -146,6 +151,9 @@ namespace FluidHTN.Compounds
         protected override void OnDecomposePrimitiveTask(IContext ctx, IPrimitiveTask task, int taskIndex,
             int[] oldStackDepth, out Queue<ITask> result)
         {
+            // oldStackDepth is not used here; rollback of primitive task effects is handled
+            // at the Sequence level (in OnDecomposeTask/OnDecomposeCompoundTask) via TrimToStackDepth.
+
             // We don't add MTR tracking on sequences for primary sub-tasks, since they will always be included, so they're irrelevant to MTR tracking.
 
             if (ctx.LogDecomposition)

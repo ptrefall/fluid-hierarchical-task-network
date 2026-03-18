@@ -124,6 +124,8 @@ namespace FluidHTN.Compounds
 
                 var task = Subtasks[taskIndex];
 
+                // Selector passes null for oldStackDepth: each subtask alternative is independent,
+                // so there are no accumulated world state effects to roll back between attempts.
                 var status = OnDecomposeTask(ctx, task, taskIndex, null, out result);
                 switch (status)
                 {

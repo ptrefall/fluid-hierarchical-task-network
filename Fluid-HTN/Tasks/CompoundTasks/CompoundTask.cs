@@ -56,6 +56,10 @@ namespace FluidHTN.Compounds
 
         protected abstract DecompositionStatus OnDecompose(IContext ctx, int startIndex, out Queue<ITask> result);
 
+        // oldStackDepth is a snapshot of world state change stack depths taken before the
+        // decomposition loop began (see Sequence.OnDecompose). It is threaded through every
+        // helper so that a Sequence can roll back all accumulated world state changes on failure.
+        // Selector always passes null here because it never accumulates effects across alternatives.
         protected abstract DecompositionStatus OnDecomposeTask(IContext ctx, ITask task, int taskIndex, int[] oldStackDepth, out Queue<ITask> result);
 
         protected abstract void OnDecomposePrimitiveTask(IContext ctx, IPrimitiveTask task, int taskIndex, int[] oldStackDepth, out Queue<ITask> result);
